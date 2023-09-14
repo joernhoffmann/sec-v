@@ -1,0 +1,96 @@
+// SPDX-License-Identifier: BSD-3-clause
+/*
+ * Copyright (C) Jörn Hoffmann, 2023
+ *
+ * Project  : SEC-V
+ * Author   : J. Hoffmann <joern@bitaggregat.de>
+ *
+ * Purpose  : ALU of the SEC-V Processor
+ *
+ * TODOs
+ *  [ ] Improve shift operations, use barrel shifter
+ *  [ ] Use signal and single sext32() to assign result
+ */
+`include "secv_pkg.svh"
+import secv_pkg::*;
+
+module alu #(
+    parameter int XLEN = secv_pkg::XLEN
+) (
+    input   alu_op_t            op_i,   // Operation to perform
+    input   logic [XLEN-1:0]    a_i,    // 1st operand
+    input   logic [XLEN-1:0]    b_i,    // 2nd operand
+
+    // Output
+    output  logic [XLEN-1:0]    res_o   // Result
+);
+
+    // Sign extends the 32-bit operand to XLEN bits
+    function automatic [XLEN-1:0] sext32(logic [31:0] operand);
+        logic sign;
+
+        sign = operand[31];
+        return {{XLEN-31{sign}}, operand[30:0]};
+    endfunction
+
+    // Main logic
+    logic [31:0] a32, b32;
+    assign a32 = a_i[31:0];
+    assign b32 = b_i[31:0];
+
+    always_comb begin
+        case(op_i)
+            // Logic
+            ALU_OP_AND:
+                res_o = a_i & b_i;
+
+            ALU_OP_OR:
+                res_o = a_i | b_i;
+
+            ALU_OP_XOR:
+                res_o = a_i ^ b_i;
+
+            // Arithmetic
+            ALU_OP_ADD:
+                res_o = a_i + b_i;
+
+            ALU_OP_SUB:
+                res_o = a_i - b_i;
+
+            ALU_OP_ADDW:
+                res_o = sext32(a32 + b32);
+
+            ALU_OP_SUBW:
+                res_o = sext32(a32 - b32);
+
+            // Shift
+            ALU_OP_SLL:
+                res_o = a_i << b_i;
+
+            ALU_OP_SRL:
+                res_o = a_i >> b_i;
+
+            ALU_OP_SRA:
+                res_o = $signed(a_i) >>> b_i;
+
+            ALU_OP_SLLW:
+                res_o = sext32(a32 << b32);
+
+            ALU_OP_SRLW:
+                res_o = sext32(a32 >> b32);
+
+            ALU_OP_SRAW:
+                res_o = sext32($signed(a32) >>> b32);
+
+            // Compares
+            ALU_OP_SLT:
+                res_o = {~a_i[XLEN-1], a_i[XLEN-2:0]} < {~b_i[XLEN-1], b_i[XLEN-2:0]} ? 'h1 : 'h0;
+
+            ALU_OP_SLTU:
+                res_o = $unsigned(a_i) < $unsigned(b_i) ? 'h1 : 'h0;
+
+            default:
+                res_o = 0;
+        endcase
+    end
+endmodule
