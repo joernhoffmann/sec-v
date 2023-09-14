@@ -5,7 +5,7 @@
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  *
- * Purpose  : Generap purpose register file
+ * Purpose  : General purpose register file
  */
 
 `include "secv_pkg.svh"

@@ -5,7 +5,7 @@
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  *
- * Purpose  : Main defines of the processor
+ * Purpose  : Main defines of the processor.
  */
 
 package secv_pkg;

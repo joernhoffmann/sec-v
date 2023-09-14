@@ -5,11 +5,16 @@
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  *
- * Purpose  : ALU of the SEC-V Processor
+ * Purpose  : ALU of the SEC-V processor
+ *
+ * History
+ *      v1.0    - Initial version
  *
  * TODOs
- *  [ ] Improve shift operations, use barrel shifter
+ *  [ ] Improve shift operations with barrel shifter
  *  [ ] Use signal and single sext32() to assign result
+ *  [ ] Use a separate flag for 32-bit operations.
+ *
  */
 `include "secv_pkg.svh"
 import secv_pkg::*;
