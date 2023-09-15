@@ -10,7 +10,9 @@
 `include "secv_pkg.svh"
 import secv_pkg::*;
 
-module gpr (
+module gpr #(
+    parameter int XLEN = secv_pkg::XLEN
+) (
     input   logic clk_i,
     input   logic rst_i,
 
