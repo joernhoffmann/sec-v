@@ -20,7 +20,7 @@ module secv (
     output  logic                   imem_stb_o,
     output  logic [3 : 0]           imem_sel_o,
     output  logic [7 : 0]           imem_adr_o,
-    output  logic [XLEN-1 : 0]      imem_dat_i,
+    output  logic [ILEN-1 : 0]      imem_dat_i,
     input   logic                   imem_ack_i,
 
     // Data memory
@@ -32,11 +32,13 @@ module secv (
     output  logic [XLEN-1 : 0]      dmem_dat_i,
     input   logic                   dmem_ack_i
 );
-
-    // Register file
+    // -------------------------------------------------------------------------------------------------------------- //
+    // GPR
+    // -------------------------------------------------------------------------------------------------------------- //
     regadr_t rs1, rs2, rd;
     logic [XLEN-1:0] rs1_dat, rs2_dat, rd_dat;
     logic rd_ena;
+
     gpr gpr0 (
         .clk_i        (clk_i),
         .rst_i        (rst_i),
@@ -49,9 +51,125 @@ module secv (
         .rd_ena_i     (rd_ena)
     );
 
+    // -------------------------------------------------------------------------------------------------------------- //
     // ALU
+    // -------------------------------------------------------------------------------------------------------------- //
+    alu_op_t alu_op;
+    logic [XLEN-1:0] alu_a, alu_b, alu_res;
 
+    alu alu0(
+        .op_i   (alu_op),
+        .a_i    (alu_a),
+        .b_i    (alu_b),
+        .res_o  (alu_res)
+    );
 
+    // -------------------------------------------------------------------------------------------------------------- //
+    // Decoder
+    // -------------------------------------------------------------------------------------------------------------- //
+    inst_t inst;
+    opcode_t opcode;
+    funct3_t funct3;
+    funct7_t funct7;
+    imm_t imm;
+    funit_t funit;
 
+    decode dec0(
+        .inst_i     (inst),
+        // Opcode fields
+        .opcode_o   (opcode),
+        .funct3_o   (funct3),
+        .funct7_o   (funct7),
+        // Operands
+        .rs1_o      (rs1),
+        .rs2_o      (rs2),
+        .rd_o       (rd),
+        .imm_o      (imm),
+        // Function units
+        .alu_op_o   (alu_op),
+        .funit_o    (funit)
+    );
 
+    // -------------------------------------------------------------------------------------------------------------- //
+    // Main FSM
+    // -------------------------------------------------------------------------------------------------------------- //
+    typedef enum logic [3:0] {
+        STATE_IDLE,
+        STATE_FETCH,
+        STATE_DECODE,
+        STATE_EXECUTE,
+        STATE_WB
+    } state_t;
+    state_t state, state_next;
+
+    // Instruction
+    logic [XLEN-1:0] pc, pc_next;
+    logic [ILEN-1:0] ir, ir_next;
+
+    always_ff @( posedge clk_i) begin
+        if (rst_i) begin
+            state <= STATE_IDLE;
+            pc    <= 'b0;
+            ir    <= INST_NOP;
+        end
+
+        else begin
+            state <= state_next;
+            pc    <= pc_next;
+            ir    <= ir_next;
+        end
+    end
+
+    assign inst = ir;
+
+    always_comb begin
+        state_next = state;
+        pc_next = pc;
+        ir_next = ir;
+
+        imem_cyc_o = 0;
+        imem_stb_o = 0;
+        imem_adr_o = 'b0;
+
+        case (state)
+            STATE_IDLE: begin
+                state_next = STATE_FETCH;
+            end
+
+            STATE_FETCH: begin
+                // Access instruction memory
+                imem_cyc_o = 1'b1;
+                imem_stb_o = 1'b1;
+                imem_adr_o = pc[7:0];
+
+                if (imem_ack_i) begin
+                    state_next =STATE_DECODE;
+                    ir_next = imem_dat_i;
+                end
+            end
+
+            STATE_DECODE: begin
+
+                // Trigger decoder
+                // Select function unit
+                // Select gpr
+                state_next = STATE_EXECUTE;
+            end
+
+            STATE_EXECUTE: begin
+                // Start execution
+                // Save result output's
+                state_next = STATE_WB;
+            end
+
+            STATE_WB: begin
+                // Update register file
+                // Update pc
+                state_next = STATE_FETCH;
+            end
+
+            default:
+                state_next = state;
+        endcase
+    end
 endmodule;

@@ -17,8 +17,11 @@ package secv_pkg;
     parameter int REG_COUNT = 32;                       // Number of general purpose integer registers
     parameter int REG_ADDR_WIDTH = $clog2(REG_COUNT);   // Width to address registers
 
+    /* --- Program counter and programm execution ------------------------------------------------------------------- */
+    // parameter int IMEM_ADDR_WIDTH = 8;
+    // typedef logic [IMEM_ADDR_WIDTH-1 : 0 ] imem_adr_t;
 
-    /* --- Function units ------------------------------------------------------------------------------------------ */
+    /* --- Function units ------------------------------------------------------------------------------------------- */
     typedef enum {
         FUNIT_NONE,     // No operation
         FUNIT_MOV,      // LUI, AUIPC etc.
@@ -31,7 +34,7 @@ package secv_pkg;
         FUNIT_DIV
     } funit_t;
 
-    /* --- Decoder ------------------------------------------------------------------------------------------------- */
+    /* --- Decoder -------------------------------------------------------------------------------------------------- */
     // Opcodes
     // Note: not all will be finally supported and therefore uncommented
     typedef enum logic [6:0] {
@@ -103,6 +106,8 @@ package secv_pkg;
         inst_j_t  j_type;    // Jump
     } inst_t;
 
+    const inst_t INST_NOP = {25'b0, OPCODE_OP_IMM};     // ADDI 0, 0, $0
+
     // funct3 - ALU
     typedef enum logic [$bits(funct3_t)-1:0] {
         FUNCT3_ALU_ADD   = 3'b000,  // Add _or_ sub (funct7[5] == 0 ? ADD : SUB)
@@ -155,7 +160,7 @@ package secv_pkg;
         return {{12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0 };
     endfunction
 
-/* --- ALU ---------------------------- */
+/* --- ALU ---------------------------------------------------------------------------------------------------------- */
     typedef enum bit [15:0] {
         ALU_OP_NONE = 0,
 

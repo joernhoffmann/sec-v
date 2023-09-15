@@ -10,8 +10,7 @@
  `include "secv_pkg.svh"
 import secv_pkg::*;
 
-module decode
-(
+module decode (
     input   inst_t      inst_i,     // instruction
 
     // Opcode fields
@@ -20,16 +19,16 @@ module decode
     output funct7_t     funct7_o,   // funct7 field
 
     // Operands
-    output regadr_t     rd_o,       // destination register
     output regadr_t     rs1_o,      // source register 1
     output regadr_t     rs2_o,      // source register 2
+    output regadr_t     rd_o,       // destination register
     output imm_t        imm_o,      // immediate operand
 
     // Function units
     output  funit_t     funit_o,    // function unit
-    output alu_op_t     alu_op_o,   // ALU operation
-    output logic        alu_32_o,   // ALU uses 32-bit operands
-    output logic        alu_imm_o   // ALU uses immediate operand
+    output alu_op_t     alu_op_o   // ALU operation
+    // output logic        alu_32_o,   // ALU uses 32-bit operands
+    // output logic        alu_imm_o   // ALU uses immediate operand
 );
 
     // Decode opcode
@@ -173,14 +172,14 @@ module decode
     assign funct7_o = funct7;
 
     // Operands
-    assign rd_o  = inst_i.r_type.rd;
     assign rs1_o = inst_i.r_type.rs1;
     assign rs2_o = inst_i.r_type.rs2;
+    assign rd_o  = inst_i.r_type.rd;
     assign imm_o = imm;
 
     // Units
     assign funit_o   = funit;
     assign alu_op_o  = alu_op;
-    assign alu_32_o  = (op_reg_32 | op_imm_32);
-    assign alu_imm_o = (op_imm_32 | op_imm_64);
+    // assign alu_32_o  = (op_reg_32 | op_imm_32);
+    // assign alu_imm_o = (op_imm_32 | op_imm_64);
 endmodule
