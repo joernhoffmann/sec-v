@@ -12,7 +12,8 @@ package secv_pkg;
     parameter int ILEN = 32;                            // Instruction width
     parameter int XLEN = 64;                            // Data width
     parameter int REG_COUNT = 32;                       // Number of general purpose integer registers
-    parameter int REG_ADDR_BITS = $clog2(REG_COUNT);    // Width to address registers
+    parameter int REG_ADDR_WIDTH = $clog2(REG_COUNT);   // Width to address registers
+
 
     /* --- Function units ------------------------------------------------------------------------------------------ */
     typedef enum {
