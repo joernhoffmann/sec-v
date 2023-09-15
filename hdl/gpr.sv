@@ -7,7 +7,7 @@
  *
  * Purpose  : General purpose register file
  */
-
+`include "secv_pkg.svh"
 import secv_pkg::*;
 
 module gpr (
@@ -22,8 +22,8 @@ module gpr (
     output  logic [XLEN-1:0]    rs2_dat_o,
 
     input   regadr_t            rd_i,
-    input   logic               rd_ena,
-    input   logic [XLEN-1:0]    rd_dat_i
+    input   logic [XLEN-1:0]    rd_dat_i,
+    input   logic               rd_ena_i
 );
 
 logic [XLEN-1 : 0] regfile [REG_COUNT];
@@ -40,7 +40,7 @@ always_comb begin
     regfile_next = regfile;
 
     // Write destination register if requested and not zero
-    if (rd_ena && rd_i != 'b0)
+    if (rd_ena_i && rd_i != 'b0)
         regfile_next[rd_i] = rd_dat_i;
 end
 

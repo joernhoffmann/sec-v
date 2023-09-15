@@ -7,7 +7,7 @@
  *
  * Purpose  : Instruction decoder of the processor
  */
-`include "secv_pkg.svh"
+ `include "secv_pkg.svh"
 import secv_pkg::*;
 
 module decode

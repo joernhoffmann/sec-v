@@ -11,18 +11,44 @@
 `include "secv_pkg.svh"
 import secv_pkg::*;
 
-module sec_v (
+module secv (
     input   logic   clk_i,
     input   logic   rst_i,
 
     // Instruction memory
-    output  logic                   cyc_o,
-    output  logic                   stb_o,
-    output  logic [3 : 0]           sel_o,
-    output  logic [ XLEN-1 : 0 ]    dat_i,
-    input   logic                   ack_i,
+    output  logic                   imem_cyc_o,
+    output  logic                   imem_stb_o,
+    output  logic [3 : 0]           imem_sel_o,
+    output  logic [7 : 0]           imem_adr_o,
+    output  logic [XLEN-1 : 0]      imem_dat_i,
+    input   logic                   imem_ack_i,
 
+    // Data memory
+    output  logic                   dmem_cyc_o,
+    output  logic                   dmem_stb_o,
+    output  logic [3 : 0]           dmem_sel_o,
+    output  logic [7 : 0]           dmem_adr_o,
+    output  logic [XLEN-1 : 0]      dmem_dat_o,
+    output  logic [XLEN-1 : 0]      dmem_dat_i,
+    input   logic                   dmem_ack_i
+);
+
+    // Register file
+    regadr_t rs1, rs2, rd;
+    logic [XLEN-1:0] rs1_dat, rs2_dat, rd_dat;
+    logic rd_ena;
+    gpr gpr0 (
+        .clk_i        (clk_i),
+        .rst_i        (rst_i),
+        .rs1_i        (rs1),        // Source Register 1
+        .rs1_dat_o    (rs1_dat),
+        .rs2_i        (rs2),        // Source register 2
+        .rs2_dat_o    (rs2_dat),
+        .rd_i         (rd),         // Destination register
+        .rd_dat_i     (rd_dat),
+        .rd_ena_i     (rd_ena)
     );
+
 
 
 endmodule;
