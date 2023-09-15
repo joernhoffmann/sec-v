@@ -23,12 +23,12 @@ module decode (
     output regadr_t     rs2_o,      // source register 2
     output regadr_t     rd_o,       // destination register
     output imm_t        imm_o,      // immediate operand
+    output logic        imm_use_o,  // operation uses immediate
 
     // Function units
     output  funit_t     funit_o,    // function unit
-    output alu_op_t     alu_op_o   // ALU operation
+    output alu_op_t     alu_op_o    // ALU operation
     // output logic        alu_32_o,   // ALU uses 32-bit operands
-    // output logic        alu_imm_o   // ALU uses immediate operand
 );
 
     // Decode opcode
@@ -40,6 +40,7 @@ module decode (
     assign funct7 = inst_i.r_type.funct7;
 
     // Decode immediate
+    logic imm_use;
     imm_t imm, imm_i, imm_s, imm_b, imm_u, imm_j;
     assign imm_i = decode_imm_i(inst_i);
     assign imm_s = decode_imm_s(inst_i);
@@ -49,23 +50,35 @@ module decode (
 
     always_comb begin : decode_imm
         case (opcode)
-            OPCODE_LUI, OPCODE_AUIPC :
+            OPCODE_LUI, OPCODE_AUIPC : begin
                 imm = imm_u;
+                imm_use = 1'b1;
+            end
 
-            OPCODE_JAL:
+            OPCODE_JAL: begin
                 imm = imm_j;
+                imm_use = 1'b1;
+            end
 
-            OPCODE_BRANCH:
+            OPCODE_BRANCH: begin
                 imm = imm_b;
+                imm_use = 1'b1;
+            end
 
-            OPCODE_STORE:
+            OPCODE_STORE: begin
                 imm = imm_s;
+                imm_use = 1'b1;
+            end
 
-            OPCODE_JALR, OPCODE_LOAD, OPCODE_OP_IMM, OPCODE_OP_IMM_32:
+            OPCODE_JALR, OPCODE_LOAD, OPCODE_OP_IMM, OPCODE_OP_IMM_32: begin
                 imm = imm_i;
+                imm_use = 1'b1;
+            end
 
-            default:
-                imm = 0;
+            default: begin
+                imm = 'b0;
+                imm_use = 1'b0;
+            end
         endcase
     end
 
@@ -176,10 +189,11 @@ module decode (
     assign rs2_o = inst_i.r_type.rs2;
     assign rd_o  = inst_i.r_type.rd;
     assign imm_o = imm;
+    assign imm_use_o = imm_use;
 
     // Units
-    assign funit_o   = funit;
-    assign alu_op_o  = alu_op;
+    assign funit_o  = funit;
+    assign alu_op_o = alu_op;
     // assign alu_32_o  = (op_reg_32 | op_imm_32);
     // assign alu_imm_o = (op_imm_32 | op_imm_64);
 endmodule
