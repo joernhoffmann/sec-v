@@ -8,6 +8,9 @@
  * Purpose  : Main defines of the processor.
  */
 
+`ifndef SECV_PKG
+`define SECV_PKG
+
 package secv_pkg;
     parameter int ILEN = 32;                            // Instruction width
     parameter int XLEN = 64;                            // Data width
@@ -180,3 +183,4 @@ package secv_pkg;
         ALU_OP_SLTU = 1 << 15   // set less than unsigned
     } alu_op_t;
 endpackage
+`endif
