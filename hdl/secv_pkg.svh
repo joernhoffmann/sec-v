@@ -108,43 +108,44 @@ package secv_pkg;
 
     // funct3 - ALU
     typedef enum logic [$bits(funct3_t)-1:0] {
-        FUNCT3_ALU_ADD   = 3'b000,  // Add _or_ sub (funct7[5] == 0 ? ADD : SUB)
-        FUNCT3_ALU_SLL   = 3'b001,  // Shift left logic
-        FUNCT3_ALU_SLT   = 3'b010,  // Set less than
-        FUNCT3_ALU_SLTU  = 3'b011,  // Set less than unsigned
-        FUNCT3_ALU_XOR   = 3'b100,
-        FUNCT3_ALU_SRL   = 3'b101,  // Shift right logic _or_ shift right arithmetic (funct7[5] == 0 ? SRL : SRA)
-        FUNCT3_ALU_OR    = 3'b110,
-        FUNCT3_ALU_AND   = 3'b111
+        FUNCT3_ALU_ADD  = 3'b000,   // Add / sub, funct7[5] == 0 ? ADD : SUB
+        FUNCT3_ALU_SLL  = 3'b001,   // Shift left logic
+        FUNCT3_ALU_SLT  = 3'b010,   // Set less than
+        FUNCT3_ALU_SLTU = 3'b011,   // Set less than (unsigned)
+        FUNCT3_ALU_XOR  = 3'b100,   // Logic xor
+        FUNCT3_ALU_SRL  = 3'b101,   // Shift right logic / shift right arithmetic, funct7[5] == 0 ? SRL : SRA
+        FUNCT3_ALU_OR   = 3'b110,   // Logic or
+        FUNCT3_ALU_AND  = 3'b111    // Logic and
     } funct3_alu_t;
 
     // funct3 - Branch
     typedef enum logic [$bits(funct3_t)-1:0] {
-        FUNCT3_BRANCH_BEQ   = 3'b000,
-        FUNCT3_BRANCH_BNQ   = 3'b001,
+        FUNCT3_BRANCH_BEQ   = 3'b000,   // Branch equal                  ==
+        FUNCT3_BRANCH_BNQ   = 3'b001,   // Branch not equal              !=
         //
-        FUNCT3_BRANCH_BLT   = 3'b100,
-        FUNCT3_BRANCH_BGE   = 3'b101,
-        FUNCT3_BRANCH_BLTU  = 3'b110,
-        FUNCT3_BRANCH_BGEU  = 3'b111
+        FUNCT3_BRANCH_BLT   = 3'b100,   // Branch less than              <
+        FUNCT3_BRANCH_BGE   = 3'b101,   // Branch greater equal          >=
+        FUNCT3_BRANCH_BLTU  = 3'b110,   // Branch less than usigned      <  (u)
+        FUNCT3_BRANCH_BGEU  = 3'b111    // Branch greater equal unsigned >= (u)
     } funct3_branch_t;
-
 
     // funct3 - Load
     typedef enum logic [$bits(funct3_t)-1:0] {
-        FUNCT3_LOAD_LB    = 3'b000,
-        FUNCT3_LOAD_LH    = 3'b001,
-        FUNCT3_LOAD_LW    = 3'b010,
+        FUNCT3_LOAD_LB  = 3'b000,   // Load byte
+        FUNCT3_LOAD_LH  = 3'b001,   // Load half
+        FUNCT3_LOAD_LW  = 3'b010,   // Load word
+        FUNCT3_LOAD_LD  = 3'b011,   // load double word
         //
-        FUNCT3_LOAD_LBU   = 3'b100,
-        FUNCT3_LOAD_LHU   = 3'b101
+        FUNCT3_LOAD_LBU = 3'b100,   // Load byte unsigned
+        FUNCT3_LOAD_LHU = 3'b101    // Load half unsigned
     } funct3_load_t;
 
     // funct3 - Store
     typedef enum logic [$bits(funct3_t)-1:0] {
-        FUNCT3_STORE_BYTE   = 3'b000,
-        FUNCT3_STORE_HALF   = 3'b001,
-        FUNCT3_STORE_WORD   = 3'b010
+        FUNCT3_STORE_LB = 3'b000,   // Store byte
+        FUNCT3_STORE_LH = 3'b001,   // Store half
+        FUNCT3_STORE_LW = 3'b010,   // Store word
+        FUNCT3_STORE_LD = 3'b011    // Store double word
     } funct3_store_t;
 
     // funct3 - Atomic
