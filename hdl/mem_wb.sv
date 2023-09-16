@@ -5,7 +5,7 @@
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  *
- * Purpose  : Wishbone-compliant instruction memory. Operates in little-endian byte order
+ * Purpose  : Wishbone-compatible memory module. Operates in little-endian byte order.
  *
  * Features :
  *   - Configurable parameters for address and data width
