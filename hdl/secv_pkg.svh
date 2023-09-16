@@ -29,9 +29,9 @@ package secv_pkg;
         FUNIT_BRANCH,   // JAL, JALR, BEQ, BNE etc.
         FUNIT_MEM,      // L, S, FENCE
         FUNIT_SYSTEM,   // ECALL, EBREAK, CSR etc.
-        FUNIT_CSR,      // CSRRW etc.
-        FUNIT_MUL,
-        FUNIT_DIV
+        FUNIT_CSR       // CSRRW etc.
+//      FUNIT_MUL,
+//      FUNIT_DIV
     } funit_t;
 
     /* --- Decoder -------------------------------------------------------------------------------------------------- */
@@ -106,8 +106,6 @@ package secv_pkg;
         inst_j_t  j_type;    // Jump
     } inst_t;
 
-    const inst_t INST_NOP = {25'b0, OPCODE_OP_IMM};     // ADDI 0, 0, $0
-
     // funct3 - ALU
     typedef enum logic [$bits(funct3_t)-1:0] {
         FUNCT3_ALU_ADD   = 3'b000,  // Add _or_ sub (funct7[5] == 0 ? ADD : SUB)
@@ -121,8 +119,34 @@ package secv_pkg;
     } funct3_alu_t;
 
     // funct3 - Branch
+    typedef enum logic [$bits(funct3_t)-1:0] {
+        FUNCT3_BRANCH_BEQ   = 3'b000,
+        FUNCT3_BRANCH_BNQ   = 3'b001,
+        //
+        FUNCT3_BRANCH_BLT   = 3'b100,
+        FUNCT3_BRANCH_BGE   = 3'b101,
+        FUNCT3_BRANCH_BLTU  = 3'b110,
+        FUNCT3_BRANCH_BGEU  = 3'b111
+    } funct3_branch_t;
+
+
     // funct3 - Load
+    typedef enum logic [$bits(funct3_t)-1:0] {
+        FUNCT3_LOAD_LB    = 3'b000,
+        FUNCT3_LOAD_LH    = 3'b001,
+        FUNCT3_LOAD_LW    = 3'b010,
+        //
+        FUNCT3_LOAD_LBU   = 3'b100,
+        FUNCT3_LOAD_LHU   = 3'b101
+    } funct3_load_t;
+
     // funct3 - Store
+    typedef enum logic [$bits(funct3_t)-1:0] {
+        FUNCT3_STORE_BYTE   = 3'b000,
+        FUNCT3_STORE_HALF   = 3'b001,
+        FUNCT3_STORE_WORD   = 3'b010
+    } funct3_store_t;
+
     // funct3 - Atomic
     // fucnt3 - CSR
 
@@ -130,6 +154,10 @@ package secv_pkg;
     const funct7_t FUNCT7_00h = 7'h00;
     const funct7_t FUNCT7_20h = 7'h20;
 
+    /* --- Special instructions ------------------------------------------------------------------------------------- */
+    const inst_t INST_NOP = {25'b0, OPCODE_OP_IMM};     // ADDI 0, 0, $0
+
+    /* --- Decode functions ----------------------------------------------------------------------------------------- */
     // Decodes the opcode of the instruction
     function automatic opcode_t decode_opcode (inst_t inst_i);
         return opcode_t'(inst_i[6:0]);
@@ -160,7 +188,7 @@ package secv_pkg;
         return {{12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0 };
     endfunction
 
-/* --- ALU ---------------------------------------------------------------------------------------------------------- */
+    /* --- ALU ------------------------------------------------------------------------------------------------------ */
     typedef enum bit [15:0] {
         ALU_OP_NONE = 0,
 
