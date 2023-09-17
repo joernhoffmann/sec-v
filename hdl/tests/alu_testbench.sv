@@ -275,8 +275,8 @@ module alu_testbench();
     `UNIT_TEST_END
 
     `UNIT_TEST("SLT check less than both neg")
-        a_i 	= 1'b1 << XLEN-1;
-        b_i 	= 1'b1 << XLEN-1 | 1'b1 << XLEN-2;
+        a_i 	= 1 << XLEN-1;
+        b_i 	= 1 << XLEN-1 | 1 << XLEN-2;
         op_i 	= ALU_OP_SLT;
         #1 `FAIL_IF_NOT_EQUAL(res_o, 1);
     `UNIT_TEST_END
