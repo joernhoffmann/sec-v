@@ -11,7 +11,7 @@
 `include "secv_pkg.svh"
 import secv_pkg::*;
 
-module memory_unit (
+module mem (
     input  logic clk_i,
     input  logic rst_i,
 
@@ -60,5 +60,4 @@ module memory_unit (
     end
 
     assign mem_data_o = mem_data;
-
 endmodule
