@@ -131,21 +131,22 @@ package secv_pkg;
 
     // funct3 - Load
     typedef enum logic [$bits(funct3_t)-1:0] {
-        FUNCT3_LOAD_LB  = 3'b000,   // Load byte
-        FUNCT3_LOAD_LH  = 3'b001,   // Load half
-        FUNCT3_LOAD_LW  = 3'b010,   // Load word
+        FUNCT3_LOAD_LB  = 3'b000,   // Load byte (sign extended)
+        FUNCT3_LOAD_LH  = 3'b001,   // Load half (sign extended)
+        FUNCT3_LOAD_LW  = 3'b010,   // Load word (sign extended)
         FUNCT3_LOAD_LD  = 3'b011,   // load double word
         //
-        FUNCT3_LOAD_LBU = 3'b100,   // Load byte unsigned
-        FUNCT3_LOAD_LHU = 3'b101    // Load half unsigned
+        FUNCT3_LOAD_LBU = 3'b100,   // Load byte unsigned (zero extended)
+        FUNCT3_LOAD_LHU = 3'b101,   // Load half unsigned (zero extended)
+        FUNCT3_LOAD_LWU = 3'b110    // Load word unsigned (zero extended)
     } funct3_load_t;
 
     // funct3 - Store
     typedef enum logic [$bits(funct3_t)-1:0] {
-        FUNCT3_STORE_LB = 3'b000,   // Store byte
-        FUNCT3_STORE_LH = 3'b001,   // Store half
-        FUNCT3_STORE_LW = 3'b010,   // Store word
-        FUNCT3_STORE_LD = 3'b011    // Store double word
+        FUNCT3_STORE_SB = 3'b000,   // Store byte
+        FUNCT3_STORE_SH = 3'b001,   // Store half
+        FUNCT3_STORE_SW = 3'b010,   // Store word
+        FUNCT3_STORE_SD = 3'b011    // Store double word
     } funct3_store_t;
 
     // funct3 - Atomic
@@ -188,6 +189,22 @@ package secv_pkg;
     function automatic imm_t decode_imm_j (inst_t inst);
         return {{12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0 };
     endfunction
+
+    // Sign extends the 32-bit word operand to XLEN bits
+    function automatic [XLEN-1:0] sext32(logic [31:0] operand);
+        return {{XLEN-32{operand[31]}}, operand[31:0]};
+    endfunction
+
+    // Sign extends the 16-bit half operand to XLEN bits
+    function automatic [XLEN-1:0] sext16(logic [15:0] operand);
+        return {{XLEN-16{operand[15]}}, operand[15:0]};
+    endfunction
+
+    // Sign extends the 8-bit byte operand to XLEN bits
+    function automatic [XLEN-1:0] sext8(logic [7:0] operand);
+        return {{XLEN-8{operand[7]}}, operand[7:0]};
+    endfunction
+
 
     /* --- ALU ------------------------------------------------------------------------------------------------------ */
     typedef enum bit [15:0] {

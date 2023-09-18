@@ -30,14 +30,6 @@ module alu #(
     output  logic [XLEN-1:0]    res_o   // Result
 );
 
-    // Sign extends the 32-bit operand to XLEN bits
-    function automatic [XLEN-1:0] sext32(logic [31:0] operand);
-        logic sign;
-
-        sign = operand[31];
-        return {{XLEN-31{sign}}, operand[30:0]};
-    endfunction
-
     // Main logic
     logic [31:0] a32, b32;
     assign a32 = a_i[31:0];
