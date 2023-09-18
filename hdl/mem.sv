@@ -5,7 +5,13 @@
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  *
- * Purpose  : Memory function unit for SEC-V processor.
+ * Purpose  : Memory function unit for the SEC-V processor.
+ * History
+ *      v1.0    - Initial version
+ *
+ * Todo
+ *  [ ] Split load and store
+ *  [ ] Add functions etc. to generalize code
  */
 
 `include "secv_pkg.svh"
@@ -15,16 +21,11 @@ module mem #(
     parameter int XLEN = secv_pkg::XLEN,
     parameter int ADR_WIDTH = 8,
     localparam int SEL_WIDTH = XLEN/8
-)
-
-(
-    input  logic clk_i,
-    input  logic rst_i,
-
+) (
     // Control signals
     input  logic                    ena_i,          // Enable unit
     output logic                    rdy_o,          // Unit ready
-    output logic                    invalid_op_o,   // Invalid operation decoded
+    output logic                    err_o,          // Error occured
 
     // Input operands
     input inst_t                    inst_i,         // Instruction to perform
@@ -32,7 +33,7 @@ module mem #(
     input logic [XLEN-1 : 0]        rs2_dat_i,      // Source register 2 data
     input imm_t                     imm_i,          // Immediate data
 
-    // Output operand
+    // Output reults
     output logic [XLEN-1 : 0]       dat_o,          // Read data
     output logic                    dat_vld_o,      // Read data is valid
 
@@ -53,19 +54,12 @@ module mem #(
     logic invalid_op;
     logic [XLEN-1 : 0] dmem_dat;
 
-    // Module is ready if
-    //  (a) enabled, operation is valid and data memory has acknowledged
-    //  (b) enabled, but operation is invalid
-    //  (c) not enabled
-    assign rdy_o = (ena_i && !invalid_op && dmem_ack_i) || (ena_i && invalid_op) || !ena_i;
-    assign invalid_op_o = invalid_op;
-
     // Memory access logic
     assign opcode = inst_i.r_type.opcode;
     assign funct3 = inst_i.r_type.funct3;
 
     always_comb begin
-        // Initialize memory signals
+        // Bus signals
         dmem_cyc_o = 'b0;
         dmem_stb_o = 'b0;
         dmem_sel_o = 'b0;
@@ -73,10 +67,8 @@ module mem #(
         dmem_dat_o = 'b0;
         dmem_we_o  = 'b0;
 
-        // Output signals
+        // Data signals
         dmem_dat    = 'b0;
-        dat_o       = 'b0;
-        dat_vld_o   = 'b0;
         invalid_op  = 'b0;
 
         if (ena_i) begin
@@ -124,12 +116,6 @@ module mem #(
                     default:
                         invalid_op = 1'b1;
                 endcase
-
-                // Assign register operands
-                if (!invalid_op) begin
-                    dat_o = dmem_dat;
-                    dat_vld_o = 1'b1;
-                end
             end
 
             else if (opcode == OPCODE_STORE) begin
@@ -162,6 +148,23 @@ module mem #(
                         invalid_op = 1'b1;
                 endcase
             end
+        end
+    end
+
+    // Module is ready if enabled and
+    //  (a) operation valid and data memory has acknowledged
+    //  (b) operation invalid
+    assign rdy_o = ena_i && ((!invalid_op && dmem_ack_i) || invalid_op);
+    assign err_o = invalid_op;
+
+    // Data Ouptut
+    always_comb begin
+        dat_o       = 'b0;
+        dat_vld_o   = 'b0;
+
+        if (ena_i && opcode == OPCODE_LOAD && !invalid_op) begin
+            dat_o = dmem_dat;
+            dat_vld_o = 1'b1;
         end
     end
 endmodule

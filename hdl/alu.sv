@@ -5,9 +5,9 @@
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  *
- * Purpose  : ALU of the SEC-V processor
+ * Purpose  : Arithmetic logic unit for the SEC-V processor.
  *
- * History
+ * History  :
  *      v1.0    - Initial version
  *
  * TODOs

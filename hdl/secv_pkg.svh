@@ -5,7 +5,7 @@
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  *
- * Purpose  : Main defines of the processor.
+ * Purpose  : Main defines for the SEC-V processor.
  */
 
 `ifndef SECV_PKG
@@ -27,12 +27,21 @@ package secv_pkg;
         FUNIT_MOV,      // LUI, AUIPC etc.
         FUNIT_ALU,      // ADD, SUB etc.
         FUNIT_BRANCH,   // JAL, JALR, BEQ, BNE etc.
-        FUNIT_MEM,      // L, S, FENCE
-        FUNIT_SYSTEM,   // ECALL, EBREAK, CSR etc.
-        FUNIT_CSR       // CSRRW etc.
+        FUNIT_MEM       // L, S, FENCE
+//      FUNIT_MEMTAG,   // Memory Tagging Unit
+//      FUNIT_SYSTEM,   // ECALL, EBREAK, CSR etc.
+//      FUNIT_CSR,      // CSRRW etc.
 //      FUNIT_MUL,
-//      FUNIT_DIV
+//      FUNIT_DIV,
+
     } funit_t;
+
+    typedef enum {
+        FUNIT_ERROR_NONE = 0,
+        FUNIT_ERROR_INVALID_OPCODE,
+        FUNIT_ERROR_NOT_IMPLEMENTED
+    } funit_error_t;
+
 
     /* --- Decoder -------------------------------------------------------------------------------------------------- */
     // Opcodes
@@ -120,13 +129,13 @@ package secv_pkg;
 
     // funct3 - Branch
     typedef enum logic [$bits(funct3_t)-1:0] {
-        FUNCT3_BRANCH_BEQ   = 3'b000,   // Branch equal                  ==
-        FUNCT3_BRANCH_BNQ   = 3'b001,   // Branch not equal              !=
-        //
-        FUNCT3_BRANCH_BLT   = 3'b100,   // Branch less than              <
-        FUNCT3_BRANCH_BGE   = 3'b101,   // Branch greater equal          >=
-        FUNCT3_BRANCH_BLTU  = 3'b110,   // Branch less than usigned      <  (u)
-        FUNCT3_BRANCH_BGEU  = 3'b111    // Branch greater equal unsigned >= (u)
+        FUNCT3_BRANCH_BEQ   = 3'b000,   // Branch equal                  a == b
+        FUNCT3_BRANCH_BNE   = 3'b001,   // Branch not equal              a != b
+        // .. //
+        FUNCT3_BRANCH_BLT   = 3'b100,   // Branch less than              a <  b
+        FUNCT3_BRANCH_BGE   = 3'b101,   // Branch greater equal          a >= b
+        FUNCT3_BRANCH_BLTU  = 3'b110,   // Branch less than usigned      a <  b (u)
+        FUNCT3_BRANCH_BGEU  = 3'b111    // Branch greater equal unsigned a >= b (u)
     } funct3_branch_t;
 
     // funct3 - Load
@@ -135,7 +144,7 @@ package secv_pkg;
         FUNCT3_LOAD_LH  = 3'b001,   // Load half (sign extended)
         FUNCT3_LOAD_LW  = 3'b010,   // Load word (sign extended)
         FUNCT3_LOAD_LD  = 3'b011,   // load double word
-        //
+        // .. //
         FUNCT3_LOAD_LBU = 3'b100,   // Load byte unsigned (zero extended)
         FUNCT3_LOAD_LHU = 3'b101,   // Load half unsigned (zero extended)
         FUNCT3_LOAD_LWU = 3'b110    // Load word unsigned (zero extended)
@@ -190,9 +199,15 @@ package secv_pkg;
         return {{12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0 };
     endfunction
 
-    // Sign extends the 32-bit word operand to XLEN bits
-    function automatic [XLEN-1:0] sext32(logic [31:0] operand);
-        return {{XLEN-32{operand[31]}}, operand[31:0]};
+    /* --- Signum extension ----------------------------------------------------------------------------------------- */
+    // Sign extends the 8-bit byte operand to XLEN bits
+    function automatic [XLEN-1:0] sext8(logic [7:0] operand);
+        return {{XLEN-8{operand[7]}}, operand[7:0]};
+    endfunction
+
+    // Sign extends 12-bit operand (immediate usually) to XLEN bits
+    function automatic [XLEN-1:0] sext12(logic [11:0] operand);
+        return {{XLEN-12{operand[11]}}, operand[11:0]};
     endfunction
 
     // Sign extends the 16-bit half operand to XLEN bits
@@ -200,10 +215,12 @@ package secv_pkg;
         return {{XLEN-16{operand[15]}}, operand[15:0]};
     endfunction
 
-    // Sign extends the 8-bit byte operand to XLEN bits
-    function automatic [XLEN-1:0] sext8(logic [7:0] operand);
-        return {{XLEN-8{operand[7]}}, operand[7:0]};
+    // Sign extends the 32-bit word operand to XLEN bits
+    function automatic [XLEN-1:0] sext32(logic [31:0] operand);
+        return {{XLEN-32{operand[31]}}, operand[31:0]};
     endfunction
+
+
 
 
     /* --- ALU ------------------------------------------------------------------------------------------------------ */
