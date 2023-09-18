@@ -34,11 +34,13 @@ interface wishbone_if
     logic [DAT_WIDTH-1 : 0] dat_s;      // Data in from slave
 
     modport master(
+        input clk, rst,
         output cyc, stb, we, sel, dat_m, adr,
         input  ack, dat_s
     );
 
     modport slave(
+        input clk, rst,
         input  cyc, stb, we, sel, dat_m, adr,
         output ack, dat_s
     );

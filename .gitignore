@@ -1,3 +1,9 @@
 hdl/tests/svut.out
 .hdl_checker
 .vscode
+obj_dir
+.*.f
+.*.sv
+run.log
+tests.xml
+qrun.out
