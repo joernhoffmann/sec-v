@@ -49,11 +49,18 @@ module branch #(
     assign opcode = inst_i.r_type.opcode;
     assign funct3 = inst_i.r_type.funct3;
 
-    // Branch computation
-    logic [XLEN-1:0] pc, rd;
+    // Internal signals
+    logic [XLEN-1:0] pc, pc_ret, pc_rel, pc_abs;
+    logic [XLEN-1:0] rd;
     logic pc_wb, rd_wb;
     logic err;
 
+    // Address computation
+    assign pc_ret = pc_i + 4;               // Calculate return address for calls (jump and link)
+    assign pc_rel = pc_i + sext32(imm_i);   // Calculate relative branch target (i-, j- or b-type imm)
+    assign pc_abs = rs1_i + sext32(imm_i);  // Calculate absolut branch target
+
+    // Branch computation
     always_comb begin
         // Initial values
         pc    =  'b0;
@@ -63,8 +70,7 @@ module branch #(
         err   = 1'b0;
 
         if (opcode == OPCODE_BRANCH) begin
-            // Calculate next_pc relative to imm (i_type)
-            pc = pc_i + sext32(imm_i);
+            pc = pc_rel;
 
             case (funct3)
                 FUNCT3_BRANCH_BEQ : pc_wb = (rs1_i          ==  rs2_i);
@@ -81,8 +87,8 @@ module branch #(
         end
 
         else if (opcode == OPCODE_JAL) begin
-            pc = pc_i + sext32(imm_i);  // Calculate next_pc relative to imm (j_type)
-            rd = pc_i + 4;              // Save pc + 4 as return address
+            pc = pc_rel;
+            rd = pc_ret;
 
             pc_wb = 1'b1;
             rd_wb = 1'b1;
@@ -90,8 +96,8 @@ module branch #(
 
         else if (opcode == OPCODE_JALR) begin
             if (funct3 == 'b0) begin
-                pc = rs1_i + sext32(imm_i); // Calculate next_pc absolut by rs1 + imm (i_type)
-                rd = pc_i + 4;              // Save pc + 4 as return address
+                pc = pc_abs;
+                rd = pc_ret;
 
                 pc_wb = 1'b1;
                 rd_wb = 1'b1;
