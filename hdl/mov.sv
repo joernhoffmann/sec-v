@@ -20,8 +20,7 @@
 import secv_pkg::*;
 
 module mov #(
-    parameter int XLEN = secv_pkg::XLEN,
-    parameter int ILEN = secv_pkg::ILEN
+    parameter int XLEN = secv_pkg::XLEN
 ) (
     // Control
     input   inst_t              inst_i,         // Instruction
