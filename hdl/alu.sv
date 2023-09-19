@@ -60,6 +60,7 @@ module alu #(
             ALU_OP_SUB:
                 res_o = a_i - b_i;
 
+            // Arithmetic (32-bit)
             ALU_OP_ADDW:
                 res_o = sext32(a32 + b32);
 
@@ -76,6 +77,7 @@ module alu #(
             ALU_OP_SRA:
                 res_o = $signed(a_i) >>> b_i;
 
+            // Shift (32-bit)
             ALU_OP_SLLW:
                 res_o = sext32(a32 << b32);
 
