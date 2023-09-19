@@ -27,7 +27,7 @@ module mem #(
     parameter int ADR_WIDTH = 8,
     localparam int SEL_WIDTH = XLEN/8
 ) (
-    // Control signals
+    // Control
     input  logic                    ena_i,          // Enable unit
     output logic                    rdy_o,          // Unit ready
     output logic                    err_o,          // Error occured
@@ -38,19 +38,20 @@ module mem #(
     input logic [XLEN-1 : 0]        rs2_dat_i,      // Source register 2 data
     input imm_t                     imm_i,          // Immediate data
 
-    // Output reults
-    output logic [XLEN-1 : 0]       dat_o,          // Read data
-    output logic                    dat_vld_o,      // Read data is valid
+    // Output operands
+    output logic [XLEN-1 : 0]       rd_o,           // Destination register (read data)
+    output logic                    rd_wb_o,        // Destination register write-back (read data is valid)
 
     // Wishbone data memory interface
     output logic                    dmem_cyc_o,
     output logic                    dmem_stb_o,
     output logic [SEL_WIDTH-1 : 0]  dmem_sel_o,
     output logic [ADR_WIDTH-1 : 0]  dmem_adr_o,
-    output logic [XLEN-1      : 0]  dmem_dat_o,
     output logic                    dmem_we_o,
-    input  logic                    dmem_ack_i,
-    input  logic [XLEN-1      : 0]  dmem_dat_i
+    output logic [XLEN-1      : 0]  dmem_dat_o,
+    input  logic [XLEN-1      : 0]  dmem_dat_i,
+    input  logic                    dmem_ack_i
+
 );
 
     // Internal signals
@@ -164,12 +165,12 @@ module mem #(
 
     // Data Ouptut
     always_comb begin
-        dat_o       = 'b0;
-        dat_vld_o   = 'b0;
+        rd_o       = 'b0;
+        rd_wb_o   = 'b0;
 
         if (ena_i && opcode == OPCODE_LOAD && !invalid_op) begin
-            dat_o = dmem_dat;
-            dat_vld_o = 1'b1;
+            rd_o = dmem_dat;
+            rd_wb_o = 1'b1;
         end
     end
 endmodule

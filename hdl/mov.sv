@@ -19,7 +19,7 @@
 `include "secv_pkg.svh"
 import secv_pkg::*;
 
-module branch #(
+module mov #(
     parameter int XLEN = secv_pkg::XLEN,
     parameter int ILEN = secv_pkg::ILEN
 ) (
@@ -76,5 +76,4 @@ module branch #(
     assign err_o = err;
     assign rd_o    = rd;
     assign rd_wb_o = rd_wb;
-
 endmodule
