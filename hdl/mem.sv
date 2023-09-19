@@ -4,10 +4,10 @@
  *
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
- *
  * Purpose  : Memory function unit for the SEC-V processor.
+ *
  * History
- *      v1.0    - Initial version
+ *  v1.0    - Initial version
  *
  * Todo
  *  [ ] Split load and store

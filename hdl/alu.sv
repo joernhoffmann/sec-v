@@ -4,11 +4,17 @@
  *
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
- *
  * Purpose  : Arithmetic logic unit for the SEC-V processor.
  *
- * History  :
- *      v1.0    - Initial version
+ * Notes
+ *  - Inputs a and b must contain properly decoded register or immediate values.
+ *
+ * Opcodes
+ *  - 64-Bit: ADD, SUB, SLL, SRL, SRA, SLT, SLTU, AND, OR, XOR
+ *  - 32-Bit: ADDW, SUBW, SLLW, SRLW, SRAW
+ *
+ * History
+ *  v1.0    - Initial version
  *
  * TODOs
  *  [ ] Improve shift operations with barrel shifter

@@ -4,8 +4,10 @@
  *
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
- *
  * Purpose  : Instruction decoder for the SEC-V processor.
+ *
+ * History
+ *  v1.0    - Initial version
  */
  `include "secv_pkg.svh"
 import secv_pkg::*;

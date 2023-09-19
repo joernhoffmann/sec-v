@@ -4,8 +4,10 @@
  *
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
- *
  * Purpose  : General purpose register file
+ *
+ * History
+ *  v1.0    - Initial version
  */
 `include "secv_pkg.svh"
 import secv_pkg::*;

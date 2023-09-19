@@ -4,8 +4,11 @@
  *
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
- *
  * Purpose  : Main core and control logic of the SEC-V processor.
+ *
+ * History  :
+ *  v1.0    - Initial version
+ *
  * Todo
  *  [ ] Improve main fsm, separate signals
  *  [ ] Seperate units

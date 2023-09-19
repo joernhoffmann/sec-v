@@ -4,10 +4,17 @@
  *
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
- *
  * Purpose  : Branch function unit for the SEC-V processor.
- * History  :
- *      v1.0    - Initial version
+ *
+ * Notes
+ *  - The immediate value imm_i must be proper decoded (I-, B- or J-type) in advance.
+ *
+ * Opcodes
+ *  - Branch : BEQ, BNE, BLT, BGE, BLTU, BGEU
+ *  - Jump   : JAL and JALR
+ *
+ * History
+ *  v1.0    - Initial version
  */
 
 `include "secv_pkg.svh"

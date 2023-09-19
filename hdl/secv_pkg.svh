@@ -4,8 +4,10 @@
  *
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
- *
  * Purpose  : Main defines for the SEC-V processor.
+ *
+ * History
+ *  v1.0    - Initial version
  */
 
 `ifndef SECV_PKG
@@ -24,16 +26,15 @@ package secv_pkg;
     /* --- Function units ------------------------------------------------------------------------------------------- */
     typedef enum {
         FUNIT_NONE,     // No operation
-        FUNIT_MOV,      // LUI, AUIPC etc.
         FUNIT_ALU,      // ADD, SUB etc.
         FUNIT_BRANCH,   // JAL, JALR, BEQ, BNE etc.
-        FUNIT_MEM       // L, S, FENCE
-//      FUNIT_MEMTAG,   // Memory Tagging Unit
-//      FUNIT_SYSTEM,   // ECALL, EBREAK, CSR etc.
+        FUNIT_MEM,      // L, S, FENCE
+        FUNIT_MOV       // LUI, AUIPC etc.
 //      FUNIT_CSR,      // CSRRW etc.
+//      FUNIT_SYSTEM,   // ECALL, EBREAK, CSR etc.
+//      FUNIT_MEMTAG,   // Memory Tagging Unit
 //      FUNIT_MUL,
 //      FUNIT_DIV,
-
     } funit_t;
 
     typedef enum {

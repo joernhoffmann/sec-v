@@ -4,17 +4,19 @@
  *
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
+ * Purpose  : Wishbone-compatible memory module.
  *
- * Purpose  : Wishbone-compatible memory module. Operates in little-endian byte order.
+ * Notes
+ *  - Memory addressing operates in little-endian byte order.
  *
- * Features :
- *   - Configurable parameters for address and data width
- *   - Byte-selectable memory access
- *   - Configurable memory reset
- *   - Synchronous reset
+ * Features
+ *  - Configurable parameters for address and data width
+ *  - Byte-selectable memory access
+ *  - Configurable memory reset
+ *  - Synchronous reset
  *
- * History  :
- *      v1.0    Initial version
+ * History
+ *  v1.0    - Initial version
  */
 
 module mem_wb #(
