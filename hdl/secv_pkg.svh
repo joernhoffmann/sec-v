@@ -176,26 +176,31 @@ package secv_pkg;
 
     // Decode I-immediate (lower 12'bits)
     function automatic imm_t decode_imm_i (inst_t inst);
+        //      {    sext[11]},      [10: 0]}
         return  {{21{inst[31]}}, inst[30:20]};
     endfunction
 
     // Decode S-immediate (store)
     function automatic imm_t decode_imm_s (inst_t inst);
-        return  {{21{inst[31]}}, inst[30:25],  inst[11:7]};
+        //     {    sext[11],       [10: 5],       [4:0]}
+        return {{21{inst[31]}}, inst[30:25],  inst[11:7]};
     endfunction
 
     // Decode B-immediate (branch)
     function automatic imm_t decode_imm_b (inst_t inst);
+        //     {    sext[12],      [11],      [10: 5],       [4:1],   [0]}
         return {{20{inst[31]}}, inst[7],  inst[30:25],  inst[11:8], 1'b0 };
     endfunction
 
     // Decode U-immediate (upper 20'bits)
     function automatic imm_t decode_imm_u (inst_t inst);
-        return {inst[31], inst[30:12], 12'b0};
+        //     {    [31:12],  [11:0]}
+        return {inst[31:12],  12'b0 };
     endfunction
 
     // Decode J-immediate (jump)
     function automatic imm_t decode_imm_j (inst_t inst);
+        //     {    sext[20],      [19:12],     [11],      [10:1],    [0]}
         return {{12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0 };
     endfunction
 
