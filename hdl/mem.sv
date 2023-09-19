@@ -6,11 +6,16 @@
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  * Purpose  : Memory function unit for the SEC-V processor.
  *
+ * Opcodes
+ *  - loads (sign-ext)  : LB, LH, LW, LD
+ *  - loads (zero-ext)  : LBU, LHU, LWU
+ *  - stores            : SB, SH, SW, SD
+ *
  * History
  *  v1.0    - Initial version
  *
  * Todo
- *  [ ] Split load and store
+ *  [ ] Consider separate blocks for load and store
  *  [ ] Add functions etc. to generalize code
  */
 
