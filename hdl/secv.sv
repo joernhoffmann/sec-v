@@ -48,20 +48,26 @@ module secv (
     // -------------------------------------------------------------------------------------------------------------- //
     // GPR
     // -------------------------------------------------------------------------------------------------------------- //
-    regadr_t rs1, rs2, rd;
     logic [XLEN-1:0] rs1_dat, rs2_dat, rd_dat;
-    logic rd_ena;
+    regadr_t rs1_adr, rs2_adr, rd_adr;
+    logic rd_wb;
 
     gpr gpr0 (
         .clk_i        (clk_i),
         .rst_i        (rst_i),
-        .rs1_i        (rs1),        // Source Register 1
+
+         // Source Register 1
+        .rs1_adr_i    (rs1_adr),
         .rs1_dat_o    (rs1_dat),
-        .rs2_i        (rs2),        // Source register 2
+
+        // Source register 2
+        .rs2_adr_i    (rs2_adr),
         .rs2_dat_o    (rs2_dat),
-        .rd_i         (rd),         // Destination register
+
+        // Destination register
+        .rd_adr_i     (rd_adr),
         .rd_dat_i     (rd_dat),
-        .rd_ena_i     (rd_ena)
+        .rd_wb_i      (rd_wb)
     );
 
     // -------------------------------------------------------------------------------------------------------------- //
@@ -83,9 +89,9 @@ module secv (
         .funct7_o   (funct7),
 
         // Operands
-        .rs1_o      (rs1),
-        .rs2_o      (rs2),
-        .rd_o       (rd),
+        .rs1_adr_o  (rs1_adr),
+        .rs2_adr_o  (rs2_adr),
+        .rd_adr_o   (rd_adr),
         .imm_o      (imm),
         .imm_use_o  (imm_op),
 
@@ -134,7 +140,7 @@ module secv (
         .dmem_ack_i (dmem_ack_i)
     );
 
-    // Transport unit
+    // Move (transport) unit
     funit_in_t mov_i;
     funit_out_t mov_o;
     mov mov0 (

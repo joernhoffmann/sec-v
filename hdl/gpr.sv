@@ -19,37 +19,29 @@ module gpr #(
     input   logic rst_i,
 
     // Register operands
-    input   regadr_t            rs1_i,
+    input   regadr_t            rs1_adr_i,
     output  logic [XLEN-1:0]    rs1_dat_o,
 
-    input   regadr_t            rs2_i,
+    input   regadr_t            rs2_adr_i,
     output  logic [XLEN-1:0]    rs2_dat_o,
 
-    input   regadr_t            rd_i,
+    input   regadr_t            rd_adr_i,
     input   logic [XLEN-1:0]    rd_dat_i,
-    input   logic               rd_ena_i
+    input   logic               rd_wb_i
 );
 
-logic [XLEN-1 : 0] regfile [REG_COUNT];
-logic [XLEN-1 : 0] regfile_next [REG_COUNT];
+    logic [XLEN-1 : 0] regfile [REG_COUNT];
 
-always_ff @(posedge clk_i) begin
-    if (rst_i)
-        regfile <= '{default: 0};
-    else
-        regfile <= regfile_next;
-end
+    // Write logic
+    always_ff @(posedge clk_i) begin
+        if (rst_i)
+            regfile <= '{default: 0};
 
-always_comb begin
-    regfile_next = regfile;
+        else if (rd_adr_i != 'b0 && rd_wb_i)
+            regfile[rd_adr_i] <= rd_dat_i;
+    end
 
-    // Write destination register if requested and not zero
-    if (rd_ena_i && rd_i != 'b0)
-        regfile_next[rd_i] = rd_dat_i;
-end
-
-// Outputs
-assign rs1_dat_o = (rs1_i == 'b0) ? 'b0 : regfile[rs1_i];
-assign rs2_dat_o = (rs2_i == 'b0) ? 'b0 : regfile[rs2_i];
-
+    // Read logic
+    assign rs1_dat_o = (rs1_adr_i == 'b0) ? 'b0 : regfile[rs1_adr_i];
+    assign rs2_dat_o = (rs2_adr_i == 'b0) ? 'b0 : regfile[rs2_adr_i];
 endmodule

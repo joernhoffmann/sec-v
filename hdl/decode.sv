@@ -17,24 +17,23 @@
 import secv_pkg::*;
 
 module decode (
-    input   inst_t      inst_i,     // instruction
+    input   inst_t      inst_i,     // Instruction
 
     // Opcode fields
-    output opcode_t     opcode_o,   // opcode
-    output funct3_t     funct3_o,   // funct3 field
-    output funct7_t     funct7_o,   // funct7 field
+    output opcode_t     opcode_o,   // Opcode
+    output funct3_t     funct3_o,   // Funct3 field
+    output funct7_t     funct7_o,   // Funct7 field
 
     // Operands
-    output regadr_t     rs1_o,      // source register 1
-    output regadr_t     rs2_o,      // source register 2
-    output regadr_t     rd_o,       // destination register
-    output imm_t        imm_o,      // immediate operand
-    output logic        imm_use_o,  // operation uses immediate
+    output regadr_t     rs1_adr_o,  // Source register 1
+    output regadr_t     rs2_adr_o,  // Source register 2
+    output regadr_t     rd_adr_o,   // Destination register
+    output imm_t        imm_o,      // Immediate operand
+    output logic        imm_use_o,  // Operation uses immediate
 
     // Function units
-    output  funit_t     funit_o,    // function unit
+    output  funit_t     funit_o,    // Selected function unit
     output alu_op_t     alu_op_o    // ALU operation
-    // output logic        alu_32_o,   // ALU uses 32-bit operands
 );
 
     // Decode opcode
@@ -45,7 +44,7 @@ module decode (
     assign funct3 = inst_i.r_type.funct3;
     assign funct7 = inst_i.r_type.funct7;
 
-    // Decode immediate
+    // Decode immediate operand
     logic imm_use;
     imm_t imm, imm_i, imm_s, imm_b, imm_u, imm_j;
     assign imm_i = decode_imm_i(inst_i);
@@ -191,9 +190,9 @@ module decode (
     assign funct7_o = funct7;
 
     // Operands
-    assign rs1_o = inst_i.r_type.rs1;
-    assign rs2_o = inst_i.r_type.rs2;
-    assign rd_o  = inst_i.r_type.rd;
+    assign rs1_adr_o = inst_i.r_type.rs1;
+    assign rs2_adr_o = inst_i.r_type.rs2;
+    assign rd_adr_o  = inst_i.r_type.rd;
     assign imm_o = imm;
     assign imm_use_o = imm_use;
 
