@@ -170,7 +170,8 @@ module secv (
     logic [XLEN-1:0] op_a, op_b, op_a_next, op_b_next;
     logic [XLEN-1:0] res, res_next;
 
-    assign inst = ir;   // Assign decoder input to instruction register
+    // Assign decoder input to instruction register
+    assign inst = ir;
     assign alu_a = op_a;
     assign alu_b = op_b;
 
