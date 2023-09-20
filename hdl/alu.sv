@@ -18,9 +18,10 @@
  *
  * TODOs
  *  [ ] Improve shift operations with barrel shifter
- *  [ ] Use signal and single sext32() to assign result
  *  [ ] Use a separate flag for 32-bit operations.
- *
+ *  [ ] Use single sext32() for 32-bit operations
+ *  [ ] Add control signals like other funits
+ *  [ ] Consider adding decoder logic like other funits
  */
 `include "secv_pkg.svh"
 import secv_pkg::*;

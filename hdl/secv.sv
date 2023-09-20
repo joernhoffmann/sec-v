@@ -11,10 +11,10 @@
  *
  * Todo
  *  [ ] Improve main fsm, separate signals
- *  [ ] Seperate units
- *  [ ] Introduce data types for interfaces etc.
+ *  [ ] Seperate units (e.g. alu decoder, pipeline etc.)
+ *  [ ] Introduce more data types (e. g. wishbone, function unit, function unit array)
  *  [x] Simplify immediate hanlding, extend 32-bit to 64-bit imm, e. g. via sext32(imm)
- *  [ ] Use data types i/o for fuints, use array with units
+
  */
 `include "secv_pkg.svh"
 import secv_pkg::*;
