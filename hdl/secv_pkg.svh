@@ -224,7 +224,7 @@ package secv_pkg;
     } funit_error_t;
 
     // Function unit input interface
-    typedef struct {
+    typedef struct packed {
         // Control
         logic               ena;        // Unit is enabled
 
@@ -239,7 +239,7 @@ package secv_pkg;
     } funit_in_t;
 
     // Function unit output interface
-    typedef struct {
+    typedef struct packed {
         // Control
         logic               rdy;        // Unit ready, operation completed
         logic               err;        // Error occured

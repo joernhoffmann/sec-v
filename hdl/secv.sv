@@ -81,7 +81,7 @@ module secv (
     logic imm_op;
     funit_t funit;
 
-    decode dec0 (
+    decoder dec0 (
         .inst_i     (inst),
         // Opcode fields
         .opcode_o   (opcode),
@@ -95,8 +95,7 @@ module secv (
         .imm_o      (imm),
         .imm_use_o  (imm_op),
 
-        // Function units
-        .alu_op_o   (alu_op),
+        // Function unit
         .funit_o    (funit)
     );
 

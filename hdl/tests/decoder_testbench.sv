@@ -12,9 +12,9 @@
 `include "svut_h.sv"
 
 // Specify the module to load or on files.f
-`include "../decode.sv"
+`include "../decoder.sv"
 
-module decode_testbench();
+module decoder_testbench();
 import secv_pkg::*;
 
     `SVUT_SETUP
@@ -27,15 +27,13 @@ import secv_pkg::*;
     imm_t               imm_o;
     imm_t               imm;
 
-    decode
-    dut  (
-        .inst_i   (inst_i),
-        .rs1_o    (rs1_o),
-        .rs2_o    (rs2_o),
-        .rd_o     (rd_o),
-        .imm_o    (imm_o),
-        .funit_o  (funit_o),
-        .alu_op_o (alu_op_o)
+    decoder dut (
+        .inst_i     (inst_i),
+        .rs1_adr_o  (rs1_o),
+        .rs2_adr_o  (rs2_o),
+        .rd_adr_o   (rd_o),
+        .imm_o      (imm_o),
+        .funit_o    (funit_o)
     );
 
     // To create a clock:
