@@ -12,7 +12,7 @@
  `include "secv_pkg.svh"
 import secv_pkg::*;
 
-module alu_op_decoder(
+module alu_decoder (
     input   inst_t      inst_i,
 
     output  alu_op_t    op_o,           // ALU operation to perform

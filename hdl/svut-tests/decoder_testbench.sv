@@ -15,9 +15,8 @@
 `include "../decoder.sv"
 
 module decoder_testbench();
-import secv_pkg::*;
-
     `SVUT_SETUP
+
     inst_t              inst_i;
     regadr_t            rs1_o;
     regadr_t            rs2_o;

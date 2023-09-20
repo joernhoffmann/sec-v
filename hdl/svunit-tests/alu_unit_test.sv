@@ -1,13 +1,12 @@
 `include "svunit_defines.svh"
 `include "secv_pkg.svh"
-`include "alu.sv"
+`include "alu_core.sv"
 
-module alu_unit_test;
+module alu_core_unit_test;
   import svunit_pkg::svunit_testcase;
   import secv_pkg::*;
 
-
-  string name = "alu_ut";
+  string name = "alu_core_ut";
   svunit_testcase svunit_ut;
 
   parameter XLEN=64;
@@ -18,9 +17,9 @@ module alu_unit_test;
   // This is the UUT that we're
   // running the Unit Tests on
   //===================================
-  alu #(
+  alu_core #(
     .XLEN   (XLEN)
-  ) my_alu (
+  ) dut (
     .a_i    (a_i),
     .b_i    (b_i),
     .res_o  (res_o),

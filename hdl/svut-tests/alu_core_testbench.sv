@@ -12,13 +12,12 @@
 `include "svut_h.sv"
 
 // Specify the module to load or on files.f
-`include "../alu.sv"
+`include "../alu_core.sv"
 
-module alu_testbench();
+module alu_core_testbench();
     `SVUT_SETUP
 
     parameter XLEN = 64;
-
     alu_op_t	     op_i;
     logic [XLEN-1:0] a_i;
     logic [XLEN-1:0] b_i;
@@ -26,7 +25,7 @@ module alu_testbench();
     /* verilator lint_off UNOPTFLAT */
     logic [XLEN-1:0] 	res_o;
 
-    alu	#(
+    alu_core #(
         .XLEN   (XLEN)
     ) dut (
         .op_i 	 (op_i),
