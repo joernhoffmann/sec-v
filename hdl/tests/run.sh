@@ -1,5 +1,5 @@
 #!/bin/bash
-SVUT=$HOME/.svut/svutRun
+SVUT=$HOME/lib/svut/svutRun
 
 # Run specific tests
 $SVUT -test alu_testbench.sv

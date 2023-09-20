@@ -1,0 +1,17 @@
+# Verilator
+VERILATOR_PATH=$HOME/lib/verilator/bin
+if [ -d $VERILATOR_PATH ]; then
+	export PATH=$VERILATOR_PATH:$PATH
+fi
+
+# SVUnit
+# export SVUNIT_INSTALL=`pwd`
+# export PATH=$PATH:$SVUNIT_INSTALL"/bin"
+if [ -z ${SVUNIT_INSTALL} ]; then
+
+    export SVUNIT_INSTALL=$HOME/lib/svunit
+    if [ "${PATH/$SVUNIT_INSTALL\/bin/}" == "$PATH" ]; then
+        export PATH=$PATH:$SVUNIT_INSTALL"/bin"
+    fi
+
+fi
