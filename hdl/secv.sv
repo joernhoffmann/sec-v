@@ -136,24 +136,12 @@ module secv (
     // -------------------------------------------------------------------------------------------------------------- //
     // MOV unit
     // -------------------------------------------------------------------------------------------------------------- //
-    logic mov_ena, mov_rdy, mov_err;
-    logic [XLEN-1:0] mov_rd;
-    logic mov_rd_wb;
+    funit_in_t mov_i;
+    funit_out_t mov_o;
 
     mov mov0 (
-        // Control
-        .inst_i     (inst),
-        .ena_i      (mov_ena),
-        .rdy_o      (mov_rdy),
-        .err_o      (mov_err),
-
-        // Input operands
-        .pc_i       (pc),
-        .imm_i      (imm),
-
-        // Output
-        .rd_o       (mov_rd),
-        .rd_wb_o    (mov_rd_wb)
+        .fu_i (mov_i),
+        .fu_o (mov_o)
     );
 
     // -------------------------------------------------------------------------------------------------------------- //

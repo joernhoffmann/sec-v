@@ -22,24 +22,14 @@ import secv_pkg::*;
 module mov #(
     parameter int XLEN = secv_pkg::XLEN
 ) (
-    // Control
-    input   inst_t              inst_i,         // Instruction
-    input   logic               ena_i,          // Enable unit
-    output  logic               rdy_o,          // Unit is ready
-    output  logic               err_o,          // Error occured (opcode invalid)
-
-    // Input operands
-    input   logic [XLEN-1 : 0]  pc_i,           // Current PC
-    input   imm_t               imm_i,          // Decoded immediate (U-type)
-
-    // Output
-    output  logic [XLEN-1:0]    rd_o,           // Link register data       rd <= dat (?)
-    output  logic               rd_wb_o         // Link register write back rd <= dat (!)
+    // Function unit interface
+    input  funit_in_t  fu_i,
+    output funit_out_t fu_o
 );
 
     // Instruction decoding
     opcode_t opcode;
-    assign opcode = inst_i.r_type.opcode;
+    assign opcode = fu_i.inst.r_type.opcode;
 
     // Branch computation
     logic [XLEN-1:0] rd;
@@ -52,16 +42,16 @@ module mov #(
         rd_wb = 1'b0;
         err   = 1'b0;
 
-        if (ena_i) begin
+        if (fu_i.ena) begin
             // Load Upper Imm
             if (opcode == OPCODE_LUI) begin
-                rd = imm_i;
+                rd = fu_i.imm;
                 rd_wb = 1'b1;
             end
 
             // Add Upper Imm to PC
             else if (opcode == OPCODE_AUIPC) begin
-                rd = pc_i + imm_i;
+                rd = fu_i.pc + fu_i.imm;
                 rd_wb = 1'b1;
             end
 
@@ -71,8 +61,15 @@ module mov #(
     end
 
     // Output
-    assign rdy_o   = ena_i;
-    assign err_o   = err;
-    assign rd_o    = rd;
-    assign rd_wb_o = rd_wb;
+    always_comb begin
+        fu_o = funit_out_default();
+
+        if (fu_i.ena) begin
+            fu_o.rdy = 1'b1;
+            fu_o.err = err;
+            fu_o.rd_dat = rd;
+            fu_o.rd_dat_wb = rd_wb;
+        end
+
+    end
 endmodule
