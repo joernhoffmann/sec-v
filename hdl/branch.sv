@@ -24,37 +24,29 @@ import secv_pkg::*;
 module branch #(
     parameter int XLEN = secv_pkg::XLEN
 ) (
-    // Control
-    input   inst_t              inst_i,         // Instruction
-    input   logic               ena_i,          // Enable unit
-    output  logic               rdy_o,          // Unit is ready
-    output  logic               err_o,          // Error occured
-
-    // Input operands
-    input   logic [XLEN-1 : 0]  pc_i,           // Current PC
-    input   logic [XLEN-1 : 0]  rs1_i,          // Source register 1 data
-    input   logic [XLEN-1 : 0]  rs2_i,          // Soruce register 2 data
-    input   imm_t               imm_i,          // Decoded immediate (I-, B- or J-Type)
-
-    // Output
-    output  logic [XLEN-1:0]    pc_o,           // NextPC: branch target address    PC <= target (?)
-    output  logic               pc_wb_o,        // NextPC write back: take branch   PC <= target (!)
-    output  logic [XLEN-1:0]    rd_o,           // Link register data               rd <= dat (?)
-    output  logic               rd_wb_o         // Link register write back         rd <= dat (!)
+    input  funit_in_t  fu_i,
+    output funit_out_t fu_o
 );
 
     // Instruction decoding
     opcode_t opcode;
     funct3_t funct3;
-    assign opcode = inst_i.r_type.opcode;
-    assign funct3 = inst_i.r_type.funct3;
+    assign opcode = fu_i.inst.r_type.opcode;
+    assign funct3 = fu_i.inst.r_type.funct3;
 
-    // --- Branch target comptation --------------------------------------------------------------------------------- //
+    // Input operands alias
+    logic [XLEN-1:0] rs1_i, rs2_i, imm_i, pc_i;
+    assign rs1_i = fu_i.rs1_dat;
+    assign rs2_i = fu_i.rs2_dat;
+    assign imm_i = fu_i.imm;
+    assign pc_i  = fu_i.pc;
+
+    // --- Target computation --------------------------------------------------------------------------------------- //
     logic [XLEN-1:0] pc, pc_ret;
 
-    // Forward address
+    // Branch address
     always_comb begin
-        pc = pc_i;
+        pc = 'b0;
 
         // Relative branch target (b-type and j-type imm)
         if (opcode == OPCODE_BRANCH || opcode == OPCODE_JAL)
@@ -66,9 +58,9 @@ module branch #(
     end
 
     // Return address
-    assign pc_ret = pc_i + 4;
+    assign pc_ret = fu_i.pc + 4;
 
-    // --- Branch decision computation ------------------------------------------------------------------------------ //
+    // --- Decision computation ------------------------------------------------------------------------------------- //
     logic pc_wb, rd_wb;
     logic err;
     always_comb begin
@@ -109,12 +101,20 @@ module branch #(
     end
 
     // Outputs
-    assign rdy_o    = ena_i;
-    assign err_o    = err;
+    always_comb begin
+        fu_o = funit_out_default();
 
-    assign pc_o     = pc;
-    assign pc_wb_o  = pc_wb;
+        if (fu_i.ena) begin
+            fu_o.rdy        = 1'b1;
+            fu_o.err        = err;
 
-    assign rd_o     = pc_ret;
-    assign rd_wb_o  = rd_wb;
+            // Branch target (= next pc)
+            fu_o.pc         = pc;
+            fu_o.pc_wb      = pc_wb;
+
+            // Return address (= destination register)
+            fu_o.rd_dat     = pc_ret;
+            fu_o.rd_dat_wb  = rd_wb;
+        end
+    end
 endmodule

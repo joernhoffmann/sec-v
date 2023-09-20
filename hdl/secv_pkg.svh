@@ -180,7 +180,7 @@ package secv_pkg;
         return {{XLEN-20{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0 };
     endfunction
 
-    /* --- Signum extension ----------------------------------------------------------------------------------------- */
+    /* --- Signum extension function -------------------------------------------------------------------------------- */
     // Sign extends the 8-bit byte operand to XLEN bits
     function automatic [XLEN-1:0] sext8(logic [7:0] operand);
         return {{XLEN-8{operand[7]}}, operand[7:0]};
@@ -202,17 +202,18 @@ package secv_pkg;
     endfunction
 
     /* --- Function units ------------------------------------------------------------------------------------------- */
-    typedef enum {
-        FUNIT_NONE,     // No operation
-        FUNIT_ALU,      // ADD, SUB etc.
-        FUNIT_BRANCH,   // JAL, JALR, BEQ, BNE etc.
-        FUNIT_MEM,      // L, S, FENCE
-        FUNIT_MOV       // LUI, AUIPC etc.
+    typedef enum int{
+        FUNIT_NONE,     // No function unit
+        FUNIT_ALU,      // Arithmetic logic unit (ADD, SUB etc.)
+        FUNIT_BRANCH,   // Branch unit           (JAL, JALR, BEQ, BNE etc.)
+        FUNIT_MEM,      // Memory unit           (Loads, Stores, FENCE etc.)
+        FUNIT_MOV,      // Move unit             (LUI, AUIPC)
 //      FUNIT_CSR,      // CSRRW etc.
 //      FUNIT_SYSTEM,   // ECALL, EBREAK, CSR etc.
 //      FUNIT_MEMTAG,   // Memory Tagging Unit
 //      FUNIT_MUL,
 //      FUNIT_DIV,
+        FUNIT_COUNT
     } funit_t;
 
     // Error codes (not yet used)

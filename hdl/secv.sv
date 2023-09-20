@@ -72,7 +72,7 @@ module secv (
     );
 
     // -------------------------------------------------------------------------------------------------------------- //
-    // ALU unit
+    // ALU
     // -------------------------------------------------------------------------------------------------------------- //
     alu_op_t alu_op;
     logic [XLEN-1:0] alu_a, alu_b, alu_res;
@@ -87,28 +87,11 @@ module secv (
     // -------------------------------------------------------------------------------------------------------------- //
     // BRANCH unit
     // -------------------------------------------------------------------------------------------------------------- //
-    logic brn_ena, brn_rdy, brn_err;
-    logic [XLEN-1:0] brn_pc, brn_rd;
-    logic brn_pc_wb, brn_rd_wb;
-
+    funit_in_t brn_i;
+    funit_out_t brn_o;
     branch brn0 (
-        // Control
-        .inst_i     (inst),
-        .ena_i      (brn_ena),
-        .rdy_o      (brn_rdy),
-        .err_o      (brn_err),
-
-        // Input operands
-        .pc_i       (pc),
-        .rs1_i      (rs1_dat),
-        .rs2_i      (rs2_dat),
-        .imm_i     (imm),
-
-        // Output
-        .pc_o       (brn_pc),
-        .pc_wb_o    (brn_pc_wb),
-        .rd_o       (brn_rd),
-        .rd_wb_o    (brn_rd_wb)
+        .fu_i   (brn_i),
+        .fu_o   (brn_o)
     );
 
     // -------------------------------------------------------------------------------------------------------------- //
@@ -166,6 +149,17 @@ module secv (
         .alu_op_o   (alu_op),
         .funit_o    (funit)
     );
+
+    // Function unit
+    funit_in_t fui_vect[FUNIT_COUNT];
+    assign fui_vect[FUNIT_BRANCH] = mov_i;
+    assign fui_vect[FUNIT_MEM]    = mem_i;
+    assign fui_vect[FUNIT_MOV]    = brn_i;
+
+    funit_out_t fuo_vect[FUNIT_COUNT];
+    assign fuo_vect[FUNIT_BRANCH] = mov_o;
+    assign fuo_vect[FUNIT_MEM]    = mem_o;
+    assign fuo_vect[FUNIT_MOV]    = brn_o;
 
     // -------------------------------------------------------------------------------------------------------------- //
     // Main FSM
