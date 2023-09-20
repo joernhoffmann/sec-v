@@ -165,8 +165,8 @@ module mem #(
 
     // Data Ouptut
     always_comb begin
-        rd_o       = 'b0;
-        rd_wb_o   = 'b0;
+        rd_o    = 'b0;
+        rd_wb_o = 'b0;
 
         if (ena_i && opcode == OPCODE_LOAD && !invalid_op) begin
             rd_o = dmem_dat;

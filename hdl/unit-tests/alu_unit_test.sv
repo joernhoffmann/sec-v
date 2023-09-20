@@ -1,7 +1,6 @@
-// `include "svunit_defines.svh"
-`include "/opt/svunit/svunit_base/svunit_defines.svh"
-`include "alu.sv"
+`include "svunit_defines.svh"
 `include "secv_pkg.svh"
+`include "alu.sv"
 
 module alu_unit_test;
   import svunit_pkg::svunit_testcase;
