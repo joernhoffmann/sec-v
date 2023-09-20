@@ -6,13 +6,14 @@
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  * Purpose  : Main core and control logic of the SEC-V processor.
  *
- * History  :
+ * History
  *  v1.0    - Initial version
  *
  * Todo
  *  [ ] Improve main fsm, separate signals
  *  [ ] Seperate units (e.g. alu decoder, pipeline etc.)
  *  [ ] Introduce more data types (e. g. wishbone, function unit, function unit array)
+ *  [x] Introduce function unit input/ output data type
  *  [x] Simplify immediate hanlding, extend 32-bit to 64-bit imm, e. g. via sext32(imm)
 
  */
