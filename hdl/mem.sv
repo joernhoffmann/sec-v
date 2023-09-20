@@ -27,20 +27,9 @@ module mem #(
     parameter int ADR_WIDTH = 8,
     localparam int SEL_WIDTH = XLEN/8
 ) (
-    // Control
-    input  logic                    ena_i,          // Enable unit
-    output logic                    rdy_o,          // Unit ready
-    output logic                    err_o,          // Error occured
-
-    // Input operands
-    input inst_t                    inst_i,         // Instruction to perform
-    input logic [XLEN-1 : 0]        rs1_dat_i,      // Source register 1 data
-    input logic [XLEN-1 : 0]        rs2_dat_i,      // Source register 2 data
-    input imm_t                     imm_i,          // Immediate data
-
-    // Output operands
-    output logic [XLEN-1 : 0]       rd_o,           // Destination register (read data)
-    output logic                    rd_wb_o,        // Destination register write-back (read data is valid)
+    // Function unit interface
+    input  funit_in_t  fu_i,
+    output funit_out_t fu_o,
 
     // Wishbone data memory interface
     output logic                    dmem_cyc_o,
@@ -51,7 +40,6 @@ module mem #(
     output logic [XLEN-1      : 0]  dmem_dat_o,
     input  logic [XLEN-1      : 0]  dmem_dat_i,
     input  logic                    dmem_ack_i
-
 );
 
     // Internal signals
@@ -61,8 +49,8 @@ module mem #(
     logic [XLEN-1 : 0] dmem_dat;
 
     // Memory access logic
-    assign opcode = inst_i.r_type.opcode;
-    assign funct3 = inst_i.r_type.funct3;
+    assign opcode = fu_i.inst.r_type.opcode;
+    assign funct3 = fu_i.inst.r_type.funct3;
 
     always_comb begin
         // Bus signals
@@ -77,10 +65,10 @@ module mem #(
         dmem_dat    = 'b0;
         invalid_op  = 'b0;
 
-        if (ena_i) begin
+        if (fu_i.ena) begin
             dmem_cyc_o = 1'b1;
             dmem_stb_o = 1'b1;
-            dmem_adr_o = ADR_WIDTH'(rs1_dat_i + imm_i);
+            dmem_adr_o = ADR_WIDTH'(fu_i.rs1_dat + fu_i.imm);
 
             if (opcode == OPCODE_LOAD) begin
                 case(funct3)
@@ -127,25 +115,25 @@ module mem #(
             else if (opcode == OPCODE_STORE) begin
                 case(funct3)
                     FUNCT3_STORE_SB: begin
-                        dmem_dat_o[ 7:0] = rs2_dat_i[7:0];
+                        dmem_dat_o[ 7:0] = fu_i.rs2_dat[7:0];
                         dmem_sel_o       = 'b01;
                         dmem_we_o        = 'b1;
                     end
 
                     FUNCT3_STORE_SH: begin
-                        dmem_dat_o[15:0] = rs2_dat_i[15:0];
+                        dmem_dat_o[15:0] = fu_i.rs2_dat[15:0];
                         dmem_sel_o       = 'b011;
                         dmem_we_o        = 'b1;
                     end
 
                     FUNCT3_STORE_SW: begin
-                        dmem_dat_o[31:0] = rs2_dat_i[31:0];
+                        dmem_dat_o[31:0] = fu_i.rs2_dat[31:0];
                         dmem_sel_o       = 'b01111;
                         dmem_we_o        = 'b1;
                     end
 
                     FUNCT3_STORE_SD: begin
-                        dmem_dat_o = rs2_dat_i;
+                        dmem_dat_o = fu_i.rs2_dat;
                         dmem_sel_o = 'b01111_1111;
                         dmem_we_o  = 'b1;
                     end
@@ -157,20 +145,24 @@ module mem #(
         end
     end
 
-    // Module is ready if enabled and
-    //  (a) operation valid and data memory has acknowledged
-    //  (b) operation invalid
-    assign rdy_o = ena_i && ((!invalid_op && dmem_ack_i) || invalid_op);
-    assign err_o = invalid_op;
-
-    // Data Ouptut
+    // Ouptut
     always_comb begin
-        rd_o    = 'b0;
-        rd_wb_o = 'b0;
+        fu_o = funit_out_default();
 
-        if (ena_i && opcode == OPCODE_LOAD && !invalid_op) begin
-            rd_o = dmem_dat;
-            rd_wb_o = 1'b1;
+        if (fu_i.ena) begin
+                // Module is ready if enabled and
+                //  (a) operation valid and data memory has acknowledged
+                //  (b) operation invalid
+                fu_o.rdy = (!invalid_op && dmem_ack_i) || invalid_op;
+
+                // Error output
+                fu_o.err = invalid_op;
+
+            // Operand output
+            if (opcode == OPCODE_LOAD && !invalid_op) begin
+                fu_o.rd_dat    = dmem_dat;
+                fu_o.rd_dat_wb = 1'b1;
+            end
         end
     end
 endmodule

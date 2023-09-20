@@ -19,31 +19,6 @@ package secv_pkg;
     parameter int REG_COUNT = 32;                       // Number of general purpose integer registers
     parameter int REG_ADDR_WIDTH = $clog2(REG_COUNT);   // Width to address registers
 
-    /* --- Program counter and programm execution ------------------------------------------------------------------- */
-    // parameter int IMEM_ADDR_WIDTH = 8;
-    // typedef logic [IMEM_ADDR_WIDTH-1 : 0 ] imem_adr_t;
-
-    /* --- Function units ------------------------------------------------------------------------------------------- */
-    typedef enum {
-        FUNIT_NONE,     // No operation
-        FUNIT_ALU,      // ADD, SUB etc.
-        FUNIT_BRANCH,   // JAL, JALR, BEQ, BNE etc.
-        FUNIT_MEM,      // L, S, FENCE
-        FUNIT_MOV       // LUI, AUIPC etc.
-//      FUNIT_CSR,      // CSRRW etc.
-//      FUNIT_SYSTEM,   // ECALL, EBREAK, CSR etc.
-//      FUNIT_MEMTAG,   // Memory Tagging Unit
-//      FUNIT_MUL,
-//      FUNIT_DIV,
-    } funit_t;
-
-    typedef enum {
-        FUNIT_ERROR_NONE = 0,
-        FUNIT_ERROR_INVALID_OPCODE,
-        FUNIT_ERROR_NOT_IMPLEMENTED
-    } funit_error_t;
-
-
     /* --- Decoder -------------------------------------------------------------------------------------------------- */
     // Opcodes
     // Note: not all will be finally supported and therefore uncommented
@@ -226,8 +201,68 @@ package secv_pkg;
         return {{XLEN-32{operand[31]}}, operand[31:0]};
     endfunction
 
+    /* --- Function units ------------------------------------------------------------------------------------------- */
+    typedef enum {
+        FUNIT_NONE,     // No operation
+        FUNIT_ALU,      // ADD, SUB etc.
+        FUNIT_BRANCH,   // JAL, JALR, BEQ, BNE etc.
+        FUNIT_MEM,      // L, S, FENCE
+        FUNIT_MOV       // LUI, AUIPC etc.
+//      FUNIT_CSR,      // CSRRW etc.
+//      FUNIT_SYSTEM,   // ECALL, EBREAK, CSR etc.
+//      FUNIT_MEMTAG,   // Memory Tagging Unit
+//      FUNIT_MUL,
+//      FUNIT_DIV,
+    } funit_t;
 
+    // Error codes (not yet used)
+    typedef enum {
+        FUNIT_ERROR_NONE = 0,
+        FUNIT_ERROR_INVALID_OPCODE,
+        FUNIT_ERROR_NOT_IMPLEMENTED
+    } funit_error_t;
 
+    // Function unit input interface
+    typedef struct {
+        // Control
+        logic               ena;        // Unit is enabled
+
+        // Operands
+        inst_t              inst;       // Fetched instruction
+        logic   [XLEN-1:0]  rs1_dat;    // Source register 1 data
+        logic   [XLEN-1:0]  rs2_dat;    // Source register 2 data
+        imm_t               imm;        // Decoded immediate
+
+        // Branch
+        logic   [XLEN-1:0]  pc;         // Current program counter
+    } funit_in_t;
+
+    // Function unit output interface
+    typedef struct {
+        // Control
+        logic               rdy;        // Unit ready, operation completed
+        logic               err;        // Error occured
+
+        // Operands
+        logic   [XLEN-1:0]  rd_dat;     // Destination register data
+        logic               rd_dat_wb;  // Write back destination register (data is valid)
+
+        // Branch
+        logic   [XLEN-1:0]  pc;         // Branch target address (next pc)
+        logic               pc_wb;      // Branch target is valid (write back)
+    } funit_out_t;
+
+    function automatic funit_out_t funit_out_default();
+        funit_out_t fu;
+        fu.rdy       = 1'b0;
+        fu.err       = 1'b0;
+        fu.rd_dat    =  'b0;
+        fu.rd_dat_wb = 1'b0;
+        fu.pc        =  'b0;
+        fu.pc_wb     = 1'b0;
+
+        return fu;
+    endfunction
 
     /* --- ALU ------------------------------------------------------------------------------------------------------ */
     typedef enum bit [15:0] {

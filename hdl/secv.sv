@@ -114,25 +114,13 @@ module secv (
     // -------------------------------------------------------------------------------------------------------------- //
     // MEM unit
     // -------------------------------------------------------------------------------------------------------------- //
-    logic mem_ena, mem_rdy, mem_err;
-    logic [XLEN-1:0] mem_rd;
-    logic mem_rd_wb;
+    funit_in_t mem_i;
+    funit_out_t mem_o;
 
     mem mem0(
         // Control
-        .ena_i      (mem_ena),
-        .rdy_o      (mem_rdy),
-        .err_o      (mem_err),
-
-        // Input operands
-        .inst_i     (inst),
-        .rs1_dat_i  (rs1_dat),
-        .rs2_dat_i  (rs2_dat),
-        .imm_i      (imm),
-
-        // Ouptut operands
-        .rd_o       (mem_rd),
-        .rd_wb_o    (mem_rd_wb),
+        .fu_i   (mem_i),
+        .fu_o   (mem_o),
 
         // Wishbone data memory interface
         .dmem_cyc_o (dmem_cyc_o),
