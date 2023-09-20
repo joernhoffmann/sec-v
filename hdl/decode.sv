@@ -6,6 +6,10 @@
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  * Purpose  : Instruction decoder for the SEC-V processor.
  *
+ * Todo
+ *  [ ] Move alu decoder to ALU.
+ *  [ ] Improve decoder to only output rs1, rs2 etc. regarding to instruction type
+ *
  * History
  *  v1.0    - Initial version
  */
