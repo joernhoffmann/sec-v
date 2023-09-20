@@ -15,6 +15,7 @@
  *
  * History
  *  v1.0    - Initial version
+ *  v1.1    - Reduce adder, simplify code
  */
 
 `include "secv_pkg.svh"
@@ -48,29 +49,35 @@ module branch #(
     assign opcode = inst_i.r_type.opcode;
     assign funct3 = inst_i.r_type.funct3;
 
-    // Internal signals
-    logic [XLEN-1:0] pc, pc_ret, pc_rel, pc_abs;
-    logic [XLEN-1:0] rd;
+    // --- Branch target comptation --------------------------------------------------------------------------------- //
+    logic [XLEN-1:0] pc, pc_ret;
+
+    // Forward address
+    always_comb begin
+        pc = pc_i;
+
+        // Relative branch target (b-type and j-type imm)
+        if (opcode == OPCODE_BRANCH || opcode == OPCODE_JAL)
+            pc = pc_i + imm_i;
+
+        // Absolut branch target (i-type imm)
+        else if (opcode == OPCODE_JALR)
+            pc = rs1_i + imm_i;
+    end
+
+    // Return address
+    assign pc_ret = pc_i + 4;
+
+    // --- Branch decision computation ------------------------------------------------------------------------------ //
     logic pc_wb, rd_wb;
     logic err;
-
-    // Address computation
-    assign pc_ret = pc_i  + 4;      // Return address for calls (JAL, JALR)
-    assign pc_rel = pc_i  + imm_i;  // Relative branch target (JAL and Bxx, j-type and b-type imm)
-    assign pc_abs = rs1_i + imm_i;  // Absolut branch target (JALR i-type imm)
-
-    // Branch computation
     always_comb begin
         // Initial values
-        pc    =  'b0;
-        rd    =  'b0;
         pc_wb = 1'b0;
         rd_wb = 1'b0;
         err   = 1'b0;
 
         if (opcode == OPCODE_BRANCH) begin
-            pc = pc_rel;
-
             case (funct3)
                 FUNCT3_BRANCH_BEQ : pc_wb = (rs1_i          ==  rs2_i);
                 FUNCT3_BRANCH_BNE : pc_wb = (rs1_i          !=  rs2_i);
@@ -86,18 +93,12 @@ module branch #(
         end
 
         else if (opcode == OPCODE_JAL) begin
-            pc = pc_rel;
-            rd = pc_ret;
-
             pc_wb = 1'b1;
             rd_wb = 1'b1;
         end
 
         else if (opcode == OPCODE_JALR) begin
             if (funct3 == 'b0) begin
-                pc = pc_abs;
-                rd = pc_ret;
-
                 pc_wb = 1'b1;
                 rd_wb = 1'b1;
             end
@@ -110,8 +111,10 @@ module branch #(
     // Outputs
     assign rdy_o    = ena_i;
     assign err_o    = err;
+
     assign pc_o     = pc;
-    assign rd_o     = rd;
     assign pc_wb_o  = pc_wb;
+
+    assign rd_o     = pc_ret;
     assign rd_wb_o  = rd_wb;
 endmodule
