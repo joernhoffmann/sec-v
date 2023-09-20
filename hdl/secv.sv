@@ -41,14 +41,6 @@ module secv (
     output  logic [XLEN-1 : 0]      dmem_dat_i,
     input   logic                   dmem_ack_i
 );
-    // Instruction
-    inst_t inst;
-    opcode_t opcode;
-    funct3_t funct3;
-    funct7_t funct7;
-    imm_t imm;
-    logic imm_op;
-
     // Program counter
     logic [XLEN-1:0] pc, pc_next;
 
@@ -72,65 +64,16 @@ module secv (
     );
 
     // -------------------------------------------------------------------------------------------------------------- //
-    // ALU
+    // Decoder
     // -------------------------------------------------------------------------------------------------------------- //
-    alu_op_t alu_op;
-    logic [XLEN-1:0] alu_a, alu_b, alu_res;
-
-    alu alu0 (
-        .op_i   (alu_op),
-        .a_i    (alu_a),
-        .b_i    (alu_b),
-        .res_o  (alu_res)
-    );
-
-    // -------------------------------------------------------------------------------------------------------------- //
-    // BRANCH unit
-    // -------------------------------------------------------------------------------------------------------------- //
-    funit_in_t brn_i;
-    funit_out_t brn_o;
-    branch brn0 (
-        .fu_i   (brn_i),
-        .fu_o   (brn_o)
-    );
-
-    // -------------------------------------------------------------------------------------------------------------- //
-    // MEM unit
-    // -------------------------------------------------------------------------------------------------------------- //
-    funit_in_t mem_i;
-    funit_out_t mem_o;
-
-    mem mem0(
-        // Control
-        .fu_i   (mem_i),
-        .fu_o   (mem_o),
-
-        // Wishbone data memory interface
-        .dmem_cyc_o (dmem_cyc_o),
-        .dmem_stb_o (dmem_stb_o),
-        .dmem_sel_o (dmem_sel_o),
-        .dmem_adr_o (dmem_adr_o),
-        .dmem_we_o  (dmem_we_o),
-        .dmem_dat_o (dmem_dat_o),
-        .dmem_dat_i (dmem_dat_i),
-        .dmem_ack_i (dmem_ack_i)
-    );
-
-    // -------------------------------------------------------------------------------------------------------------- //
-    // MOV unit
-    // -------------------------------------------------------------------------------------------------------------- //
-    funit_in_t mov_i;
-    funit_out_t mov_o;
-
-    mov mov0 (
-        .fu_i (mov_i),
-        .fu_o (mov_o)
-    );
-
-    // -------------------------------------------------------------------------------------------------------------- //
-    // Decoder unit
-    // -------------------------------------------------------------------------------------------------------------- //
+    inst_t inst;
+    opcode_t opcode;
+    funct3_t funct3;
+    funct7_t funct7;
+    imm_t imm;
+    logic imm_op;
     funit_t funit;
+
     decode dec0 (
         .inst_i     (inst),
         // Opcode fields
@@ -150,7 +93,55 @@ module secv (
         .funit_o    (funit)
     );
 
-    // Function unit
+    // -------------------------------------------------------------------------------------------------------------- //
+    // Function units
+    // -------------------------------------------------------------------------------------------------------------- //
+    // Arithmetic-logic unit
+    alu_op_t alu_op;
+    logic [XLEN-1:0] alu_a, alu_b, alu_res;
+    alu alu0 (
+        .op_i   (alu_op),
+        .a_i    (alu_a),
+        .b_i    (alu_b),
+        .res_o  (alu_res)
+    );
+
+    // Branch unit
+    funit_in_t brn_i;
+    funit_out_t brn_o;
+    branch brn0 (
+        .fu_i   (brn_i),
+        .fu_o   (brn_o)
+    );
+
+    // Data memory unit
+    funit_in_t mem_i;
+    funit_out_t mem_o;
+    mem mem0(
+        // Control
+        .fu_i   (mem_i),
+        .fu_o   (mem_o),
+
+        // Wishbone data memory interface
+        .dmem_cyc_o (dmem_cyc_o),
+        .dmem_stb_o (dmem_stb_o),
+        .dmem_sel_o (dmem_sel_o),
+        .dmem_adr_o (dmem_adr_o),
+        .dmem_we_o  (dmem_we_o),
+        .dmem_dat_o (dmem_dat_o),
+        .dmem_dat_i (dmem_dat_i),
+        .dmem_ack_i (dmem_ack_i)
+    );
+
+    // Transport unit
+    funit_in_t mov_i;
+    funit_out_t mov_o;
+    mov mov0 (
+        .fu_i (mov_i),
+        .fu_o (mov_o)
+    );
+
+    // Function unit connection
     funit_in_t fui_vect[FUNIT_COUNT];
     assign fui_vect[FUNIT_BRANCH] = mov_i;
     assign fui_vect[FUNIT_MEM]    = mem_i;
