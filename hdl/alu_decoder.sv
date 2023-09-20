@@ -15,9 +15,10 @@ import secv_pkg::*;
 module alu_decoder (
     input   inst_t      inst_i,
 
-    output  alu_op_t    op_o,           // ALU operation to perform
-    output  logic       op_imm_o,       // Operation uses immediate as 2nd operand
-    output  logic       op_32_o        // Operation uses 32-bit
+    output  alu_op_t    op_o,       // ALU operation to perform
+    output  logic       op_imm_o,   // Operation uses immediate as 2nd operand
+    output  logic       op_32_o,    // Operation uses 32-bit
+    output  logic       err_o
 );
 
     // Decode opcode
@@ -39,14 +40,16 @@ module alu_decoder (
 
     // Decode ALU operation
     alu_op_t op;
+    logic err;
+
     always_comb begin : decode_alu
         op = ALU_OP_NONE;
+        err = 1'b0;
 
         // Check if ALU addressed
         if (op_reg_32 || op_imm_32 ||
             op_reg_64 || op_imm_64)
         begin
-
             // Decode operation to perform
             case(funct3)
                 FUNCT3_ALU_AND:
@@ -63,7 +66,7 @@ module alu_decoder (
                         case (funct7)
                             FUNCT7_00h: op = ALU_OP_ADDW;
                             FUNCT7_20h: op = ALU_OP_SUBW;
-                            default   : op = ALU_OP_NONE;
+                            default   : err = 1'b1;
                         endcase
 
                     else if(op_imm_32)
@@ -73,7 +76,7 @@ module alu_decoder (
                         case (funct7)
                             FUNCT7_00h: op = ALU_OP_ADD;
                             FUNCT7_20h: op = ALU_OP_SUB;
-                            default   : op = ALU_OP_NONE;
+                            default   : err = 1'b1;
                         endcase
 
                     else if (op_imm_64)
@@ -87,14 +90,14 @@ module alu_decoder (
                         case (funct7)
                             FUNCT7_00h: op = ALU_OP_SRLW;
                             FUNCT7_20h: op = ALU_OP_SRAW;
-                            default   : op = ALU_OP_NONE;
+                            default   : err = 1'b1;
                         endcase
 
                     else if (op_reg_64 || op_imm_64)
                         case (funct7)
                             FUNCT7_00h: op = ALU_OP_SRL;
                             FUNCT7_20h: op = ALU_OP_SRA;
-                            default   : op = ALU_OP_NONE;
+                            default   : err = 1'b1;
                         endcase
 
                 FUNCT3_ALU_SLT:
@@ -104,13 +107,18 @@ module alu_decoder (
                     op = ALU_OP_SLTU;
 
                 default:
-                    op = ALU_OP_NONE;
+                    err = 1'b1;
             endcase
         end
+
+        // ALU not addressed
+        else
+                err = 1'b1;
     end
 
     // Ouptut
-    assign op_o = op;
+    assign op_o     = op;
     assign op_imm_o = (op_imm_32 | op_imm_64);
     assign op_32_o  = (op_reg_32 | op_imm_32);
+    assign err_o    = err;
 endmodule

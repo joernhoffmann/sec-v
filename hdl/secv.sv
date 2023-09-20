@@ -103,13 +103,11 @@ module secv (
     // Function units
     // -------------------------------------------------------------------------------------------------------------- //
     // Arithmetic-logic unit
-    alu_op_t alu_op;
-    logic [XLEN-1:0] alu_a, alu_b, alu_res;
-    alu alu0 (
-        .op_i   (alu_op),
-        .a_i    (alu_a),
-        .b_i    (alu_b),
-        .res_o  (alu_res)
+    funit_in_t alu_i;
+    funit_out_t alu_o;
+    branch alu0 (
+        .fu_i   (alu_i),
+        .fu_o   (alu_o)
     );
 
     // Branch unit
@@ -147,19 +145,28 @@ module secv (
         .fu_o (mov_o)
     );
 
-    // Function unit connection
-    funit_in_t fui_vect[FUNIT_COUNT];
-    assign fui_vect[FUNIT_BRANCH] = mov_i;
-    assign fui_vect[FUNIT_MEM]    = mem_i;
-    assign fui_vect[FUNIT_MOV]    = brn_i;
+    // Function unit bus
+    funit_in_t fui_bus[FUNIT_COUNT];
+    assign alu_i = fui_bus[FUNIT_ALU];
+    assign mov_i = fui_bus[FUNIT_BRANCH];
+    assign mem_i = fui_bus[FUNIT_MEM];
+    assign brn_i = fui_bus[FUNIT_MOV];
 
-    funit_out_t fuo_vect[FUNIT_COUNT];
-    assign fuo_vect[FUNIT_BRANCH] = mov_o;
-    assign fuo_vect[FUNIT_MEM]    = mem_o;
-    assign fuo_vect[FUNIT_MOV]    = brn_o;
+    funit_out_t fuo_bus[FUNIT_COUNT];
+    assign fuo_bus[FUNIT_ALU]    = alu_o;
+    assign fuo_bus[FUNIT_BRANCH] = mov_o;
+    assign fuo_bus[FUNIT_MEM]    = mem_o;
+    assign fuo_bus[FUNIT_MOV]    = brn_o;
+
+    // Function unit selection
+    funit_in_t fui;
+    funit_out_t fuo;
+
+    assign fui_bus[funit] = fui;
+    assign fuo = fuo_bus[funit];
 
     // -------------------------------------------------------------------------------------------------------------- //
-    // Main FSM
+    // Main state machine
     // -------------------------------------------------------------------------------------------------------------- //
     typedef enum logic [3:0] {
         STATE_IDLE,
@@ -170,48 +177,45 @@ module secv (
     } state_t;
     state_t state, state_next;
 
-    // Instruction
+    // Registers
     logic [ILEN-1:0] ir, ir_next;
-    logic [XLEN-1:0] op_a, op_b, op_a_next, op_b_next;
-    logic [XLEN-1:0] res, res_next;
-
-    // Assign decoder input to instruction register
     assign inst = ir;
-    assign alu_a = op_a;
-    assign alu_b = op_b;
-
     always_ff @( posedge clk_i) begin
         if (rst_i) begin
             state <= STATE_IDLE;
             pc    <= 'b0;
             ir    <= INST_NOP;
-            op_a  <= 'b0;
-            op_b  <= 'b0;
-            res   <= 'b0;
         end
 
         else begin
             state <= state_next;
             pc    <= pc_next;
             ir    <= ir_next;
-            op_a  <= op_a_next;
-            op_b  <= op_b_next;
-            res   <= res_next;
         end
     end
 
-    always_comb begin
+    // Next state logic
+    always_comb begin : main_fsm
+        // Default values
         state_next = state;
         pc_next = pc;
         ir_next = ir;
-        op_a_next = op_a;
-        op_b_next = op_b;
-        res_next = res;
 
+        // Prevent latches
         imem_cyc_o = 0;
         imem_stb_o = 0;
         imem_adr_o = 'b0;
 
+        // Function unit
+        fui = funit_in_default();
+        fui.ena     = 1'b0;
+        fui.inst    = inst;
+        fui.rs1_dat = rs1_dat;
+        fui.rs2_dat = rs2_dat;
+        fui.imm     = imm;
+        fui.pc      = pc;
+
+        // State transistion
         case (state)
             STATE_IDLE: begin
                 state_next = STATE_FETCH;
@@ -231,31 +235,27 @@ module secv (
 
             STATE_DECODE: begin
                 // Start decoder
-                // ...
+                // ... Already started ...
 
-                // Function unit
-                if (funit == FUNIT_ALU) begin
-                    op_a_next = rs1_dat;
-                    op_b_next = imm_op ? imm : rs2_dat;
-                end
+                // Select function unit
+                // ... Already selected ...
 
-                else if (funit == FUNIT_MEM) begin
+                // Mux function unit I/O signals
+                // ... Already connected ...
 
-                end
-
-                // Other
-                // ...
-
-                // Select GPRs
-                // ...
+                // Store signals
+                // ... Not yet necessary ...
                 state_next = STATE_EXECUTE;
             end
 
             STATE_EXECUTE: begin
                 // Start execution
-                // ...
+                fui.ena = 1'b1;
 
                 // Save result output's
+                // ...
+
+                // Decide / jump
                 // ...
 
                 state_next = STATE_WB;

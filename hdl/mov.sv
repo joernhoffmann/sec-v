@@ -70,6 +70,5 @@ module mov #(
             fu_o.rd_dat = rd;
             fu_o.rd_dat_wb = rd_wb;
         end
-
     end
 endmodule

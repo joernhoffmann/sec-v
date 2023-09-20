@@ -227,27 +227,33 @@ package secv_pkg;
     typedef struct packed {
         // Control
         logic               ena;        // Unit is enabled
-
         // Operands
         inst_t              inst;       // Fetched instruction
         logic   [XLEN-1:0]  rs1_dat;    // Source register 1 data
         logic   [XLEN-1:0]  rs2_dat;    // Source register 2 data
         imm_t               imm;        // Decoded immediate
-
         // Branch
         logic   [XLEN-1:0]  pc;         // Current program counter
     } funit_in_t;
+
+    function automatic funit_in_t funit_in_default();
+        funit_in_t fu;
+        fu.ena       = 1'b0;
+        fu.inst      =  'b0;
+        fu.rs1_dat   =  'b0;
+        fu.rs2_dat   =  'b0;
+        fu.pc        =  'b0;
+        return fu;
+    endfunction
 
     // Function unit output interface
     typedef struct packed {
         // Control
         logic               rdy;        // Unit ready, operation completed
         logic               err;        // Error occured
-
         // Operands
         logic   [XLEN-1:0]  rd_dat;     // Destination register data
         logic               rd_dat_wb;  // Write back destination register (data is valid)
-
         // Branch
         logic   [XLEN-1:0]  pc;         // Branch target address (next pc)
         logic               pc_wb;      // Branch target is valid (write back)
@@ -261,7 +267,6 @@ package secv_pkg;
         fu.rd_dat_wb = 1'b0;
         fu.pc        =  'b0;
         fu.pc_wb     = 1'b0;
-
         return fu;
     endfunction
 

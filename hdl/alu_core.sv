@@ -6,10 +6,6 @@
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  * Purpose  : Performs decoded alu operations. Main part of the ALU.
  *
- * Operations
- *  - 64-Bit: ADD, SUB, SLL, SRL, SRA, SLT, SLTU, AND, OR, XOR
- *  - 32-Bit: ADDW, SUBW, SLLW, SRLW, SRAW
- *
  * History
  *  v1.0    - Initial version
  *
