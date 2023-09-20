@@ -95,7 +95,7 @@ package secv_pkg;
     typedef logic [6:0] funct7_t;
     typedef logic [2:0] funct3_t;
     typedef logic [4:0] regadr_t;
-    typedef logic signed [31:0] imm_t;
+    typedef logic signed [XLEN-1:0] imm_t;
 
     // Instruction formats
     typedef struct packed {funct7_t funct7;                                 regadr_t rs2;   regadr_t rs1;   funct3_t funct3;    regadr_t rd;                                opcode_t opcode;} inst_r_t;
@@ -177,32 +177,32 @@ package secv_pkg;
 
     // Decode I-immediate (lower 12'bits)
     function automatic imm_t decode_imm_i (inst_t inst);
-        //      {    sext[11]},      [10: 0]}
-        return  {{21{inst[31]}}, inst[30:20]};
+        //      {         sext[11]},      [10: 0]}
+        return  {{XLEN-11{inst[31]}}, inst[30:20]};
     endfunction
 
     // Decode S-immediate (store)
     function automatic imm_t decode_imm_s (inst_t inst);
-        //     {    sext[11],       [10: 5],       [4:0]}
-        return {{21{inst[31]}}, inst[30:25],  inst[11:7]};
+        //     {         sext[11],       [10: 5],       [4:0]}
+        return {{XLEN-11{inst[31]}}, inst[30:25],  inst[11:7]};
     endfunction
 
     // Decode B-immediate (branch)
     function automatic imm_t decode_imm_b (inst_t inst);
-        //     {    sext[12],      [11],      [10: 5],       [4:1],   [0]}
-        return {{20{inst[31]}}, inst[7],  inst[30:25],  inst[11:8], 1'b0 };
+        //     {         sext[12],      [11],      [10: 5],       [4:1],   [0]}
+        return {{XLEN-12{inst[31]}}, inst[7],  inst[30:25],  inst[11:8], 1'b0 };
     endfunction
 
     // Decode U-immediate (upper 20'bits)
     function automatic imm_t decode_imm_u (inst_t inst);
-        //     {    [31:12],  [11:0]}
-        return {inst[31:12],  12'b0 };
+        //     {         sext[31],       [30:12],   [11:0]}
+        return {{XLEN-31{inst[31]}}, inst[30:12],   12'b0};
     endfunction
 
     // Decode J-immediate (jump)
     function automatic imm_t decode_imm_j (inst_t inst);
-        //     {    sext[20],      [19:12],     [11],      [10:1],    [0]}
-        return {{12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0 };
+        //     {         sext[20],      [19:12],     [11],      [10:1],    [0]}
+        return {{XLEN-20{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0 };
     endfunction
 
     /* --- Signum extension ----------------------------------------------------------------------------------------- */

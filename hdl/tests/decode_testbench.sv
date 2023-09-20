@@ -88,38 +88,38 @@ import secv_pkg::*;
     // Instruction type decoding
     // -------------------------------------------------------------------------------------------------------------- //
     `UNIT_TEST("Decode I-type immediate")
-        inst_i = 32'bx111_1111_1100_zzzz_zzzz_zzzz_zzzz_zzzz;
+        inst_i = 64'bx111_1111_1100_zzzz_zzzz_zzzz_zzzz_zzzz;
         imm = decode_imm_i(inst_i);
 
-        #1 `FAIL_IF_NOT_EQUAL(imm, 32'bxxxx_xxxx_xxxx_xxxx_xxxx_x111_1111_1100);
+        #1 `FAIL_IF_NOT_EQUAL(imm, 64'bxxxx_xxxx_xxxx_xxxx_xxxx_x111_1111_1100);
     `UNIT_TEST_END
 
     `UNIT_TEST("Decode S-type immediate")
-        inst_i = 32'bx111_101z_zzzz_zzzz_zzzz_0110_1zzz_zzzz;
+        inst_i = 64'bx111_101z_zzzz_zzzz_zzzz_0110_1zzz_zzzz;
         imm = decode_imm_s(inst_i);
 
-        #1 `FAIL_IF_NOT_EQUAL(imm, 32'bxxxx_xxxx_xxxx_xxxx_xxxx_x111_1010_1101);
+        #1 `FAIL_IF_NOT_EQUAL(imm, 64'bxxxx_xxxx_xxxx_xxxx_xxxx_x111_1010_1101);
     `UNIT_TEST_END
 
     `UNIT_TEST("Decode B-type immediate")
-        inst_i = 32'bx111_0110_0000_0000_0000_0101_1zzz_zzzz;
+        inst_i = 64'bx111_0110_0000_0000_0000_0101_1zzz_zzzz;
         imm = decode_imm_b(inst_i);
 
-        #1 `FAIL_IF_NOT_EQUAL(imm, 32'bxxx_xxxx_xxx_xxxx_xxxx_1111_0110_1010);
+        #1 `FAIL_IF_NOT_EQUAL(imm, 64'bxxx_xxxx_xxx_xxxx_xxxx_1111_0110_1010);
     `UNIT_TEST_END
 
     `UNIT_TEST("Decode U-type immediate")
-        inst_i = 32'bx101_1110_0110_0011_1001_zzzz_zzzz_zzzz;
+        inst_i = 64'bx101_1110_0110_0011_1001_zzzz_zzzz_zzzz;
         imm = decode_imm_u(inst_i);
 
-        #1 `FAIL_IF_NOT_EQUAL(imm, 32'bx101_1110_0110_0011_1001_0000_0000_0000);
+        #1 `FAIL_IF_NOT_EQUAL(imm, 64'bx101_1110_0110_0011_1001_0000_0000_0000);
     `UNIT_TEST_END
 
     `UNIT_TEST("Decode J-type immediate")
-        inst_i = 32'bx_1111010010_0_00110101_zzzz_zzzz_zzzz;
+        inst_i = 64'bx_1111010010_0_00110101_zzzz_zzzz_zzzz;
         imm = decode_imm_j(inst_i);
 
-        #1 `FAIL_IF_NOT_EQUAL(imm, 32'bxxxx_xxxx_xxxx_00110101_0_1111010010_0);
+        #1 `FAIL_IF_NOT_EQUAL(imm, 64'bxxxx_xxxx_xxxx_00110101_0_1111010010_0);
     `UNIT_TEST_END
 
     // -------------------------------------------------------------------------------------------------------------- //

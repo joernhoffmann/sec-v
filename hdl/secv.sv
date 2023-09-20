@@ -13,7 +13,7 @@
  *  [ ] Improve main fsm, separate signals
  *  [ ] Seperate units
  *  [ ] Introduce data types for interfaces etc.
- *  [ ] Simplify immediate hanlding, extend 32-bit to 64-bit imm, e. g. via sext32(imm)
+ *  [x] Simplify immediate hanlding, extend 32-bit to 64-bit imm, e. g. via sext32(imm)
  *  [ ] Use data types i/o for fuints, use array with units
  */
 `include "secv_pkg.svh"
@@ -268,7 +268,7 @@ module secv (
                 // Function unit
                 if (funit == FUNIT_ALU) begin
                     op_a_next = rs1_dat;
-                    op_b_next = imm_op ? sext32(imm) : rs2_dat;
+                    op_b_next = imm_op ? imm : rs2_dat;
                 end
 
                 else if (funit == FUNIT_MEM) begin

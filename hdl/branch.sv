@@ -55,9 +55,9 @@ module branch #(
     logic err;
 
     // Address computation
-    assign pc_ret = pc_i + 4;               // Return address for calls (JAL, JALR)
-    assign pc_rel = pc_i + sext32(imm_i);   // Relative branch target (JAL and Bxx, j-type and b-type imm)
-    assign pc_abs = rs1_i + sext32(imm_i);  // Absolut branch target (JALR i-type imm)
+    assign pc_ret = pc_i  + 4;      // Return address for calls (JAL, JALR)
+    assign pc_rel = pc_i  + imm_i;  // Relative branch target (JAL and Bxx, j-type and b-type imm)
+    assign pc_abs = rs1_i + imm_i;  // Absolut branch target (JALR i-type imm)
 
     // Branch computation
     always_comb begin

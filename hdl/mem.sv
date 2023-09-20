@@ -80,7 +80,7 @@ module mem #(
         if (ena_i) begin
             dmem_cyc_o = 1'b1;
             dmem_stb_o = 1'b1;
-            dmem_adr_o = ADR_WIDTH'(rs1_dat_i + sext32(imm_i));
+            dmem_adr_o = ADR_WIDTH'(rs1_dat_i + imm_i);
 
             if (opcode == OPCODE_LOAD) begin
                 case(funct3)

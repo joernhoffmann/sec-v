@@ -41,10 +41,6 @@ module mov #(
     opcode_t opcode;
     assign opcode = inst_i.r_type.opcode;
 
-    // Sign extend immediate
-    logic [XLEN-1:0] sext_imm;
-    assign sext_imm = sext32(imm_i);
-
     // Branch computation
     logic [XLEN-1:0] rd;
     logic rd_wb;
@@ -59,13 +55,13 @@ module mov #(
         if (ena_i) begin
             // Load Upper Imm
             if (opcode == OPCODE_LUI) begin
-                rd = sext_imm;
+                rd = imm_i;
                 rd_wb = 1'b1;
             end
 
             // Add Upper Imm to PC
             else if (opcode == OPCODE_AUIPC) begin
-                rd = pc_i + sext_imm;
+                rd = pc_i + imm_i;
                 rd_wb = 1'b1;
             end
 
