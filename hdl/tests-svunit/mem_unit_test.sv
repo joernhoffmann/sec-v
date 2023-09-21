@@ -1,0 +1,129 @@
+`include "/home/joern/lib/svunit/svunit_base/svunit_defines.svh"
+`include "svunit_defines.svh"
+`include "secv_pkg.svh"
+`include "mem.sv"
+
+module mem_unit_test;
+  import svunit_pkg::svunit_testcase;
+
+  string name = "mem_ut";
+  svunit_testcase svunit_ut;
+
+  parameter int ADR_WIDTH = 8;
+  parameter int SEL_WIDTH = XLEN/8;
+
+
+  //===================================
+  // This is the UUT that we're
+  // running the Unit Tests on
+  //===================================
+  funit_in_t fu_i;
+  funit_out_t fu_o;
+  logic                    dmem_cyc_o;
+  logic                    dmem_stb_o;
+  logic [SEL_WIDTH-1 : 0]  dmem_sel_o;
+  logic [ADR_WIDTH-1 : 0]  dmem_adr_o;
+  logic                    dmem_we_o;
+  logic [XLEN-1      : 0]  dmem_dat_o;
+  logic [XLEN-1      : 0]  dmem_dat_i;
+  logic                    dmem_ack_i;
+
+  mem #(
+    .XLEN(XLEN),
+    .ADR_WIDTH(ADR_WIDTH)
+  ) dut (
+    // Funit interface
+    .fu_i (fu_i),
+    .fu_o (fu_o),
+
+    // Wishbone interface
+    .dmem_cyc_o (dmem_cyc_o),
+    .dmem_stb_o (dmem_stb_o),
+    .dmem_sel_o (dmem_sel_o),
+    .dmem_adr_o (dmem_adr_o),
+    .dmem_we_o  (dmem_we_o),
+    .dmem_dat_o (dmem_dat_o),
+    .dmem_dat_i (dmem_dat_i),
+    .dmem_ack_i (dmem_ack_i)
+  );
+
+
+  //===================================
+  // Build
+  //===================================
+  function void build();
+    svunit_ut = new(name);
+  endfunction
+
+
+  //===================================
+  // Setup for running the Unit Tests
+  //===================================
+  task setup();
+    svunit_ut.setup();
+
+    /* Place Setup Code Here */
+    fu_i = funit_in_default();
+
+  endtask
+
+
+  //===================================
+  // Here we deconstruct anything we
+  // need after running the Unit Tests
+  //===================================
+  task teardown();
+    svunit_ut.teardown();
+    /* Place Teardown Code Here */
+
+  endtask
+
+
+  //===================================
+  // All tests are defined between the
+  // SVUNIT_TESTS_BEGIN/END macros
+  //
+  // Each individual test must be
+  // defined between `SVTEST(_NAME_)
+  // `SVTEST_END
+  //
+  // i.e.
+  //   `SVTEST(mytest)
+  //     <test code>
+  //   `SVTEST_END
+  //===================================
+  `SVUNIT_TESTS_BEGIN
+
+    // --- General behaviour ---------------------------------------------------------------------------------------- //
+    `SVTEST(MEM_not_ready_if_not_enabled)
+        fu_i.ena = 0;
+
+        #1 `FAIL_UNLESS(!fu_o.rdy);
+    `SVTEST_END
+
+    `SVTEST(MEM_ready_if_enabled_with_invalid_opcode)
+        fu_i.ena = 1;
+
+        #1 `FAIL_UNLESS(fu_o.rdy);
+    `SVTEST_END
+
+    `SVTEST(MEM_signals_error_if_enabled_with_invalid_opcode)
+        fu_i.ena = 1;
+
+        #1 `FAIL_UNLESS(fu_o.err);
+    `SVTEST_END
+
+    `SVTEST(MEM_does_not_write_back_if_enabled_with_invalid_opcode)
+        fu_i.ena = 1;
+
+        #1 `FAIL_UNLESS(!fu_o.rd_wb);
+    `SVTEST_END
+
+
+  // --- Load ------------------------------------------------------------------------------------------------------- //
+
+
+
+  `SVUNIT_TESTS_END
+
+endmodule

@@ -145,6 +145,9 @@ module mem #(
                         invalid_op = 1'b1;
                 endcase
             end
+
+            else
+                invalid_op = 1'b1;
         end
     end
 
