@@ -22,13 +22,15 @@ module gpr #(
     input   logic clk_i,
     input   logic rst_i,
 
-    // Register operands
+    // Source register 1
     input   regadr_t            rs1_adr_i,
     output  logic [XLEN-1:0]    rs1_dat_o,
 
+    // Source register 2
     input   regadr_t            rs2_adr_i,
     output  logic [XLEN-1:0]    rs2_dat_o,
 
+    // Destination register
     input   regadr_t            rd_adr_i,
     input   logic [XLEN-1:0]    rd_dat_i,
     input   logic               rd_wb_i

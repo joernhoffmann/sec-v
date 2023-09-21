@@ -153,7 +153,7 @@ module mem #(
         fu_o = funit_out_default();
 
         if (fu_i.ena) begin
-                // Module is ready if enabled and
+                // Module is ready if unit enabled and
                 //  (a) operation valid and data memory has acknowledged
                 //  (b) operation invalid
                 fu_o.rdy = (!invalid_op && dmem_ack_i) || invalid_op;
