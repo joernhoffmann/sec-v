@@ -10,6 +10,10 @@
  *  - 64-Bit: ADD, SUB, SLL, SRL, SRA, SLT, SLTU, AND, OR, XOR
  *  - 32-Bit: ADDW, SUBW, SLLW, SRLW, SRAW
  *
+ * Todo
+ *  [ ] Add unit tests
+ *  [ ] Add formal verification
+ *
  * History
  *  v1.0    - Initial version
  */

@@ -11,12 +11,15 @@
  *  - loads (zero-ext)  : LBU, LHU, LWU
  *  - stores            : SB, SH, SW, SD
  *
- * History
- *  v1.0    - Initial version
- *
  * Todo
  *  [ ] Consider separate blocks for load and store
  *  [ ] Add functions etc. to generalize code
+ *  [ ] Add unit tests
+ *  [ ] Add formal verification
+ *
+ * History
+ *  v1.0    - Initial version
+ *
  */
 
 `include "secv_pkg.svh"

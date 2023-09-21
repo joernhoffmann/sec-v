@@ -6,13 +6,14 @@
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  * Purpose  : Performs decoded alu operations. Main part of the ALU.
  *
- * History
- *  v1.0    - Initial version
- *
- * TODOs
+ * Todo
  *  [ ] Improve shift operations with barrel shifter
  *  [ ] Use a separate flag for 32-bit operations.
  *  [ ] Use single sext32() for 32-bit operations
+ *  [ ] Add unit tests
+ *
+ * History
+ *  v1.0    - Initial version
  */
 `include "secv_pkg.svh"
 import secv_pkg::*;

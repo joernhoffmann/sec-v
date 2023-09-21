@@ -6,6 +6,10 @@
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  * Purpose  : Main defines for the SEC-V processor.
  *
+ * Todo
+ *  [ ] Cleanup and reorder
+ *  [ ] Add unit test
+ *
  * History
  *  v1.0    - Initial version
  */

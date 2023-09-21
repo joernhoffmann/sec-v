@@ -12,6 +12,10 @@
  * Opcodes
  *  - LUI, AUIPC
  *
+ * Todo
+ *  [ ] Add unit tests
+ *  [ ] Add formal verification
+ *
  * History
  *  v1.0    - Initial version
  */

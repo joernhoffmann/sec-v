@@ -6,50 +6,58 @@
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  * Purpose  : Main core and control logic of the SEC-V processor.
  *
+ * Todo
+ *  [ ] Improve main fsm
+ *  [ ] Seperate units (e.g. main fsm, pipeline etc.)
+ *  [ ] Introduce more data types (e. g. wishbone, function unit, function unit array)
+ *  [ ] Improve pipeline,  implement
+ *      [ ] a) regular pipeline processing
+ *      [ ] b) interleaved multi threading pipeline
+ *      [ ] c) Out-of-order or superscalar processing
+ *  [ ] Add security functions
+ *
  * History
  *  v1.0    - Initial version
- *
- * Todo
- *  [ ] Improve main fsm, separate signals
- *  [ ] Seperate units (e.g. alu decoder, pipeline etc.)
- *  [ ] Introduce more data types (e. g. wishbone, function unit, function unit array)
- *  [x] Introduce function unit input/ output data type
- *  [x] Simplify immediate hanlding, extend 32-bit to 64-bit imm, e. g. via sext32(imm)
-
+ *  v1.1    - Add function unit bus
  */
 `include "secv_pkg.svh"
 import secv_pkg::*;
 
 module secv #(
-    parameter int IADR = 8  // Instuction address width
-)
+    parameter int ILEN = secv_pkg::ILEN,
+    parameter int XLEN = secv_pkg::XLEN,
 
-(
+    parameter int IADR_WIDTH = 8,        // Instruction memory address width
+    parameter int DADR_WIDTH = 8,        // Data memory address width
+
+    localparam int ISEL_WIDTH = ILEN/8,  // Instruction memory byte selection width
+    localparam int DSEL_WIDTH = XLEN/8   // Data memory byte selection width
+) (
     input   logic   clk_i,
     input   logic   rst_i,
 
     // Instruction memory
-    output  logic                   imem_cyc_o,
-    output  logic                   imem_stb_o,
-    output  logic [3 : 0]           imem_sel_o,
-    output  logic [IADR-1 : 0]      imem_adr_o,
-    output  logic [ILEN-1 : 0]      imem_dat_i,
-    input   logic                   imem_ack_i,
+    output  logic                       imem_cyc_o,
+    output  logic                       imem_stb_o,
+    output  logic [ISEL_WIDTH-1 : 0]    imem_sel_o,
+    output  logic [IADR_WIDTH-1 : 0]    imem_adr_o,
+    input   logic [ILEN-1       : 0]    imem_dat_i,
+    input   logic                       imem_ack_i,
 
     // Data memory
-    output  logic                   dmem_cyc_o,
-    output  logic                   dmem_stb_o,
-    output  logic [7 : 0]           dmem_sel_o,
-    output  logic [7 : 0]           dmem_adr_o,
-    output  logic                   dmem_we_o,
-    output  logic [XLEN-1 : 0]      dmem_dat_o,
-    output  logic [XLEN-1 : 0]      dmem_dat_i,
-    input   logic                   dmem_ack_i
+    output  logic                       dmem_cyc_o,
+    output  logic                       dmem_stb_o,
+    output  logic [DSEL_WIDTH-1 : 0]    dmem_sel_o,
+    output  logic [DADR_WIDTH-1 : 0]    dmem_adr_o,
+    output  logic                       dmem_we_o,
+    output  logic [XLEN-1 : 0]          dmem_dat_o,
+    input   logic [XLEN-1 : 0]          dmem_dat_i,
+    input   logic                       dmem_ack_i
 );
     // Program counter
     logic [XLEN-1:0] pc, pc_next;
 
-    // ---GPR ------------------------------------------------------------------------------------------------------- //
+    // --- General purpose register file ---------------------------------------------------------------------------- //
     logic [XLEN-1:0] rs1_dat, rs2_dat, rd_dat;
     regadr_t rs1_adr, rs2_adr, rd_adr;
     logic rd_wb;
@@ -101,28 +109,22 @@ module secv #(
 
     // --- Function units ------------------------------------------------------------------------------------------- //
     // Arithmetic-logic unit
-    funit_in_t alu_i;
-    funit_out_t alu_o;
-    branch alu0 (
-        .fu_i   (alu_i),
-        .fu_o   (alu_o)
+    alu alu0 (
+        .fu_i   (fui_bus[FUNIT_ALU]),
+        .fu_o   (fuo_bus[FUNIT_ALU])
     );
 
     // Branch unit
-    funit_in_t brn_i;
-    funit_out_t brn_o;
     branch brn0 (
-        .fu_i   (brn_i),
-        .fu_o   (brn_o)
+        .fu_i   (fui_bus[FUNIT_BRANCH]),
+        .fu_o   (fuo_bus[FUNIT_BRANCH])
     );
 
-    // Data memory unit
-    funit_in_t mem_i;
-    funit_out_t mem_o;
+    // Data memory inteface unit
     mem mem0(
         // Control
-        .fu_i   (mem_i),
-        .fu_o   (mem_o),
+        .fu_i   (fui_bus[FUNIT_MEM]),
+        .fu_o   (fuo_bus[FUNIT_MEM]),
 
         // Wishbone data memory interface
         .dmem_cyc_o (dmem_cyc_o),
@@ -136,30 +138,18 @@ module secv #(
     );
 
     // Move (transport) unit
-    funit_in_t mov_i;
-    funit_out_t mov_o;
     mov mov0 (
-        .fu_i (mov_i),
-        .fu_o (mov_o)
+        .fu_i (fui_bus[FUNIT_MOV]),
+        .fu_o (fuo_bus[FUNIT_MOV])
     );
 
-    // Function unit bus
-    funit_in_t fui_bus[FUNIT_COUNT];
-    assign alu_i = fui_bus[FUNIT_ALU];
-    assign mov_i = fui_bus[FUNIT_BRANCH];
-    assign mem_i = fui_bus[FUNIT_MEM];
-    assign brn_i = fui_bus[FUNIT_MOV];
-
+    // --- Function unit bus ---------------------------------------------------------------------------------------- //
+    funit_in_t  fui_bus[FUNIT_COUNT];
     funit_out_t fuo_bus[FUNIT_COUNT];
-    assign fuo_bus[FUNIT_ALU]    = alu_o;
-    assign fuo_bus[FUNIT_BRANCH] = mov_o;
-    assign fuo_bus[FUNIT_MEM]    = mem_o;
-    assign fuo_bus[FUNIT_MOV]    = brn_o;
-
-    // Function unit selection
-    funit_in_t fui;
+    funit_in_t  fui;
     funit_out_t fuo;
 
+    // Connect decoded function unit
     assign fui_bus[funit] = fui;
     assign fuo = fuo_bus[funit];
 
@@ -200,11 +190,12 @@ module secv #(
         ir_next = ir;
 
         // Prevent latches
-        imem_cyc_o = 0;
-        imem_stb_o = 0;
-        imem_adr_o = 'b0;
-        rd_dat     = 'b0;
-        rd_wb      = 'b0;
+        imem_cyc_o = 1'b0;
+        imem_stb_o = 1'b0;
+        imem_adr_o =  'b0;
+        imem_sel_o =  'b0;
+        rd_dat     =  'b0;
+        rd_wb      = 1'b0;
 
         // Function unit
         fui = funit_in_default();
@@ -225,7 +216,8 @@ module secv #(
                 // Access instruction memory
                 imem_cyc_o = 1'b1;
                 imem_stb_o = 1'b1;
-                imem_adr_o = pc[IADR-1 : 0];
+                imem_sel_o =  'b1;
+                imem_adr_o = pc[IADR_WIDTH-1 : 0];
 
                 if (imem_ack_i) begin
                     state_next = STATE_DECODE;
@@ -234,10 +226,9 @@ module secv #(
             end
 
             STATE_DECODE: begin
-                // Here the decoder decodes the instruction.
-                // - Source and desitnation registers are addresed
-                // - Function unit is determined, selected and connected via fu bus
-
+                // Here, the intstruction is decoded via the decoder module.
+                // - the source registers an destination register are addressed,
+                // - the function unit is determined, selected and connected via the bus interface.
                 state_next = STATE_EXECUTE;
             end
 
@@ -252,13 +243,10 @@ module secv #(
 
             STATE_WB: begin
                 pc_next = pc + 4;
+                state_next = STATE_FETCH;
 
-                // If error occured, fetch next instruction
-                if (fuo.err)
-                    state_next = STATE_FETCH;
-
-                // Else write back registers
-                else begin
+                // Write back register if no error occured
+                if (!fuo.err) begin
                     if (fuo.pc_wb)
                         pc_next = fuo.pc;
 

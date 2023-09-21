@@ -6,6 +6,10 @@
  * Author   : J. Hoffmann <joern@bitaggregat.de>
  * Purpose  : Decodes the ALU operation from RISC-V instruction.
  *
+ * Todo
+ *  [ ] Add unit tests
+ *  [ ] Add formal verification
+ *
  * History
  *  v1.0    - Initial version
  */

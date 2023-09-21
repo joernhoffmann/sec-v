@@ -15,6 +15,10 @@
  *  - Configurable memory reset
  *  - Synchronous reset
  *
+ * Todo
+ *  [ ] Add unit tests
+ *  [ ] Add formal verification
+ *
  * History
  *  v1.0    - Initial version
  */

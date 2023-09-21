@@ -13,6 +13,10 @@
  *  - Branch : BEQ, BNE, BLT, BGE, BLTU, BGEU
  *  - Jump   : JAL and JALR
  *
+ * Todo
+ *  [ ] Add unit tests
+ *  [ ] Add formal verification
+ *
  * History
  *  v1.0    - Initial version
  *  v1.1    - Reduce adder, simplify code
