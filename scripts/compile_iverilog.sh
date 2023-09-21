@@ -1,6 +1,9 @@
 #!/bin/bash
-apt install -y autoconf gperf make gcc g++ bison fle
+echo "Install dependencies"
+apt install -y autoconf gperf make gcc g++ bison flex
+
+echo "Build"
 sh autoconf.sh
 ./configure
-make -j32
+make -j`nproc`
 sudo make install

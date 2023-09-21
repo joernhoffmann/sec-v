@@ -3,4 +3,4 @@
 autoconf
 export VERILATOR_ROOT=`pwd`
 ./configure
-make -j32
+make -j`nproc`
