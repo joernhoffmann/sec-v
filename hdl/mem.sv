@@ -160,8 +160,8 @@ module mem #(
 
             // Operand output
             if (opcode == OPCODE_LOAD && !invalid_op) begin
-                fu_o.rd_dat    = dmem_dat;
-                fu_o.rd_dat_wb = 1'b1;
+                fu_o.rd_dat = dmem_dat;
+                fu_o.rd_wb  = 1'b1;
             end
         end
     end

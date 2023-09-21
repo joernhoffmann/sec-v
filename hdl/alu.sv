@@ -51,10 +51,10 @@ module alu #(
         fu_o = funit_out_default();
 
         if (fu_i.ena) begin
-            fu_o.rdy        = 1'b1;
-            fu_o.err        = err;
-            fu_o.rd_dat     = res;
-            fu_o.rd_dat_wb  = !err;
+            fu_o.rdy    = 1'b1;
+            fu_o.err    = err;
+            fu_o.rd_dat = res;
+            fu_o.rd_wb  = !err;
         end
     end
 endmodule

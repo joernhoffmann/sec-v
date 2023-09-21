@@ -253,7 +253,7 @@ package secv_pkg;
         logic               err;        // Error occured
         // Operands
         logic   [XLEN-1:0]  rd_dat;     // Destination register data
-        logic               rd_dat_wb;  // Write back destination register (data is valid)
+        logic               rd_wb;      // Write back destination register (data is valid)
         // Branch
         logic   [XLEN-1:0]  pc;         // Branch target address (next pc)
         logic               pc_wb;      // Branch target is valid (write back)
@@ -264,7 +264,7 @@ package secv_pkg;
         fu.rdy       = 1'b0;
         fu.err       = 1'b0;
         fu.rd_dat    =  'b0;
-        fu.rd_dat_wb = 1'b0;
+        fu.rd_wb     = 1'b0;
         fu.pc        =  'b0;
         fu.pc_wb     = 1'b0;
         return fu;

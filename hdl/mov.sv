@@ -65,10 +65,10 @@ module mov #(
         fu_o = funit_out_default();
 
         if (fu_i.ena) begin
-            fu_o.rdy = 1'b1;
-            fu_o.err = err;
+            fu_o.rdy    = 1'b1;
+            fu_o.err    = err;
             fu_o.rd_dat = rd;
-            fu_o.rd_dat_wb = rd_wb;
+            fu_o.rd_wb  = rd_wb;
         end
     end
 endmodule

@@ -20,7 +20,11 @@
 `include "secv_pkg.svh"
 import secv_pkg::*;
 
-module secv (
+module secv #(
+    parameter int IADR = 8  // Instuction address width
+)
+
+(
     input   logic   clk_i,
     input   logic   rst_i,
 
@@ -28,7 +32,7 @@ module secv (
     output  logic                   imem_cyc_o,
     output  logic                   imem_stb_o,
     output  logic [3 : 0]           imem_sel_o,
-    output  logic [7 : 0]           imem_adr_o,
+    output  logic [IADR-1 : 0]      imem_adr_o,
     output  logic [ILEN-1 : 0]      imem_dat_i,
     input   logic                   imem_ack_i,
 
@@ -45,9 +49,7 @@ module secv (
     // Program counter
     logic [XLEN-1:0] pc, pc_next;
 
-    // -------------------------------------------------------------------------------------------------------------- //
-    // GPR
-    // -------------------------------------------------------------------------------------------------------------- //
+    // ---GPR ------------------------------------------------------------------------------------------------------- //
     logic [XLEN-1:0] rs1_dat, rs2_dat, rd_dat;
     regadr_t rs1_adr, rs2_adr, rd_adr;
     logic rd_wb;
@@ -70,9 +72,7 @@ module secv (
         .rd_wb_i      (rd_wb)
     );
 
-    // -------------------------------------------------------------------------------------------------------------- //
-    // Decoder
-    // -------------------------------------------------------------------------------------------------------------- //
+    // ---Decoder --------------------------------------------------------------------------------------------------- //
     inst_t inst;
     opcode_t opcode;
     funct3_t funct3;
@@ -99,9 +99,7 @@ module secv (
         .funit_o    (funit)
     );
 
-    // -------------------------------------------------------------------------------------------------------------- //
-    // Function units
-    // -------------------------------------------------------------------------------------------------------------- //
+    // --- Function units ------------------------------------------------------------------------------------------- //
     // Arithmetic-logic unit
     funit_in_t alu_i;
     funit_out_t alu_o;
@@ -205,6 +203,8 @@ module secv (
         imem_cyc_o = 0;
         imem_stb_o = 0;
         imem_adr_o = 'b0;
+        rd_dat     = 'b0;
+        rd_wb      = 'b0;
 
         // Function unit
         fui = funit_in_default();
@@ -225,7 +225,7 @@ module secv (
                 // Access instruction memory
                 imem_cyc_o = 1'b1;
                 imem_stb_o = 1'b1;
-                imem_adr_o = pc[7:0];
+                imem_adr_o = pc[IADR-1 : 0];
 
                 if (imem_ack_i) begin
                     state_next = STATE_DECODE;
@@ -234,17 +234,10 @@ module secv (
             end
 
             STATE_DECODE: begin
-                // Start decoder
-                // ... Already started ...
+                // Here the decoder decodes the instruction.
+                // - Source and desitnation registers are addresed
+                // - Function unit is determined, selected and connected via fu bus
 
-                // Select function unit
-                // ... Already selected ...
-
-                // Mux function unit I/O signals
-                // ... Already connected ...
-
-                // Store signals
-                // ... Not yet necessary ...
                 state_next = STATE_EXECUTE;
             end
 
@@ -252,23 +245,28 @@ module secv (
                 // Start execution
                 fui.ena = 1'b1;
 
-                // Save result output's
-                // ...
-
-                // Decide / jump
-                // ...
-
-                state_next = STATE_WB;
+                // Check ouptut reads
+                if (fuo.rdy)
+                    state_next = STATE_WB;
             end
 
             STATE_WB: begin
-                // Update register file
-                // ...
+                pc_next = pc + 4;
 
-                // Update pc
-                // ...
+                // If error occured, fetch next instruction
+                if (fuo.err)
+                    state_next = STATE_FETCH;
 
-                state_next = STATE_FETCH;
+                // Else write back registers
+                else begin
+                    if (fuo.pc_wb)
+                        pc_next = fuo.pc;
+
+                    if (fuo.rd_wb) begin
+                        rd_dat = fuo.rd_dat;
+                        rd_wb  = 1'b1;
+                    end
+                end
             end
 
             default:
