@@ -28,7 +28,7 @@ module alu #(
     output funit_out_t fu_o
 );
 
-    // Decode ALU operation
+    // Decode operation by alu_decoder
     alu_op_t op;
     logic op_imm, op_32, err;
     alu_decoder alu_dec0 (
@@ -39,26 +39,29 @@ module alu #(
         .err_o      (err)
     );
 
-    // Perform ALU operation
-    logic [XLEN-1 : 0] a, b, res;
+    // Perform operation by alu_core
+    logic [XLEN-1 : 0] a, b, result;
+    assign a = fu_i.rs1_dat;                            // Operand a is always register
+    assign b = op_imm ? fu_i.imm : fu_i.rs2_dat;        // Operand b is either register or immediate
     alu_core #(
         .XLEN (XLEN)
     ) alu0 (
         .op_i   (op),
         .a_i    (a),
         .b_i    (b),
-        .res_o  (res)
+        .res_o  (result)
     );
 
     // Output
     always_comb begin
         fu_o = funit_out_default();
 
+        // Assign output if unit is enabled
         if (fu_i.ena) begin
-            fu_o.rdy    = 1'b1;
-            fu_o.err    = err;
-            fu_o.rd_dat = res;
-            fu_o.rd_wb  = !err;
+            fu_o.rdy    = 1'b1;         // Ready when enabled
+            fu_o.err    = err;          // Return error
+            fu_o.rd_dat = result;       // Assign result to destination register
+            fu_o.rd_wb  = !err;         // If no error occured, write back result
         end
     end
 endmodule
