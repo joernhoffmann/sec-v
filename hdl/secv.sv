@@ -146,8 +146,16 @@ module secv #(
     funit_in_t  fui;
     funit_out_t fuo;
 
-    // Connect decoded function unit
-    assign fui_bus[funit] = fui;
+    // Connect input of selected function unit
+    always_comb begin
+        // Set default inputs
+        for (int idx = 0; idx < FUNIT_COUNT; idx++)
+            fui_bus[idx] = funit_in_default();
+
+        fui_bus[funit] = fui;
+    end
+
+    // Connect output of selected function unit
     assign fuo = fuo_bus[funit];
 
     // -------------------------------------------------------------------------------------------------------------- //
