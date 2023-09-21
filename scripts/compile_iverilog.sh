@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Install dependencies"
-apt install -y autoconf gperf make gcc g++ bison flex
+sudo apt-get install -y autoconf gperf make gcc g++ bison flex
 
 echo "Build"
 sh autoconf.sh
