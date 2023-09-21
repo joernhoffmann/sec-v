@@ -95,14 +95,12 @@ module secv #(
         .opcode_o   (opcode),
         .funct3_o   (funct3),
         .funct7_o   (funct7),
-
         // Operands
         .rs1_adr_o  (rs1_adr),
         .rs2_adr_o  (rs2_adr),
         .rd_adr_o   (rd_adr),
         .imm_o      (imm),
         .imm_use_o  (imm_op),
-
         // Function unit
         .funit_o    (funit)
     );
@@ -125,7 +123,6 @@ module secv #(
         // Control
         .fu_i   (fui_bus[FUNIT_MEM]),
         .fu_o   (fuo_bus[FUNIT_MEM]),
-
         // Wishbone data memory interface
         .dmem_cyc_o (dmem_cyc_o),
         .dmem_stb_o (dmem_stb_o),
@@ -197,7 +194,7 @@ module secv #(
         rd_dat     =  'b0;
         rd_wb      = 1'b0;
 
-        // Function unit
+        // Function unit input
         fui = funit_in_default();
         fui.ena     = 1'b0;
         fui.inst    = inst;
@@ -220,15 +217,16 @@ module secv #(
                 imem_adr_o = pc[IADR_WIDTH-1 : 0];
 
                 if (imem_ack_i) begin
-                    state_next = STATE_DECODE;
                     ir_next = imem_dat_i;
+                    state_next = STATE_DECODE;
                 end
             end
 
             STATE_DECODE: begin
-                // Here, the intstruction is decoded via the decoder module.
-                // - the source registers an destination register are addressed,
-                // - the function unit is determined, selected and connected via the bus interface.
+                // Here, the intstruction is decoded. Therefore,
+                // (1) the source and destination register are addressed
+                // (2) the immediate, if any, is decoded
+                // (3) the function unit is determined, selected and connected via the bus interface.
                 state_next = STATE_EXECUTE;
             end
 
@@ -236,7 +234,7 @@ module secv #(
                 // Start execution
                 fui.ena = 1'b1;
 
-                // Check ouptut reads
+                // Check if unit is ready
                 if (fuo.rdy)
                     state_next = STATE_WB;
             end
