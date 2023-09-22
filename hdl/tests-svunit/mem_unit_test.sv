@@ -1,4 +1,3 @@
-`include "/home/joern/lib/svunit/svunit_base/svunit_defines.svh"
 `include "svunit_defines.svh"
 `include "secv_pkg.svh"
 `include "mem.sv"

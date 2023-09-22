@@ -1,4 +1,3 @@
-`include "/home/reckert/lib/svunit/svunit_base/svunit_defines.svh"
 `include "svunit_defines.svh"
 `include "secv_pkg.svh"
 `include "mov.sv"
@@ -25,6 +24,8 @@ module mov_unit_test;
     .fu_o (fu_o)
   );
 
+  const logic[XLEN-1:0] imm = 42;
+  const logic[XLEN-1:0] pc = 21;
 
   //===================================
   // Build
@@ -70,7 +71,8 @@ module mov_unit_test;
   //     <test code>
   //   `SVTEST_END
   //===================================
-  `SVUNIT_TESTS_BEGIN
+    `SVUNIT_TESTS_BEGIN
+
 
     // --- General behaviour ---------------------------------------------------------------------------------------- //
     `SVTEST(MOV_not_ready_if_not_enabled)
@@ -92,22 +94,29 @@ module mov_unit_test;
       #1 `FAIL_UNLESS(!fu_o.rdy);
     `SVTEST_END
 
-    `SVTEST(MOV_enabled_with_valid_opcode_OPCODE_LUI)
+    // --- Opcode tests --------------------------------------------------------------------------------------------- //
+    `SVTEST(MOV_performs_LUI)
       fu_i.ena = 1;
       fu_i.inst.i_type.opcode = OPCODE_LUI;
-      fu_i.imm = 42;
+      fu_i.imm = imm;
 
-      #1 `FAIL_UNLESS(fu_o.rd_dat == 42);
+      #1
+      `FAIL_UNLESS(fu_o.rdy);
+      `FAIL_UNLESS(fu_o.rd_dat == imm);
+      `FAIL_UNLESS(fu_o.rd_wb  == 1'b1);
+      `FAIL_IF(fu_o.pc_wb);
     `SVTEST_END
 
-    `SVTEST(MOV_enabled_with_valid_opcode_OPCODE_AUIPC)
+    `SVTEST(MOV_performs_AUIPC)
       fu_i.ena = 1;
       fu_i.inst.i_type.opcode = OPCODE_AUIPC;
-      fu_i.imm = 42;
-      fu_i.pc = 21;
+      fu_i.pc = pc;
+      fu_i.imm = imm;
 
-      #1 `FAIL_UNLESS(fu_o.rd_dat == 63);
-    `SVTEST_END    
-
+      #1
+      `FAIL_UNLESS(fu_o.rd_dat == pc + imm);
+      `FAIL_UNLESS(fu_o.rd_wb  == 1'b1);
+      `FAIL_IF(fu_o.pc_wb);
+    `SVTEST_END
   `SVUNIT_TESTS_END
 endmodule
