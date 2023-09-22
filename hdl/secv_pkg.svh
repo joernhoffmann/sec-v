@@ -29,40 +29,19 @@ package secv_pkg;
     // Opcodes
     typedef enum logic [6:0] {
         OPCODE_LOAD         = 7'b00_000_11,     // Load from memory
-//      OPCODE_LOAD_FP      = 7'b00_001_11,     // Load floating point from memory
-//      OPCODE_CUSTOM_0     = 7'b00_010_11,     // Custom operation 0
         OPCODE_MISC_MEM     = 7'b00_011_11,     // Misc. memory access (e.g. fence instructions)
         OPCODE_OP_IMM       = 7'b00_100_11,     // Operation immediate
         OPCODE_AUIPC        = 7'b00_101_11,     // Add unsigned immediate to pc
         OPCODE_OP_IMM_32    = 7'b00_110_11,     // Operation immediate 32-bit
-//      OPCODE_LEN_48_1     = 7'b00_111_11,     // Length 48-bits
 
         OPCODE_STORE        = 7'b01_000_11,     // Store to memory
-//      OPCODE_STORE_FP     = 7'b01_001_11,     // Store floating point
-//      OPCODE_CUSTOM_1     = 7'b01_010_11,     // Custom operation 1
-//      OPCODE_AMO          = 7'b01_011_11,     // Atomic memory operation
         OPCODE_OP           = 7'b01_100_11,     // 64-bit register operation
         OPCODE_LUI          = 7'b01_101_11,     // Load upper immediate
         OPCODE_OP_32        = 7'b01_110_11,     // 32-bit register operation
-//      OPCODE_LEN_64       = 7'b01_111_11,     // 64-bit length operation (vector op)
-
-//      OPCODE_MADD         = 7'b10_000_11,
-//      OPCODE_MSUB         = 7'b10_001_11,
-//      OPCODE_NMSUB        = 7'b10_010_11,
-//      OPCODE_NMADD        = 7'b10_011_11,
-//      OPCODE_OP_FP        = 7'b10_100_11,
-//      OPCODE_RESERVED_15  = 7'b10_101_11,
-//      OPCODE_CUSTOM_2     = 7'b10_110_11,
-//      OPCODE_LEN_48_2     = 7'b10_111_11,
 
         OPCODE_BRANCH       = 7'b11_000_11,     // Branch (unconditional)
         OPCODE_JALR         = 7'b11_001_11,     // Jump and link (to) register (call)
-//      OPCODE_RESERVED_1A  = 7'b11_010_11,
         OPCODE_JAL          = 7'b11_011_11      // Jump and link (call)
-//      OPCODE_SYSTEM       = 7'b11_100_11,     // System call
-//      OPCODE_RESERVED_1D  = 7'b11_101_11,
-//      OPCODE_CUSTOM_3     = 7'b11_110_11,
-//      OPCODE_LEN_80       = 7'b11_111_11
     } opcode_t;
 
     // Instruction fields
@@ -135,11 +114,9 @@ package secv_pkg;
     } funct3_store_t;
 
     // funct7
-    const funct7_t FUNCT7_00h = 7'h00;
-    const funct7_t FUNCT7_20h = 7'h20;
-
-    // Special instructions
-    const inst_t INST_NOP = {25'b0, OPCODE_OP_IMM};     // ADDI 0, 0, $0
+    localparam funct7_t FUNCT7_00h = 7'h00;
+    localparam funct7_t FUNCT7_20h = 7'h20;
+    localparam inst_t   INST_NOP   = {25'b0, OPCODE_OP_IMM};
 
     // -------------------------------------------------------------------------------------------------------------- //
     // Functions
@@ -210,11 +187,6 @@ package secv_pkg;
         FUNIT_BRANCH,   // Branch unit           (JAL, JALR, BEQ, BNE etc.)
         FUNIT_MEM,      // Memory unit           (Loads, Stores, FENCE etc.)
         FUNIT_MOV,      // Move unit             (LUI, AUIPC)
-//      FUNIT_CSR,      // CSRRW etc.
-//      FUNIT_SYSTEM,   // ECALL, EBREAK, CSR etc.
-//      FUNIT_MEMTAG,   // Memory Tagging Unit
-//      FUNIT_MUL,
-//      FUNIT_DIV,
         FUNIT_COUNT
     } funit_t;
 
@@ -227,73 +199,76 @@ package secv_pkg;
 
     // --- Function unit operations --------------------------------------------------------------------------------- //
     // ALU
-    typedef enum bit [14:0] {
+    typedef enum bit [3:0] {
         ALU_OP_NONE = 0,
 
         // Logic
-        ALU_OP_AND      = 1 << 0,   // Logical AND
-        ALU_OP_OR       = 1 << 1,   // Logical OR
-        ALU_OP_XOR      = 1 << 2,   // Logical XOR
+        ALU_OP_AND,
+        ALU_OP_OR,
+        ALU_OP_XOR,
 
-        ALU_OP_ADD      = 1 << 3,   // Addition
-        ALU_OP_SUB      = 1 << 4,   // Substraction
-        ALU_OP_ADDW     = 1 << 5,   // Addition (32-bit)
-        ALU_OP_SUBW     = 1 << 6,   // Substraction (32-bit)
+        // Arithmetic
+        ALU_OP_ADD,
+        ALU_OP_SUB,
+        ALU_OP_ADDW,
+        ALU_OP_SUBW,
 
-        ALU_OP_SLL      = 1 << 7,   // Shift left logic
-        ALU_OP_SRL      = 1 << 8,   // Shift right logic
-        ALU_OP_SRA      = 1 << 9,   // Shift right arithmetic (keep sign bit)
-        ALU_OP_SLLW     = 1 << 10,  // Shift left logic (32-bit)
-        ALU_OP_SRLW     = 1 << 11,  // Shift right logic (32-bit)
-        ALU_OP_SRAW     = 1 << 12,  // Shift right arithmetic (keep sign bit, 32-bit)
+        // Shifts
+        ALU_OP_SLL,
+        ALU_OP_SRL,
+        ALU_OP_SRA,
+        ALU_OP_SLLW,
+        ALU_OP_SRLW,
+        ALU_OP_SRAW,
 
-        ALU_OP_SLT      = 1 << 13,  // Set less than
-        ALU_OP_SLTU     = 1 << 14   // Set less than unsigned
+        // Compares
+        ALU_OP_SLT,
+        ALU_OP_SLTU
     } alu_op_t;
 
     // Branch
-    typedef enum bit [7:0] {
+    typedef enum bit [3:0] {
         BRANCH_OP_NONE = 0,
 
         // Branches
-        BRANCH_OP_BEQ   = 1 << 0,
-        BRANCH_OP_BNE   = 1 << 1,
-        BRANCH_OP_BLT   = 1 << 2,
-        BRANCH_OP_BGE   = 1 << 3,
-        BRANCH_OP_BLTU  = 1 << 4,
-        BRANCH_OP_BGEU  = 1 << 5,
+        BRANCH_OP_BEQ,
+        BRANCH_OP_BNE,
+        BRANCH_OP_BLT,
+        BRANCH_OP_BGE,
+        BRANCH_OP_BLTU,
+        BRANCH_OP_BGEU,
 
-        // JAL, JALR
-        BRANCH_OP_JAL   = 1 << 6,
-        BRANCH_OP_JALR  = 1 << 7
+        // Jumps
+        BRANCH_OP_JAL,
+        BRANCH_OP_JALR
     } branch_op_t;
 
     // Mem
-    typedef enum bit [10:0] {
+    typedef enum bit [3:0] {
         MEM_OP_NONE = 0,
 
         // Load
-        MEM_OP_LB       = 1 << 0,
-        MEM_OP_LH       = 1 << 1,
-        MEM_OP_LW       = 1 << 2,
-        MEM_OP_LD       = 1 << 3,
-        MEM_OP_LBU      = 1 << 4,
-        MEM_OP_LHU      = 1 << 5,
-        MEM_OP_LWU      = 1 << 6,
+        MEM_OP_LB,
+        MEM_OP_LH,
+        MEM_OP_LW,
+        MEM_OP_LD,
+        MEM_OP_LBU,
+        MEM_OP_LHU,
+        MEM_OP_LWU,
 
         // Store
-        MEM_OP_SB       = 1 << 7,
-        MEM_OP_SH       = 1 << 8,
-        MEM_OP_SW       = 1 << 9,
-        MEM_OP_SD       = 1 << 10
+        MEM_OP_SB,
+        MEM_OP_SH,
+        MEM_OP_SW,
+        MEM_OP_SD
     } mem_op_t;
 
     // Mov
-    typedef enum bit [2:0] {
+    typedef enum bit [1:0] {
         MOV_OP_NONE  = 0,
 
-        MOV_OP_LUI   = 1 << 0,
-        MOV_OP_AUIPC = 1 << 1
+        MOV_OP_LUI,
+        MOV_OP_AUIPC
     } mov_op_t;
 
 /*
