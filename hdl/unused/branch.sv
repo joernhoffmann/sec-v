@@ -69,7 +69,7 @@ module branch #(
         rd_wb = 1'b0;
         err   = 1'b0;
 
-        case (op)
+        unique case (op)
             BRANCH_OP_BEQ   : pc_wb = (rs1_i          ==  rs2_i);
             BRANCH_OP_BNE   : pc_wb = (rs1_i          !=  rs2_i);
             BRANCH_OP_BLT   : pc_wb = ($signed(rs1_i) <   $signed(rs2_i));

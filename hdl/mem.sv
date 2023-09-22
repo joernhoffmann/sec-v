@@ -48,7 +48,7 @@ module mem #(
     // Internal signals
     opcode_t opcode;
     funct3_t funct3;
-    logic invalid_op;
+    logic err;
     logic [XLEN-1 : 0] dmem_dat;
 
     // Memory access logic
@@ -66,7 +66,7 @@ module mem #(
 
         // Data signals
         dmem_dat    = 'b0;
-        invalid_op  = 'b0;
+        err = 'b0;
 
         if (fu_i.ena) begin
             dmem_cyc_o = 1'b1;
@@ -111,7 +111,7 @@ module mem #(
                     end
 
                     default:
-                        invalid_op = 1'b1;
+                        err = 1'b1;
                 endcase
             end
 
@@ -142,12 +142,12 @@ module mem #(
                     end
 
                     default:
-                        invalid_op = 1'b1;
+                        err = 1'b1;
                 endcase
             end
 
             else
-                invalid_op = 1'b1;
+                err = 1'b1;
         end
     end
 
@@ -159,13 +159,13 @@ module mem #(
                 // Module is ready if unit enabled and
                 //  (a) operation valid and data memory has acknowledged
                 //  (b) operation invalid
-                fu_o.rdy = (!invalid_op && dmem_ack_i) || invalid_op;
+                fu_o.rdy = (!err && dmem_ack_i) || err;
 
                 // Error output
-                fu_o.err = invalid_op;
+                fu_o.err = err;
 
             // Operand output
-            if (opcode == OPCODE_LOAD && !invalid_op) begin
+            if (opcode == OPCODE_LOAD && !err) begin
                 fu_o.rd_dat = dmem_dat;
                 fu_o.rd_wb  = 1'b1;
             end

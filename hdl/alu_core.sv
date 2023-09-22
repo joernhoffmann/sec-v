@@ -35,7 +35,7 @@ module alu_core #(
     assign b32 = b_i[31:0];
 
     always_comb begin
-        case(op_i)
+        unique case(op_i)
             // Logic
             ALU_OP_AND:
                 res_o = a_i & b_i;

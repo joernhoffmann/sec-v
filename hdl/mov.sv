@@ -41,19 +41,16 @@ module mov #(
     logic err;
 
     always_comb begin
-        // Initial values
         rd    =  'b0;
         rd_wb = 1'b0;
         err   = 1'b0;
 
         if (fu_i.ena) begin
-            // Load Upper Imm
             if (opcode == OPCODE_LUI) begin
                 rd = fu_i.imm;
                 rd_wb = 1'b1;
             end
 
-            // Add Upper Imm to PC
             else if (opcode == OPCODE_AUIPC) begin
                 rd = fu_i.pc + fu_i.imm;
                 rd_wb = 1'b1;

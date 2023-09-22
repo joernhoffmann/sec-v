@@ -102,6 +102,9 @@ module branch #(
             else
                 err = 1'b1;
         end
+
+        else
+            err = 1'b1;
     end
 
     // Outputs
