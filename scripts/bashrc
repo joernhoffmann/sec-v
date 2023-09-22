@@ -12,7 +12,7 @@ fi
 
 # SVUnit
 SVUNIT_INSTALL=$HOME/lib/svunit
-if [ -d $VERIBLE_PATH ]; then
+if [ -d $SVUNIT_INSTALL ]; then
 	export SVUNIT_INSTALL
 	export PATH=$PATH:$SVUNIT_INSTALL"/bin"
 fi
