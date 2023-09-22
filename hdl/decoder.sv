@@ -7,8 +7,9 @@
  * Purpose  : Instruction decoder for the SEC-V processor.
  *
  * Todo
- *  [ ] Move alu decoder to ALU.
- *  [ ] Improve decoder to only output rs1, rs2 etc. regarding to instruction type
+ *  [ ] Add muxer control for ex input / output operands
+ *  [ ] Remove unnecessary funits
+ *  [ ] Reduce adder, decoder etc. by reusing alu. 
  *
  * History
  *  v1.0    - Initial version
