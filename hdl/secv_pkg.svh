@@ -92,7 +92,7 @@ package secv_pkg;
 
     // --- funct3 --------------------------------------------------------------------------------------------------- //
     // funct3 - ALU
-    typedef enum logic [$bits(funct3_t)-1:0] {
+    typedef enum logic [2:0] {
         FUNCT3_ALU_ADD      = 3'b000,   // Add ? sub, funct7[5] == 0 ? ADD : SUB
         FUNCT3_ALU_SLL      = 3'b001,   // Shift left logic
         FUNCT3_ALU_SLT      = 3'b010,   // Set less than
@@ -104,7 +104,7 @@ package secv_pkg;
     } funct3_alu_t;
 
     // funct3 - Branch
-    typedef enum logic [$bits(funct3_t)-1:0] {
+    typedef enum logic [2:0] {
         FUNCT3_BRANCH_BEQ   = 3'b000,   // Branch equal                  a == b
         FUNCT3_BRANCH_BNE   = 3'b001,   // Branch not equal              a != b
         // .. //
@@ -115,7 +115,7 @@ package secv_pkg;
     } funct3_branch_t;
 
     // funct3 - Load
-    typedef enum logic [$bits(funct3_t)-1:0] {
+    typedef enum logic [2:0] {
         FUNCT3_LOAD_LB      = 3'b000,   // Load byte (sign extended)
         FUNCT3_LOAD_LH      = 3'b001,   // Load half (sign extended)
         FUNCT3_LOAD_LW      = 3'b010,   // Load word (sign extended)
@@ -127,7 +127,7 @@ package secv_pkg;
     } funct3_load_t;
 
     // funct3 - Store
-    typedef enum logic [$bits(funct3_t)-1:0] {
+    typedef enum logic [2:0] {
         FUNCT3_STORE_SB     = 3'b000,   // Store byte
         FUNCT3_STORE_SH     = 3'b001,   // Store half
         FUNCT3_STORE_SW     = 3'b010,   // Store word
@@ -296,12 +296,14 @@ package secv_pkg;
         MOV_OP_AUIPC = 1 << 1
     } mov_op_t;
 
+/*
     typedef union packed {
         alu_op_t     alu;
         branch_op_t  branch;
         mem_op_t     mem;
         mov_op_t     mov;
     } funit_op_t;
+*/
 
     // --- Function unit interface ---------------------------------------------------------------------------------- //
     // Function unit input interface

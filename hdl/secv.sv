@@ -123,6 +123,7 @@ module secv #(
         // Control
         .fu_i   (fui_bus[FUNIT_MEM]),
         .fu_o   (fuo_bus[FUNIT_MEM]),
+
         // Wishbone data memory interface
         .dmem_cyc_o (dmem_cyc_o),
         .dmem_stb_o (dmem_stb_o),
@@ -267,4 +268,4 @@ module secv #(
                 state_next = state;
         endcase
     end
-endmodule;
+endmodule
