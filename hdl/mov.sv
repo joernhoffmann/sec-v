@@ -46,7 +46,7 @@ module mov #(
         err   = 1'b0;
 
         if (fu_i.ena) begin
-            if (opcode == OPCODE_LUI) begin
+            unique if (opcode == OPCODE_LUI) begin
                 rd = fu_i.imm;
                 rd_wb = 1'b1;
             end

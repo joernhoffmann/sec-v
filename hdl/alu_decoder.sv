@@ -46,8 +46,9 @@ module alu_decoder (
         op = ALU_OP_NONE;
         err = 1'b0;
 
-        // Check if ALU addressed
-        if (opcode_op || opcode_op_imm || opcode_op_32 || opcode_op_imm_32)
+        // Check if ALU is addressed
+        if (opcode_op    || opcode_op_imm ||
+            opcode_op_32 || opcode_op_imm_32)
         begin
             // Decode operation to perform
             case(funct3)

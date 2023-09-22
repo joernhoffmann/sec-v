@@ -53,7 +53,7 @@ module decoder (
     assign imm_j = decode_imm_j(inst_i);
 
     always_comb begin : decode_imm
-        case (opcode)
+        unique case (opcode)
             OPCODE_LUI, OPCODE_AUIPC : begin
                 imm = imm_u;
                 imm_use = 1'b1;
@@ -86,11 +86,11 @@ module decoder (
         endcase
     end
 
-    /* --- Function unit -------------------------------------------------------------------------------------------- */
+    // --- Function unit -------------------------------------------------------------------------------------------- //
     funit_t funit;
 
     always_comb begin : decode_funit
-        case (opcode_o)
+        unique case (opcode_o)
             OPCODE_LUI, OPCODE_AUIPC:
                 funit = FUNIT_MOV;
 
@@ -108,7 +108,7 @@ module decoder (
         endcase
     end
 
-    /* --- Output -------------------------------------------------------------------------------------------------- */
+    // --- Output --------------------------------------------------------------------------------------------------- //
     // Opcode
     assign opcode_o = opcode;
     assign funct3_o = funct3;

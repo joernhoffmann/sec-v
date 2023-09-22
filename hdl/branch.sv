@@ -73,8 +73,8 @@ module branch #(
         rd_wb = 1'b0;
         err   = 1'b0;
 
-        if (opcode == OPCODE_BRANCH) begin
-            case (funct3)
+        unique if (opcode == OPCODE_BRANCH) begin
+            unique case (funct3)
                 FUNCT3_BRANCH_BEQ : pc_wb = (rs1_i          ==  rs2_i);
                 FUNCT3_BRANCH_BNE : pc_wb = (rs1_i          !=  rs2_i);
                 FUNCT3_BRANCH_BLT : pc_wb = ($signed(rs1_i) <   $signed(rs2_i));

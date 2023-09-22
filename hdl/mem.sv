@@ -73,8 +73,8 @@ module mem #(
             dmem_stb_o = 1'b1;
             dmem_adr_o = ADR_WIDTH'(fu_i.rs1_dat + fu_i.imm);
 
-            if (opcode == OPCODE_LOAD) begin
-                case(funct3)
+            unique if (opcode == OPCODE_LOAD) begin
+                unique case(funct3)
                     FUNCT3_LOAD_LB: begin
                         dmem_dat   = sext8(dmem_dat_i[ 7:0]);
                         dmem_sel_o = 'b01;
@@ -116,7 +116,7 @@ module mem #(
             end
 
             else if (opcode == OPCODE_STORE) begin
-                case(funct3)
+                unique case(funct3)
                     FUNCT3_STORE_SB: begin
                         dmem_dat_o[ 7:0] = fu_i.rs2_dat[7:0];
                         dmem_sel_o       = 'b01;

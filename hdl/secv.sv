@@ -212,7 +212,7 @@ module secv #(
         fui.pc      = pc;
 
         // State transistion
-        case (state)
+        unique case (state)
             STATE_IDLE: begin
                 state_next = STATE_FETCH;
             end

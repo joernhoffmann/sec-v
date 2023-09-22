@@ -36,7 +36,7 @@ module mov_decoder (
         op = MOV_OP_NONE;
         err = 1'b0;
 
-        if (opcode == OPCODE_LUI)
+        unique if (opcode == OPCODE_LUI)
             op = MOV_OP_LUI;
 
         else if (opcode == OPCODE_AUIPC)
@@ -47,6 +47,6 @@ module mov_decoder (
     end
 
     // Ouptut
-    assign op_o     = op;
-    assign err_o    = err;
+    assign op_o  = op;
+    assign err_o = err;
 endmodule
