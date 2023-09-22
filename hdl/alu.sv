@@ -30,12 +30,11 @@ module alu #(
 
     // Decode operation by alu_decoder
     alu_op_t op;
-    logic op_imm, op_32, err;
+    logic op_imm, err;
     alu_decoder alu_dec0 (
         .inst_i     (fu_i.inst),
         .op_o       (op),
         .op_imm_o   (op_imm),
-        .op_32_o    (op_32),
         .err_o      (err)
     );
 

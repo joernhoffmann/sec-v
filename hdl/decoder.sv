@@ -35,19 +35,17 @@ module decoder (
     output  funit_t     funit_o     // Selected function unit
 );
 
-    /* --- Opcode --------------------------------------------------------------------------------------------------- */
+    // --- Opcode --------------------------------------------------------------------------------------------------- //
     opcode_t opcode;
     funct3_t funct3;
     funct7_t funct7;
-
     assign opcode = decode_opcode(inst_i);
     assign funct3 = inst_i.r_type.funct3;
     assign funct7 = inst_i.r_type.funct7;
 
-    /* --- Immediate ------------------------------------------------------------------------------------------------ */
+    // --- Immediate ------------------------------------------------------------------------------------------------ //
     logic imm_use;
     imm_t imm, imm_i, imm_s, imm_b, imm_u, imm_j;
-
     assign imm_i = decode_imm_i(inst_i);
     assign imm_s = decode_imm_s(inst_i);
     assign imm_b = decode_imm_b(inst_i);
