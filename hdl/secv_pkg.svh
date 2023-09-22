@@ -23,9 +23,10 @@ package secv_pkg;
     parameter int REG_COUNT = 32;                       // Number of general purpose integer registers
     parameter int REG_ADDR_WIDTH = $clog2(REG_COUNT);   // Width to address registers
 
-    // --- Decoder -------------------------------------------------------------------------------------------------- //
+    // -------------------------------------------------------------------------------------------------------------- //
+    // Instruction
+    // -------------------------------------------------------------------------------------------------------------- //
     // Opcodes
-    // Note: not all will be finally supported and therefore uncommented
     typedef enum logic [6:0] {
         OPCODE_LOAD         = 7'b00_000_11,     // Load from memory
 //      OPCODE_LOAD_FP      = 7'b00_001_11,     // Load floating point from memory
@@ -64,12 +65,6 @@ package secv_pkg;
 //      OPCODE_LEN_80       = 7'b11_111_11
     } opcode_t;
 
-    // Opcode = {op, pre}
-    // typedef struct packed {
-    //    op_t        op;    // Operation
-    //    logic [1:0] pre;   // Prefix (2'b11 = 4 byte)
-    // } opcode_t;
-
     // Instruction fields
     typedef logic [6:0] funct7_t;
     typedef logic [2:0] funct3_t;
@@ -87,24 +82,25 @@ package secv_pkg;
 
     // Instruction type
     typedef union packed {
-        inst_r_t  r_type;    // Register
-        inst_i_t  i_type;    // Immediate (12' bits)
-        inst_s_t  s_type;    // Store
-        inst_b_t  b_type;    // Branch
-        inst_u_t  u_type;    // Bpper immediate (20'bits)
-        inst_j_t  j_type;    // Jump
+        inst_r_t  r_type;   // Register
+        inst_i_t  i_type;   // Immediate (12' bits)
+        inst_s_t  s_type;   // Store
+        inst_b_t  b_type;   // Branch
+        inst_u_t  u_type;   // Upper immediate (20'bits)
+        inst_j_t  j_type;   // Jump
     } inst_t;
 
+    // --- funct3 --------------------------------------------------------------------------------------------------- //
     // funct3 - ALU
     typedef enum logic [$bits(funct3_t)-1:0] {
-        FUNCT3_ALU_ADD  = 3'b000,   // Add / sub, funct7[5] == 0 ? ADD : SUB
-        FUNCT3_ALU_SLL  = 3'b001,   // Shift left logic
-        FUNCT3_ALU_SLT  = 3'b010,   // Set less than
-        FUNCT3_ALU_SLTU = 3'b011,   // Set less than (unsigned)
-        FUNCT3_ALU_XOR  = 3'b100,   // Logic xor
-        FUNCT3_ALU_SRL  = 3'b101,   // Shift right logic / shift right arithmetic, funct7[5] == 0 ? SRL : SRA
-        FUNCT3_ALU_OR   = 3'b110,   // Logic or
-        FUNCT3_ALU_AND  = 3'b111    // Logic and
+        FUNCT3_ALU_ADD      = 3'b000,   // Add ? sub, funct7[5] == 0 ? ADD : SUB
+        FUNCT3_ALU_SLL      = 3'b001,   // Shift left logic
+        FUNCT3_ALU_SLT      = 3'b010,   // Set less than
+        FUNCT3_ALU_SLTU     = 3'b011,   // Set less than (unsigned)
+        FUNCT3_ALU_XOR      = 3'b100,   // Logic xor
+        FUNCT3_ALU_SRL      = 3'b101,   // Shift right logic ? shift right arithmetic, funct7[5] == 0 ? SRL : SRA
+        FUNCT3_ALU_OR       = 3'b110,   // Logic or
+        FUNCT3_ALU_AND      = 3'b111    // Logic and
     } funct3_alu_t;
 
     // funct3 - Branch
@@ -120,34 +116,34 @@ package secv_pkg;
 
     // funct3 - Load
     typedef enum logic [$bits(funct3_t)-1:0] {
-        FUNCT3_LOAD_LB  = 3'b000,   // Load byte (sign extended)
-        FUNCT3_LOAD_LH  = 3'b001,   // Load half (sign extended)
-        FUNCT3_LOAD_LW  = 3'b010,   // Load word (sign extended)
-        FUNCT3_LOAD_LD  = 3'b011,   // load double word
+        FUNCT3_LOAD_LB      = 3'b000,   // Load byte (sign extended)
+        FUNCT3_LOAD_LH      = 3'b001,   // Load half (sign extended)
+        FUNCT3_LOAD_LW      = 3'b010,   // Load word (sign extended)
+        FUNCT3_LOAD_LD      = 3'b011,   // load double word
         // .. //
-        FUNCT3_LOAD_LBU = 3'b100,   // Load byte unsigned (zero extended)
-        FUNCT3_LOAD_LHU = 3'b101,   // Load half unsigned (zero extended)
-        FUNCT3_LOAD_LWU = 3'b110    // Load word unsigned (zero extended)
+        FUNCT3_LOAD_LBU     = 3'b100,   // Load byte unsigned (zero extended)
+        FUNCT3_LOAD_LHU     = 3'b101,   // Load half unsigned (zero extended)
+        FUNCT3_LOAD_LWU     = 3'b110    // Load word unsigned (zero extended)
     } funct3_load_t;
 
     // funct3 - Store
     typedef enum logic [$bits(funct3_t)-1:0] {
-        FUNCT3_STORE_SB = 3'b000,   // Store byte
-        FUNCT3_STORE_SH = 3'b001,   // Store half
-        FUNCT3_STORE_SW = 3'b010,   // Store word
-        FUNCT3_STORE_SD = 3'b011    // Store double word
+        FUNCT3_STORE_SB     = 3'b000,   // Store byte
+        FUNCT3_STORE_SH     = 3'b001,   // Store half
+        FUNCT3_STORE_SW     = 3'b010,   // Store word
+        FUNCT3_STORE_SD     = 3'b011    // Store double word
     } funct3_store_t;
-
-    // funct3 - Atomic
-    // fucnt3 - CSR
 
     // funct7
     const funct7_t FUNCT7_00h = 7'h00;
     const funct7_t FUNCT7_20h = 7'h20;
 
-    // --- Special instructions ------------------------------------------------------------------------------------- //
+    // Special instructions
     const inst_t INST_NOP = {25'b0, OPCODE_OP_IMM};     // ADDI 0, 0, $0
 
+    // -------------------------------------------------------------------------------------------------------------- //
+    // Functions
+    // -------------------------------------------------------------------------------------------------------------- //
     // --- Decode functions ----------------------------------------------------------------------------------------- //
     // Decodes the opcode of the instruction
     function automatic opcode_t decode_opcode (inst_t inst_i);
@@ -205,7 +201,9 @@ package secv_pkg;
         return {{XLEN-32{operand[31]}}, operand[31:0]};
     endfunction
 
-    // --- Function units ------------------------------------------------------------------------------------------- //
+    // -------------------------------------------------------------------------------------------------------------- //
+    // Function units
+    // -------------------------------------------------------------------------------------------------------------- //
     typedef enum int{
         FUNIT_NONE,     // No function unit
         FUNIT_ALU,      // Arithmetic logic unit (ADD, SUB etc.)
@@ -233,34 +231,31 @@ package secv_pkg;
         ALU_OP_NONE = 0,
 
         // Logic
-        ALU_OP_AND  = 1 << 0,   // Logical AND
-        ALU_OP_OR   = 1 << 1,   // Logical OR
-        ALU_OP_XOR  = 1 << 2,   // Logical XOR
+        ALU_OP_AND      = 1 << 0,   // Logical AND
+        ALU_OP_OR       = 1 << 1,   // Logical OR
+        ALU_OP_XOR      = 1 << 2,   // Logical XOR
 
-        // Arithmetic
-        ALU_OP_ADD  = 1 << 3,   // Addition
-        ALU_OP_SUB  = 1 << 4,   // Substraction
-        ALU_OP_ADDW = 1 << 5,   // Addition (32-bit)
-        ALU_OP_SUBW = 1 << 6,  // Substraction (32-bit)
+        ALU_OP_ADD      = 1 << 3,   // Addition
+        ALU_OP_SUB      = 1 << 4,   // Substraction
+        ALU_OP_ADDW     = 1 << 5,   // Addition (32-bit)
+        ALU_OP_SUBW     = 1 << 6,   // Substraction (32-bit)
 
-        // Shift
-        ALU_OP_SLL  = 1 << 7,   // Shift left logic
-        ALU_OP_SRL  = 1 << 8,   // Shift right logic
-        ALU_OP_SRA  = 1 << 9,   // Shift right arithmetic (keep sign bit)
-        ALU_OP_SLLW = 1 << 10,  // Shift left logic (32-bit)
-        ALU_OP_SRLW = 1 << 11,  // Shift right logic (32-bit)
-        ALU_OP_SRAW = 1 << 12,  // Shift right arithmetic (keep sign bit, 32-bit)
+        ALU_OP_SLL      = 1 << 7,   // Shift left logic
+        ALU_OP_SRL      = 1 << 8,   // Shift right logic
+        ALU_OP_SRA      = 1 << 9,   // Shift right arithmetic (keep sign bit)
+        ALU_OP_SLLW     = 1 << 10,  // Shift left logic (32-bit)
+        ALU_OP_SRLW     = 1 << 11,  // Shift right logic (32-bit)
+        ALU_OP_SRAW     = 1 << 12,  // Shift right arithmetic (keep sign bit, 32-bit)
 
-        // Compares
-        ALU_OP_SLT  = 1 << 13,  // set less than
-        ALU_OP_SLTU = 1 << 14   // set less than unsigned
+        ALU_OP_SLT      = 1 << 13,  // Set less than
+        ALU_OP_SLTU     = 1 << 14   // Set less than unsigned
     } alu_op_t;
 
     // Branch
     typedef enum bit [7:0] {
         BRANCH_OP_NONE = 0,
 
-        // BRANCH
+        // Branches
         BRANCH_OP_BEQ   = 1 << 0,
         BRANCH_OP_BNE   = 1 << 1,
         BRANCH_OP_BLT   = 1 << 2,
@@ -278,19 +273,19 @@ package secv_pkg;
         MEM_OP_NONE = 0,
 
         // Load
-        MEM_OP_LB   = 1 << 0,
-        MEM_OP_LH   = 1 << 1,
-        MEM_OP_LW   = 1 << 2,
-        MEM_OP_LD   = 1 << 3,
-        MEM_OP_LBU  = 1 << 4,
-        MEM_OP_LHU  = 1 << 5,
-        MEM_OP_LWU  = 1 << 6,
+        MEM_OP_LB       = 1 << 0,
+        MEM_OP_LH       = 1 << 1,
+        MEM_OP_LW       = 1 << 2,
+        MEM_OP_LD       = 1 << 3,
+        MEM_OP_LBU      = 1 << 4,
+        MEM_OP_LHU      = 1 << 5,
+        MEM_OP_LWU      = 1 << 6,
 
         // Store
-        MEM_OP_SB   = 1 << 7,
-        MEM_OP_SH   = 1 << 8,
-        MEM_OP_SW   = 1 << 9,
-        MEM_OP_SD   = 1 << 10
+        MEM_OP_SB       = 1 << 7,
+        MEM_OP_SH       = 1 << 8,
+        MEM_OP_SW       = 1 << 9,
+        MEM_OP_SD       = 1 << 10
     } mem_op_t;
 
     // Mov
