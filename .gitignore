@@ -8,3 +8,4 @@ run.log
 tests.xml
 qrun.out
 svut.out
+.DS_Store
