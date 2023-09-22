@@ -24,9 +24,6 @@ module mov_unit_test;
     .fu_o (fu_o)
   );
 
-  const logic[XLEN-1:0] imm = 42;
-  const logic[XLEN-1:0] pc = 21;
-
   //===================================
   // Build
   //===================================
@@ -95,28 +92,55 @@ module mov_unit_test;
     `SVTEST_END
 
     // --- Opcode tests --------------------------------------------------------------------------------------------- //
-    `SVTEST(MOV_performs_LUI)
+    `SVTEST(MOV_performs_LUI_returns_imm)
       fu_i.ena = 1;
       fu_i.inst.i_type.opcode = OPCODE_LUI;
-      fu_i.imm = imm;
+      fu_i.imm = 42;
 
       #1
       `FAIL_UNLESS(fu_o.rdy);
-      `FAIL_UNLESS(fu_o.rd_dat == imm);
+      `FAIL_UNLESS(fu_o.rd_dat == 42);
       `FAIL_UNLESS(fu_o.rd_wb  == 1'b1);
       `FAIL_IF(fu_o.pc_wb);
     `SVTEST_END
 
-    `SVTEST(MOV_performs_AUIPC)
+    `SVTEST(MOV_performs_LUI_returns_negative_imm)
       fu_i.ena = 1;
-      fu_i.inst.i_type.opcode = OPCODE_AUIPC;
-      fu_i.pc = pc;
-      fu_i.imm = imm;
+      fu_i.inst.i_type.opcode = OPCODE_LUI;
+      fu_i.imm = -42;
 
       #1
-      `FAIL_UNLESS(fu_o.rd_dat == pc + imm);
+      `FAIL_UNLESS(fu_o.rdy);
+      `FAIL_UNLESS(fu_o.rd_dat == -42);
       `FAIL_UNLESS(fu_o.rd_wb  == 1'b1);
       `FAIL_IF(fu_o.pc_wb);
     `SVTEST_END
+
+
+    `SVTEST(MOV_performs_AUIPC_adds_pc_and_positive_imm)
+      fu_i.ena = 1;
+      fu_i.inst.i_type.opcode = OPCODE_AUIPC;
+      fu_i.pc = 65535;
+      fu_i.imm = 42;
+
+      #1
+      `FAIL_UNLESS(fu_o.rd_dat == 65535 + 42);
+      `FAIL_UNLESS(fu_o.rd_wb  == 1'b1);
+      `FAIL_IF(fu_o.pc_wb);
+    `SVTEST_END
+
+    `SVTEST(MOV_performs_AUIPC_adds_pc_and_negative_imm)
+      fu_i.ena = 1;
+      fu_i.inst.i_type.opcode = OPCODE_AUIPC;
+      fu_i.pc = 65535;
+      fu_i.imm = -65536;
+
+      #1
+      `FAIL_UNLESS(fu_o.rd_dat == -1);
+      `FAIL_UNLESS(fu_o.rd_wb  == 1'b1);
+      `FAIL_IF(fu_o.pc_wb);
+    `SVTEST_END
+
+
   `SVUNIT_TESTS_END
 endmodule
