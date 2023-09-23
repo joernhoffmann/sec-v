@@ -263,22 +263,41 @@ package secv_pkg;
         MEM_OP_SD
     } mem_op_t;
 
-    // Mov
-    typedef enum bit [1:0] {
-        MOV_OP_NONE  = 0,
-
-        MOV_OP_LUI,
-        MOV_OP_AUIPC
-    } mov_op_t;
-
 /*
     typedef union packed {
         alu_op_t     alu;
         branch_op_t  branch;
         mem_op_t     mem;
-        mov_op_t     mov;
     } funit_op_t;
 */
+
+    // Source selection
+    typedef enum logic [1:0] {
+        SRC1_SEL_0,          // Value '0'
+        SRC1_SEL_RS1,        // Register source 1
+        SRC1_SEL_PC          // Current program counter
+    } src1_sel_t;
+
+    typedef enum logic [1:0] {
+        SRC2_SEL_0,          // Value '0'
+        SRC2_SEL_RS2,        // Register source 2
+        SRC2_SEL_IMM         // Immediate
+    } src2_sel_t;
+
+    // Destination register selection
+    typedef enum logic [1:0] {
+        RD_SEL_0,           // Value '0'
+        RD_SEL_FUNIT,       // Function unit
+        RD_SEL_IMM,         // Immediate
+        RD_SEL_NPC          // Next pc
+    } rd_sel_t;
+
+    // Program counter selection
+    typedef enum logic [1:0] {
+        PC_SEL_NPC,         // Next pc
+        PC_SEL_FUNIT,       // Function unit
+        PC_SEL_BRANCH       // Branch decision unit
+     } pc_sel_t;
 
     // --- Function unit interface ---------------------------------------------------------------------------------- //
     // Function unit input interface
