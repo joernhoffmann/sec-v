@@ -115,7 +115,7 @@ module mem_unit_test;
     `SVTEST(MEM_does_not_write_back_if_enabled_with_invalid_opcode)
         fu_i.ena = 1;
 
-        #1 `FAIL_UNLESS(!fu_o.rd_wb);
+        #1 `FAIL_UNLESS(!fu_o.res_wb);
     `SVTEST_END
 
     `SVTEST(MEM_not_ready_if_not_enabled_and_with_valid_opcode_and_dmem_ack)

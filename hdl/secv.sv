@@ -54,9 +54,6 @@ module secv #(
     input   logic [XLEN-1 : 0]          dmem_dat_i,
     input   logic                       dmem_ack_i
 );
-    // Program counter
-    logic [XLEN-1:0] pc, pc_next;
-
     // --- General purpose register file ---------------------------------------------------------------------------- //
     logic [XLEN-1:0] rs1_dat, rs2_dat, rd_dat;
     regadr_t rs1_adr, rs2_adr, rd_adr;
@@ -88,8 +85,8 @@ module secv #(
 
     funit_t     funit;
     imm_t       imm;
-    src1_sel_t  s1_sel;
-    src2_sel_t  s2_sel;
+    src1_sel_t  src1_sel;
+    src2_sel_t  src2_sel;
     pc_sel_t    pc_sel;
     rd_sel_t    rd_sel;
     logic       dec_err;
@@ -109,8 +106,8 @@ module secv #(
 
         // Function unit
         .funit_o    (funit),
-        .s1_sel_o   (s1_sel),
-        .s2_sel_o   (s2_sel),
+        .src1_sel_o (src1_sel),
+        .src2_sel_o (src2_sel),
         .rd_sel_o   (rd_sel),
         .pc_sel_o   (pc_sel),
 
@@ -131,15 +128,15 @@ module secv #(
     // --- Function units ------------------------------------------------------------------------------------------- //
     // Arithmetic-logic unit
     alu alu0 (
-        .fu_i   (fui_bus[FUNIT_ALU]),
-        .fu_o   (fuo_bus[FUNIT_ALU])
+        .fu_i (funit_in_bus[FUNIT_ALU]),
+        .fu_o (funit_out_bus[FUNIT_ALU])
     );
 
     // Data memory inteface unit
     mem mem0(
         // Control
-        .fu_i   (fui_bus[FUNIT_MEM]),
-        .fu_o   (fuo_bus[FUNIT_MEM]),
+        .fu_i (funit_in_bus[FUNIT_MEM]),
+        .fu_o (funit_out_bus[FUNIT_MEM]),
 
         // Wishbone data memory interface
         .dmem_cyc_o (dmem_cyc_o),
@@ -153,22 +150,22 @@ module secv #(
     );
 
     // --- Function unit bus ---------------------------------------------------------------------------------------- //
-    funit_in_t  fui_bus[FUNIT_COUNT];
-    funit_out_t fuo_bus[FUNIT_COUNT];
-    funit_in_t  fui;
-    funit_out_t fuo;
+    funit_in_t  funit_in_bus[FUNIT_COUNT];
+    funit_out_t funit_out_bus[FUNIT_COUNT];
+    funit_in_t  funit_in;
+    funit_out_t funit_out;
 
     // Connect input of selected function unit
     always_comb begin
         // Set default inputs
         for (int idx = 0; idx < FUNIT_COUNT; idx++)
-            fui_bus[idx] = funit_in_default();
+            funit_in_bus[idx] = funit_in_default();
 
-        fui_bus[funit] = fui;
+        funit_in_bus[funit] = funit_in;
     end
 
     // Connect output of selected function unit
-    assign fuo = fuo_bus[funit];
+    assign funit_out = funit_out_bus[funit];
 
     // -------------------------------------------------------------------------------------------------------------- //
     // Main state machine
@@ -182,9 +179,17 @@ module secv #(
     } state_t;
     state_t state, state_next;
 
-    // Registers
+    // Program counter
+    logic [XLEN-1:0] pc, pc_next;   // Program counter (register)
+    logic [XLEN-1:0] nxtpc;         // Next pc
+    logic [XLEN-1:0] wbstage_pc;        // PC to be written back in wb-stage
+    assign nxtpc = pc + 4;
+
+    // Instruction register
     logic [ILEN-1:0] ir, ir_next;
     assign inst = ir;
+
+    // Register updates
     always_ff @( posedge clk_i) begin
         if (rst_i) begin
             state <= STATE_IDLE;
@@ -199,9 +204,59 @@ module secv #(
         end
     end
 
-    // Next state logic
+    // Branch target computation
+    // If branch taken, take address from funtion unit else progress with next instruction.
+    logic [XLEN-1:0] brn_target;
+    assign brn_target = brn_take ? funit_out.res : nxtpc;
+
+    // --- MUXer ---------------------------------------------------------------------------------------------------- //
+    // Source 1 selection
+    logic [XLEN-1:0] src1;
+    always_comb begin: src1_mux
+        unique case (src1_sel)
+            SRC1_SEL_0   : src1 = 'b0;
+            SRC1_SEL_RS1 : src1 = rs1_dat;
+            SRC1_SEL_PC  : src1 = pc;
+            default      : src1 = 'b0;
+        endcase
+    end
+
+    // Source 2 selection
+    logic [XLEN-1:0] src2;
+    always_comb begin: src2_mux
+        unique case (src2_sel)
+            SRC2_SEL_0   : src2 = 'b0;
+            SRC2_SEL_RS2 : src2 = rs2_dat;
+            SRC2_SEL_IMM : src2 = imm;
+            default      : src2 = 'b0;
+        endcase
+    end
+
+    // Destination register update (wb-stage)
+    logic [XLEN-1:0] wbstage_rd_dat;
+    always_comb begin: rd_mux
+        unique case (rd_sel)
+            RD_SEL_NONE  : wbstage_rd_dat = 'b0;
+            RD_SEL_FUNIT : wbstage_rd_dat = funit_out.res;
+            RD_SEL_IMM   : wbstage_rd_dat = imm;
+            RD_SEL_NXTPC : wbstage_rd_dat = nxtpc;
+            default      : wbstage_rd_dat = 'b0;
+        endcase
+    end
+
+    // Program counter update (wb-stage)
+    always_comb begin: wbstage_pc_mux
+        unique case (pc_sel)
+            PC_SEL_NXTPC  : wbstage_pc = nxtpc;         // Write-back next pc
+            PC_SEL_FUNIT  : wbstage_pc = funit_out.res;       // Write-back funit output
+            PC_SEL_BRANCH : wbstage_pc = brn_target;    // Write-back branch target
+            default       : wbstage_pc = nxtpc;
+        endcase
+    end
+
+    // --- Next state logic ----------------------------------------------------------------------------------------- //
     always_comb begin : main_fsm
-        // Default values
+        // Default state transition
         state_next = state;
         pc_next = pc;
         ir_next = ir;
@@ -215,11 +270,11 @@ module secv #(
         rd_wb      = 1'b0;
 
         // Function unit input
-        fui = funit_in_default();
-        fui.ena  = 1'b0;
-        fui.inst = inst;
-        fui.src1 = rs1_dat;
-        fui.src2 = rs2_dat;
+        funit_in = funit_in_default();
+        funit_in.ena  = 1'b0;
+        funit_in.inst = inst;
+        funit_in.src1 = rs1_dat;
+        funit_in.src2 = rs2_dat;
 
         // State transistion
         unique case (state)
@@ -250,24 +305,30 @@ module secv #(
 
             STATE_EXECUTE: begin
                 // Start execution
-                fui.ena = 1'b1;
+                funit_in.ena = 1'b1;
 
                 // Check if unit is ready
-                if (fuo.rdy)
+                if (funit_out.rdy)
                     state_next = STATE_WB;
             end
 
             STATE_WB: begin
-                pc_next = pc + 4;
+                rd_dat     = wbstage_rd_dat;
+                pc_next    = wbstage_pc;
                 state_next = STATE_FETCH;
 
-                // Write back register if no error occured
-                if (!fuo.err) begin
-                    if (fuo.res_wb) begin
-                        rd_dat = fuo.res;
-                        rd_wb  = 1'b1;
-                    end
-                end
+                // Enable destination register update
+                unique case (rd_sel)
+                    RD_SEL_NONE  : rd_wb = 1'b0;
+                    RD_SEL_FUNIT : rd_wb = !funit_out.err;
+                    RD_SEL_IMM   : rd_wb = 1'b1;
+                    RD_SEL_NXTPC : rd_wb = 1'b1;
+                    default      : rd_wb = 1'b0;
+                endcase
+
+                // Check pc update from funit
+                if (pc_sel == PC_SEL_FUNIT)
+                    pc_next = funit_out.err ? nxtpc : wbstage_pc;
             end
 
             default:

@@ -33,8 +33,8 @@ module decoder (
 
     // Muxer
     output  funit_t     funit_o,    // Function unit
-    output  src1_sel_t  s1_sel_o,   // Source 1 selection
-    output  src2_sel_t  s2_sel_o,   // Source 2 selection
+    output  src1_sel_t  src1_sel_o,   // Source 1 selection
+    output  src2_sel_t  src2_sel_o,   // Source 2 selection
     output  rd_sel_t    rd_sel_o,   // Dest. register selection
     output  pc_sel_t    pc_sel_o,   // PC register selector
 
@@ -60,89 +60,89 @@ module decoder (
     assign imm_j = decode_imm_j(inst_i);
 
     // Function unit, source operands and destinations selection
-    funit_t     funit;
-    src1_sel_t  s1_sel;
-    src2_sel_t  s2_sel;
-    rd_sel_t    rd_sel;
-    pc_sel_t    pc_sel;
-    logic       err;
+    funit_t    funit;
+    src1_sel_t src1_sel;
+    src2_sel_t src2_sel;
+    rd_sel_t   rd_sel;
+    pc_sel_t   pc_sel;
+    logic      err;
 
     always_comb begin : decode_op
-        imm     = 'b0;
-        funit   = FUNIT_NONE;
-        s1_sel  = SRC1_SEL_0;
-        s2_sel  = SRC2_SEL_0;
-        rd_sel  = RD_SEL_0;
-        pc_sel  = PC_SEL_NPC;
-        err     = 1'b0;
+        imm       = 'b0;
+        funit     = FUNIT_NONE;
+        src1_sel  = SRC1_SEL_0;
+        src2_sel  = SRC2_SEL_0;
+        rd_sel    = RD_SEL_NONE;
+        pc_sel    = PC_SEL_NXTPC;
+        err       = 1'b0;
 
         unique case (opcode)
             OPCODE_LUI: begin
-                imm     = imm_u;
-                funit   = FUNIT_NONE;
-                rd_sel  = RD_SEL_IMM;
+                imm         = imm_u;
+                funit       = FUNIT_NONE;
+                rd_sel      = RD_SEL_IMM;
             end
 
             OPCODE_AUIPC: begin
-                imm     = imm_u;
-                funit   = FUNIT_ALU;
-                s1_sel  = SRC1_SEL_PC;
-                s2_sel  = SRC2_SEL_IMM;
-                rd_sel  = RD_SEL_FUNIT;
+                imm         = imm_u;
+                funit       = FUNIT_ALU;
+                src1_sel    = SRC1_SEL_PC;
+                src2_sel    = SRC2_SEL_IMM;
+                rd_sel      = RD_SEL_FUNIT;
             end
 
             OPCODE_JAL: begin
-                imm     = imm_j;
-                funit   = FUNIT_ALU;
-                s1_sel  = SRC1_SEL_PC;
-                s2_sel  = SRC2_SEL_IMM;
-                rd_sel  = RD_SEL_NPC;
+                imm         = imm_j;
+                funit       = FUNIT_ALU;
+                src1_sel    = SRC1_SEL_PC;
+                src2_sel    = SRC2_SEL_IMM;
+                rd_sel      = RD_SEL_NXTPC;
             end
 
             OPCODE_JALR: begin
-                imm     = imm_i;
-                funit   = FUNIT_ALU;
-                s1_sel  = SRC1_SEL_RS1;
-                s2_sel  = SRC2_SEL_IMM;
-                rd_sel  = RD_SEL_NPC;
+                imm         = imm_i;
+                funit       = FUNIT_ALU;
+                src1_sel    = SRC1_SEL_RS1;
+                src2_sel    = SRC2_SEL_IMM;
+                rd_sel      = RD_SEL_NXTPC;
             end
 
             OPCODE_BRANCH: begin
-                imm     = imm_b;
-                funit   = FUNIT_ALU;
-                s1_sel  = SRC1_SEL_PC;
-                s2_sel  = SRC2_SEL_IMM;
-                pc_sel  = PC_SEL_BRANCH;
+                imm         = imm_b;
+                funit       = FUNIT_ALU;
+                src1_sel    = SRC1_SEL_PC;
+                src2_sel    = SRC2_SEL_IMM;
+                pc_sel      = PC_SEL_BRANCH;
             end
 
             OPCODE_LOAD: begin
-                imm     = imm_i;
-                funit   = FUNIT_MEM;
-                s1_sel  = SRC1_SEL_RS1;
-                s2_sel  = SRC2_SEL_IMM;
-                rd_sel  = RD_SEL_FUNIT;
+                imm         = imm_i;
+                funit       = FUNIT_MEM;
+                src1_sel    = SRC1_SEL_RS1;
+                src2_sel    = SRC2_SEL_IMM;
+                rd_sel      = RD_SEL_FUNIT;
             end
 
             OPCODE_STORE: begin
-                imm     = imm_s;
-                funit   = FUNIT_MEM;
-                s1_sel  = SRC1_SEL_RS1;
-                s2_sel  = SRC2_SEL_IMM;
-                rd_sel  = RD_SEL_FUNIT;
+                imm         = imm_s;
+                funit       = FUNIT_MEM;
+                src1_sel    = SRC1_SEL_RS1;
+                src2_sel    = SRC2_SEL_IMM;
+                rd_sel      = RD_SEL_FUNIT;
             end
 
             OPCODE_OP, OPCODE_OP_32: begin
-                funit   = FUNIT_ALU;
-                s1_sel  = SRC1_SEL_RS1;
-                s2_sel  = SRC2_SEL_RS2;
-                rd_sel  = RD_SEL_FUNIT;
+                funit       = FUNIT_ALU;
+                src1_sel    = SRC1_SEL_RS1;
+                src2_sel    = SRC2_SEL_RS2;
+                rd_sel      = RD_SEL_FUNIT;
             end
 
             OPCODE_OP_IMM, OPCODE_OP_IMM_32: begin
-                imm     = imm_i;
-                s1_sel  = SRC1_SEL_RS1;
-                s2_sel  = SRC2_SEL_IMM;
-                rd_sel  = RD_SEL_FUNIT;
+                imm         = imm_i;
+                src1_sel    = SRC1_SEL_RS1;
+                src2_sel    = SRC2_SEL_IMM;
+                rd_sel      = RD_SEL_FUNIT;
             end
 
             default:
@@ -159,18 +159,18 @@ module decoder (
     assign funct7_o = funct7;
 
     // Operands
-    assign rs1_adr_o  = inst_i.r_type.rs1;
-    assign rs2_adr_o  = inst_i.r_type.rs2;
-    assign rd_adr_o   = inst_i.r_type.rd;
-    assign imm_o      = imm;
+    assign rs1_adr_o = inst_i.r_type.rs1;
+    assign rs2_adr_o = inst_i.r_type.rs2;
+    assign rd_adr_o  = inst_i.r_type.rd;
+    assign imm_o     = imm;
 
     // Function unit
-    assign funit_o  = funit;
-    assign s1_sel_o = s1_sel;
-    assign s2_sel_o = s2_sel;
-    assign rd_sel_o = rd_sel;
-    assign pc_sel_o = pc_sel;
+    assign funit_o    = funit;
+    assign src1_sel_o = src1_sel;
+    assign src2_sel_o = src2_sel;
+    assign rd_sel_o   = rd_sel;
+    assign pc_sel_o   = pc_sel;
 
     // Errors
-    assign err_o    = err;
+    assign err_o = err;
 endmodule

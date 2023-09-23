@@ -266,15 +266,15 @@ package secv_pkg;
 
     // Destination register selection
     typedef enum logic [1:0] {
-        RD_SEL_0,           // Value '0'
+        RD_SEL_NONE,        // No input
         RD_SEL_FUNIT,       // Function unit
         RD_SEL_IMM,         // Immediate
-        RD_SEL_NPC          // Next pc
+        RD_SEL_NXTPC        // Next pc
     } rd_sel_t;
 
     // Program counter selection
     typedef enum logic [1:0] {
-        PC_SEL_NPC,         // Next pc
+        PC_SEL_NXTPC,       // Next pc
         PC_SEL_FUNIT,       // Function unit
         PC_SEL_BRANCH       // Branch decision unit
      } pc_sel_t;
