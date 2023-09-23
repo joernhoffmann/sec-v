@@ -81,13 +81,18 @@ module secv #(
     );
 
     // ---Decoder --------------------------------------------------------------------------------------------------- //
-    inst_t inst;
+    inst_t   inst;
     opcode_t opcode;
     funct3_t funct3;
     funct7_t funct7;
-    imm_t imm;
-    logic imm_op;
-    funit_t funit;
+
+    funit_t     funit;
+    imm_t       imm;
+    src1_sel_t  s1_sel;
+    src2_sel_t  s2_sel;
+    pc_sel_t    pc_sel;
+    rd_sel_t    rd_sel;
+    logic       dec_err;
 
     decoder dec0 (
         .inst_i     (inst),
@@ -95,14 +100,22 @@ module secv #(
         .opcode_o   (opcode),
         .funct3_o   (funct3),
         .funct7_o   (funct7),
+
         // Operands
         .rs1_adr_o  (rs1_adr),
         .rs2_adr_o  (rs2_adr),
         .rd_adr_o   (rd_adr),
         .imm_o      (imm),
-        .imm_use_o  (imm_op),
+
         // Function unit
-        .funit_o    (funit)
+        .funit_o    (funit),
+        .s1_sel_o   (s1_sel),
+        .s2_sel_o   (s2_sel),
+        .rd_sel_o   (rd_sel),
+        .pc_sel_o   (pc_sel),
+
+        // Errors
+        .err_o      (dec_err)
     );
 
     // --- Function units ------------------------------------------------------------------------------------------- //
