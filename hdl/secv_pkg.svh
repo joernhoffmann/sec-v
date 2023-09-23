@@ -184,9 +184,7 @@ package secv_pkg;
     typedef enum int{
         FUNIT_NONE,     // No function unit
         FUNIT_ALU,      // Arithmetic logic unit (ADD, SUB etc.)
-        FUNIT_BRANCH,   // Branch unit           (JAL, JALR, BEQ, BNE etc.)
         FUNIT_MEM,      // Memory unit           (Loads, Stores, FENCE etc.)
-        FUNIT_MOV,      // Move unit             (LUI, AUIPC)
         FUNIT_COUNT
     } funit_t;
 
@@ -226,23 +224,6 @@ package secv_pkg;
         ALU_OP_SLTU
     } alu_op_t;
 
-    // Branch
-    typedef enum bit [3:0] {
-        BRANCH_OP_NONE = 0,
-
-        // Branches
-        BRANCH_OP_BEQ,
-        BRANCH_OP_BNE,
-        BRANCH_OP_BLT,
-        BRANCH_OP_BGE,
-        BRANCH_OP_BLTU,
-        BRANCH_OP_BGEU,
-
-        // Jumps
-        BRANCH_OP_JAL,
-        BRANCH_OP_JALR
-    } branch_op_t;
-
     // Mem
     typedef enum bit [3:0] {
         MEM_OP_NONE = 0,
@@ -266,7 +247,6 @@ package secv_pkg;
 /*
     typedef union packed {
         alu_op_t     alu;
-        branch_op_t  branch;
         mem_op_t     mem;
     } funit_op_t;
 */
@@ -303,26 +283,20 @@ package secv_pkg;
     // Function unit input interface
     typedef struct packed {
         // Control
-        logic               ena;        // Enable unit, input is valid
+        logic               ena;    // Enable unit, input is valid
 
         // Operands
-        inst_t              inst;       // Fetched instruction
-        logic   [XLEN-1:0]  rs1_dat;    // 1st register operand
-        logic   [XLEN-1:0]  rs2_dat;    // 2nd register operand
-        imm_t               imm;        // Immediate
-
-        // Branch
-        logic   [XLEN-1:0]  pc;         // Current program counter
+        inst_t              inst;   // Fetched instruction
+        logic   [XLEN-1:0]  src1;     // 1st source operand
+        logic   [XLEN-1:0]  src2;     // 2nd source operand
     } funit_in_t;
 
     function automatic funit_in_t funit_in_default();
         funit_in_t fu;
-        fu.ena       = 1'b0;
-        fu.inst      =  'b0;
-        fu.rs1_dat   =  'b0;
-        fu.rs2_dat   =  'b0;
-        fu.imm       =  'b0;
-        fu.pc        =  'b0;
+        fu.ena      = 1'b0;
+        fu.inst     =  'b0;
+        fu.src1     =  'b0;
+        fu.src2     =  'b0;
         return fu;
     endfunction
 
@@ -332,23 +306,17 @@ package secv_pkg;
         logic               rdy;        // Unit ready, operation completed
         logic               err;        // Error occured
 
-        // Operands
-        logic   [XLEN-1:0]  rd_dat;     // Destination register data
-        logic               rd_wb;      // Write back destination register (data is valid)
-
-        // Branch
-        logic   [XLEN-1:0]  pc;         // Branch target address (next pc)
-        logic               pc_wb;      // Branch target is valid (write back)
+        // Result
+        logic   [XLEN-1:0]  res;        // Result
+        logic               res_wb;     // Result is valid (write back)
     } funit_out_t;
 
     function automatic funit_out_t funit_out_default();
         funit_out_t fu;
-        fu.rdy       = 1'b0;
-        fu.err       = 1'b0;
-        fu.rd_dat    =  'b0;
-        fu.rd_wb     = 1'b0;
-        fu.pc        =  'b0;
-        fu.pc_wb     = 1'b0;
+        fu.rdy      = 1'b0;
+        fu.err      = 1'b0;
+        fu.res      =  'b0;
+        fu.res_wb   = 1'b0;
         return fu;
     endfunction
 endpackage

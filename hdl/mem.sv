@@ -71,7 +71,7 @@ module mem #(
         if (fu_i.ena) begin
             dmem_cyc_o = 1'b1;
             dmem_stb_o = 1'b1;
-            dmem_adr_o = ADR_WIDTH'(fu_i.rs1_dat + fu_i.imm);
+            dmem_adr_o = ADR_WIDTH'(fu_i.src1);
 
             unique if (opcode == OPCODE_LOAD) begin
                 unique case(funct3)
@@ -118,25 +118,25 @@ module mem #(
             else if (opcode == OPCODE_STORE) begin
                 unique case(funct3)
                     FUNCT3_STORE_SB: begin
-                        dmem_dat_o[ 7:0] = fu_i.rs2_dat[7:0];
+                        dmem_dat_o[ 7:0] = fu_i.src2[7:0];
                         dmem_sel_o       = 'b01;
                         dmem_we_o        = 'b1;
                     end
 
                     FUNCT3_STORE_SH: begin
-                        dmem_dat_o[15:0] = fu_i.rs2_dat[15:0];
+                        dmem_dat_o[15:0] = fu_i.src2[15:0];
                         dmem_sel_o       = 'b011;
                         dmem_we_o        = 'b1;
                     end
 
                     FUNCT3_STORE_SW: begin
-                        dmem_dat_o[31:0] = fu_i.rs2_dat[31:0];
+                        dmem_dat_o[31:0] = fu_i.src2[31:0];
                         dmem_sel_o       = 'b01111;
                         dmem_we_o        = 'b1;
                     end
 
                     FUNCT3_STORE_SD: begin
-                        dmem_dat_o = fu_i.rs2_dat;
+                        dmem_dat_o = fu_i.src2;
                         dmem_sel_o = 'b01111_1111;
                         dmem_we_o  = 'b1;
                     end
@@ -166,8 +166,8 @@ module mem #(
 
             // Operand output
             if (opcode == OPCODE_LOAD && !err) begin
-                fu_o.rd_dat = dmem_dat;
-                fu_o.rd_wb  = 1'b1;
+                fu_o.res    = dmem_dat;
+                fu_o.res_wb = 1'b1;
             end
         end
     end

@@ -118,17 +118,21 @@ module secv #(
         .err_o      (dec_err)
     );
 
+    // Branch decision unit
+    logic brn_take, brn_err;
+    branch brn0 (
+        .funct3_i   (funct3),
+        .rs1_i      (rs1_dat),
+        .rs2_i      (rs2_dat),
+        .take_o     (brn_take),
+        .err_o      (brn_err)
+    );
+
     // --- Function units ------------------------------------------------------------------------------------------- //
     // Arithmetic-logic unit
     alu alu0 (
         .fu_i   (fui_bus[FUNIT_ALU]),
         .fu_o   (fuo_bus[FUNIT_ALU])
-    );
-
-    // Branch unit
-    branch brn0 (
-        .fu_i   (fui_bus[FUNIT_BRANCH]),
-        .fu_o   (fuo_bus[FUNIT_BRANCH])
     );
 
     // Data memory inteface unit
@@ -146,12 +150,6 @@ module secv #(
         .dmem_dat_o (dmem_dat_o),
         .dmem_dat_i (dmem_dat_i),
         .dmem_ack_i (dmem_ack_i)
-    );
-
-    // Move (transport) unit
-    mov mov0 (
-        .fu_i (fui_bus[FUNIT_MOV]),
-        .fu_o (fuo_bus[FUNIT_MOV])
     );
 
     // --- Function unit bus ---------------------------------------------------------------------------------------- //
@@ -218,12 +216,10 @@ module secv #(
 
         // Function unit input
         fui = funit_in_default();
-        fui.ena     = 1'b0;
-        fui.inst    = inst;
-        fui.rs1_dat = rs1_dat;
-        fui.rs2_dat = rs2_dat;
-        fui.imm     = imm;
-        fui.pc      = pc;
+        fui.ena  = 1'b0;
+        fui.inst = inst;
+        fui.src1 = rs1_dat;
+        fui.src2 = rs2_dat;
 
         // State transistion
         unique case (state)
@@ -267,11 +263,8 @@ module secv #(
 
                 // Write back register if no error occured
                 if (!fuo.err) begin
-                    if (fuo.pc_wb)
-                        pc_next = fuo.pc;
-
-                    if (fuo.rd_wb) begin
-                        rd_dat = fuo.rd_dat;
+                    if (fuo.res_wb) begin
+                        rd_dat = fuo.res;
                         rd_wb  = 1'b1;
                     end
                 end

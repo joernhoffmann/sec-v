@@ -39,28 +39,29 @@ module alu #(
     );
 
     // Perform operation by alu_core
-    logic [XLEN-1 : 0] a, b, result;
-    assign a = fu_i.rs1_dat;                            // Operand a is always register
-    assign b = op_imm ? fu_i.imm : fu_i.rs2_dat;        // Operand b is either register or immediate
+    logic [XLEN-1 : 0] a, b, res;
+    assign a = fu_i.src1;
+    assign b = fu_i.src2;
     alu_core #(
         .XLEN (XLEN)
     ) alu0 (
         .op_i   (op),
         .a_i    (a),
         .b_i    (b),
-        .res_o  (result)
+        .res_o  (res)
     );
 
     // Output
     always_comb begin
         fu_o = funit_out_default();
 
-        // Assign output if unit is enabled
+        // Assign output, if unit is enabled and no error occured.
+        // Unit is ready as soon as enabled.
         if (fu_i.ena) begin
-            fu_o.rdy    = 1'b1;         // Ready when enabled
-            fu_o.err    = err;          // Return error
-            fu_o.rd_dat = result;       // Assign result to destination register
-            fu_o.rd_wb  = !err;         // If no error occured, write back result
+            fu_o.rdy    = 1'b1;
+            fu_o.err    = err;
+            fu_o.res    = res;
+            fu_o.res_wb = !err;
         end
     end
 endmodule
