@@ -264,6 +264,15 @@ package secv_pkg;
         SRC2_SEL_IMM         // Immediate
     } src2_sel_t;
 
+    typedef enum logic [2:0]{
+        IMM_SEL_0,
+        IMM_SEL_I,
+        IMM_SEL_S,
+        IMM_SEL_B,
+        IMM_SEL_U,
+        IMM_SEL_J
+    } imm_sel_t;
+
     // Destination register selection
     typedef enum logic [1:0] {
         RD_SEL_NONE,        // No input

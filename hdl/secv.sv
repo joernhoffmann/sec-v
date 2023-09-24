@@ -84,15 +84,16 @@ module secv #(
     funct7_t funct7;
 
     funit_t     funit;
-    imm_t       imm;
     src1_sel_t  src1_sel;
     src2_sel_t  src2_sel;
+    imm_sel_t   imm_sel;
     pc_sel_t    pc_sel;
     rd_sel_t    rd_sel;
     logic       dec_err;
 
     decoder dec0 (
         .inst_i     (inst),
+
         // Opcode fields
         .opcode_o   (opcode),
         .funct3_o   (funct3),
@@ -102,7 +103,7 @@ module secv #(
         .rs1_adr_o  (rs1_adr),
         .rs2_adr_o  (rs2_adr),
         .rd_adr_o   (rd_adr),
-        .imm_o      (imm),
+        .imm_sel_o  (imm_sel),
 
         // Function unit
         .funit_o    (funit),
@@ -114,6 +115,23 @@ module secv #(
         // Errors
         .err_o      (dec_err)
     );
+
+    // Immediate decoder
+    imm_t imm;
+    always_comb begin : imm_mux
+        unique case (imm_sel)
+            IMM_SEL_0 : imm = '0;
+            IMM_SEL_I : imm = decode_imm_i(inst);
+            IMM_SEL_S : imm = decode_imm_s(inst);
+            IMM_SEL_B : imm = decode_imm_b(inst);
+            IMM_SEL_U : imm = decode_imm_u(inst);
+            IMM_SEL_J : imm = decode_imm_j(inst);
+            default   : imm = '0;
+        endcase
+    end
+
+
+
 
     // Branch decision unit
     logic brn_take, brn_err;

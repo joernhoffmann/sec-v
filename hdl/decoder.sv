@@ -29,7 +29,7 @@ module decoder (
     output regadr_t     rs1_adr_o,  // Source register 1 address
     output regadr_t     rs2_adr_o,  // Source register 2 address
     output regadr_t     rd_adr_o,   // Dest.  register address
-    output imm_t        imm_o,      // Immediate operand
+    output imm_sel_t    imm_sel_o,  // Immediate operand type
 
     // Muxer
     output  funit_t     funit_o,    // Function unit
@@ -50,84 +50,76 @@ module decoder (
     assign funct3 = inst_i.r_type.funct3;
     assign funct7 = inst_i.r_type.funct7;
 
-    // Immediate
-    logic imm_use;
-    imm_t imm, imm_i, imm_s, imm_b, imm_u, imm_j;
-    assign imm_i = decode_imm_i(inst_i);
-    assign imm_s = decode_imm_s(inst_i);
-    assign imm_b = decode_imm_b(inst_i);
-    assign imm_u = decode_imm_u(inst_i);
-    assign imm_j = decode_imm_j(inst_i);
-
-    // Function unit, source operands and destinations selection
+    // Function unit, operands and destination selection
     funit_t    funit;
     src1_sel_t src1_sel;
     src2_sel_t src2_sel;
+    imm_sel_t  imm_sel;
     rd_sel_t   rd_sel;
     pc_sel_t   pc_sel;
     logic      err;
 
     always_comb begin : decode_op
-        imm       = 'b0;
         funit     = FUNIT_NONE;
         src1_sel  = SRC1_SEL_0;
         src2_sel  = SRC2_SEL_0;
+        imm_sel   = IMM_SEL_0;
         rd_sel    = RD_SEL_NONE;
         pc_sel    = PC_SEL_NXTPC;
         err       = 1'b0;
 
         unique case (opcode)
             OPCODE_LUI: begin
-                imm         = imm_u;
                 funit       = FUNIT_NONE;
+                imm_sel     = IMM_SEL_U;
                 rd_sel      = RD_SEL_IMM;
             end
 
             OPCODE_AUIPC: begin
-                imm         = imm_u;
                 funit       = FUNIT_ALU;
                 src1_sel    = SRC1_SEL_PC;
                 src2_sel    = SRC2_SEL_IMM;
+                imm_sel     = IMM_SEL_U;
                 rd_sel      = RD_SEL_FUNIT;
             end
 
             OPCODE_JAL: begin
-                imm         = imm_j;
                 funit       = FUNIT_ALU;
                 src1_sel    = SRC1_SEL_PC;
                 src2_sel    = SRC2_SEL_IMM;
+                imm_sel     = IMM_SEL_J;
                 rd_sel      = RD_SEL_NXTPC;
             end
 
             OPCODE_JALR: begin
-                imm         = imm_i;
                 funit       = FUNIT_ALU;
                 src1_sel    = SRC1_SEL_RS1;
                 src2_sel    = SRC2_SEL_IMM;
+                imm_sel     = IMM_SEL_I;
                 rd_sel      = RD_SEL_NXTPC;
             end
 
             OPCODE_BRANCH: begin
-                imm         = imm_b;
                 funit       = FUNIT_ALU;
                 src1_sel    = SRC1_SEL_PC;
                 src2_sel    = SRC2_SEL_IMM;
+                imm_sel     = IMM_SEL_B;
                 pc_sel      = PC_SEL_BRANCH;
             end
 
             OPCODE_LOAD: begin
-                imm         = imm_i;
                 funit       = FUNIT_MEM;
                 src1_sel    = SRC1_SEL_RS1;
                 src2_sel    = SRC2_SEL_IMM;
+                imm_sel     = IMM_SEL_I;
                 rd_sel      = RD_SEL_FUNIT;
             end
 
             OPCODE_STORE: begin
-                imm         = imm_s;
                 funit       = FUNIT_MEM;
                 src1_sel    = SRC1_SEL_RS1;
                 src2_sel    = SRC2_SEL_IMM;
+                imm_sel     = IMM_SEL_S;
                 rd_sel      = RD_SEL_FUNIT;
             end
 
@@ -139,9 +131,10 @@ module decoder (
             end
 
             OPCODE_OP_IMM, OPCODE_OP_IMM_32: begin
-                imm         = imm_i;
+                funit       = FUNIT_ALU;
                 src1_sel    = SRC1_SEL_RS1;
                 src2_sel    = SRC2_SEL_IMM;
+                imm_sel     = IMM_SEL_I;
                 rd_sel      = RD_SEL_FUNIT;
             end
 
@@ -162,7 +155,7 @@ module decoder (
     assign rs1_adr_o = inst_i.r_type.rs1;
     assign rs2_adr_o = inst_i.r_type.rs2;
     assign rd_adr_o  = inst_i.r_type.rd;
-    assign imm_o     = imm;
+    assign imm_sel_o = imm_sel;
 
     // Function unit
     assign funit_o    = funit;

@@ -18,21 +18,48 @@ module decoder_testbench();
     `SVUT_SETUP
 
     inst_t              inst_i;
-    regadr_t            rs1_o;
-    regadr_t            rs2_o;
-    regadr_t            rd_o;
-    funit_t             funit_o;
-    alu_op_t            alu_op_o;
-    imm_t               imm_o;
-    imm_t               imm;
+
+    // Operadns
+    regadr_t    rs1_o;
+    regadr_t    rs2_o;
+    regadr_t    rd_o;
+    imm_t       imm;
+
+    // MUX
+    funit_t     funit_o;
+    src1_sel_t  src1_sel;
+    src2_sel_t  src2_sel;
+    imm_sel_t   imm_sel;
+    rd_sel_t    rd_sel;
+    pc_sel_t    pc_sel;
+
+    // Error
+    logic       err;
+
+    // Ops
+    alu_op_t    alu_op_o;
+
 
     decoder dut (
         .inst_i     (inst_i),
+
+        // Opcode
+
+        // Operands
         .rs1_adr_o  (rs1_o),
         .rs2_adr_o  (rs2_o),
         .rd_adr_o   (rd_o),
-        .imm_o      (imm_o),
-        .funit_o    (funit_o)
+
+        // Muxer
+        .funit_o    (funit_o),
+        .src1_sel_o (src1_sel),
+        .src2_sel_o (src2_sel),
+        .imm_sel_o  (imm_sel),
+        .rd_sel_o   (rd_sel),
+        .pc_sel_o   (pc_sel),
+
+        // Errors
+        .err_o      (err)
     );
 
     // To create a clock:
@@ -120,35 +147,26 @@ module decoder_testbench();
     `UNIT_TEST_END
 
     // -------------------------------------------------------------------------------------------------------------- //
-    // Function unit selection
+    // Opcode decoding checks
     // -------------------------------------------------------------------------------------------------------------- //
-    `UNIT_TEST("Check selection of MOV unit")
+    `UNIT_TEST("Check LUI")
         inst_i = {25'bx, OPCODE_LUI};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_MOV);
 
-        inst_i = {25'bx, OPCODE_AUIPC};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_MOV);
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_0);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_0);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_IMM);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Check selection of BRANCH unit")
-        inst_i = {25'bx, OPCODE_BRANCH};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_BRANCH);
 
-        inst_i = {25'bx, OPCODE_JAL};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_BRANCH);
-
-        inst_i = {25'bx, OPCODE_JALR};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_BRANCH);
-    `UNIT_TEST_END
-
-    `UNIT_TEST("Check selection of MEM unit")
+    `UNIT_TEST("Check LOAD")
         inst_i = {25'bx, OPCODE_LOAD};
+
+        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_MEM);
         #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_MEM);
 
         inst_i = {25'bx, OPCODE_STORE};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_MEM);
-
-        inst_i = {25'bx, OPCODE_MISC_MEM};
         #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_MEM);
     `UNIT_TEST_END
 
@@ -164,9 +182,26 @@ module decoder_testbench();
 
         inst_i = {25'bx, OPCODE_OP_IMM_32};
         #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_ALU);
+
+        inst_i = {25'bx, OPCODE_AUIPC};
+        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_ALU);
+
+        inst_i = {25'bx, OPCODE_BRANCH};
+        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_ALU);
+
+        inst_i = {25'bx, OPCODE_JAL};
+        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_ALU);
+
+        inst_i = {25'bx, OPCODE_JALR};
+        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_ALU);
     `UNIT_TEST_END
 
-   `UNIT_TEST("Check selection of no unit with wrong opcode")
+    `UNIT_TEST("Check selection of FUNIT_NONE")
+        inst_i = {25'bx, OPCODE_LUI};
+        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+    `UNIT_TEST_END
+
+   `UNIT_TEST("Check selection of FUNIT_NONE with wrong opcode")
         inst_i = {25'bx, 7'b00000_00};
         #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
 
