@@ -91,6 +91,7 @@ module secv #(
     rd_sel_t    rd_sel;
     logic       dec_err;
 
+    // General decoder
     decoder dec0 (
         .inst_i     (inst),
 
@@ -116,7 +117,8 @@ module secv #(
         .err_o      (dec_err)
     );
 
-    // Immediate decoder
+
+    // Immediate muxer
     imm_t imm;
     always_comb begin : imm_mux
         unique case (imm_sel)
@@ -130,8 +132,17 @@ module secv #(
         endcase
     end
 
+    // ALU decoder
+    alu_op_t alu_op;
+    logic alu_dec_err;
+    alu_decoder alu_dec0 (
+        .inst_i     (inst),
+        .op_o       (alu_op),
+        .err_o      (alu_dec_err)
+    );
 
 
+    // --- Other internal units ------------------------------------------------------------------------------------- //
 
     // Branch decision unit
     logic brn_take, brn_err;

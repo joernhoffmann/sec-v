@@ -28,26 +28,15 @@ module alu #(
     output funit_out_t fu_o
 );
 
-    // Decode operation by alu_decoder
-    alu_op_t op;
-    logic op_imm, err;
-    alu_decoder alu_dec0 (
-        .inst_i     (fu_i.inst),
-        .op_o       (op),
-        .op_imm_o   (op_imm),
-        .err_o      (err)
-    );
+    logic [XLEN-1 : 0] res;
+    logic err;
 
-    // Perform operation by alu_core
-    logic [XLEN-1 : 0] a, b, res;
-    assign a = fu_i.src1;
-    assign b = fu_i.src2;
     alu_core #(
         .XLEN (XLEN)
     ) alu0 (
-        .op_i   (op),
-        .a_i    (a),
-        .b_i    (b),
+        .op_i   (fu_i.op),
+        .a_i    (fu_i.src1),
+        .b_i    (fu_i.src2),
         .res_o  (res)
     );
 

@@ -17,10 +17,9 @@
 import secv_pkg::*;
 
 module alu_decoder (
-    input   inst_t      inst_i,
-    output  alu_op_t    op_o,       // Operation to perform
-    output  logic       op_imm_o,   // Operation uses immediate
-    output  logic       err_o       // Error
+    input   inst_t      inst_i,     // RISC-V instruction
+    output  alu_op_t    op_o,       // Decoded ALU operation to perform
+    output  logic       err_o       // Decoding error, invalid opcode etc.
 );
 
     // Decode opcode
@@ -47,8 +46,7 @@ module alu_decoder (
         err = 1'b0;
 
         // Check if ALU is addressed
-        if (opcode_op    || opcode_op_imm ||
-            opcode_op_32 || opcode_op_imm_32)
+        if (opcode_op    || opcode_op_imm || opcode_op_32 || opcode_op_imm_32)
         begin
             // Decode operation to perform
             case(funct3)
@@ -118,6 +116,5 @@ module alu_decoder (
 
     // Ouptut
     assign op_o  = op;
-    assign op_imm_o = (opcode_op_imm | opcode_op_imm_32);
     assign err_o = err;
 endmodule

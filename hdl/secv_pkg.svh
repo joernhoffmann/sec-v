@@ -228,7 +228,7 @@ package secv_pkg;
     typedef enum bit [3:0] {
         MEM_OP_NONE = 0,
 
-        // Load
+        // Loads
         MEM_OP_LB,
         MEM_OP_LH,
         MEM_OP_LW,
@@ -237,33 +237,34 @@ package secv_pkg;
         MEM_OP_LHU,
         MEM_OP_LWU,
 
-        // Store
+        // Stores
         MEM_OP_SB,
         MEM_OP_SH,
         MEM_OP_SW,
         MEM_OP_SD
     } mem_op_t;
 
-/*
     typedef union packed {
         alu_op_t     alu;
         mem_op_t     mem;
     } funit_op_t;
-*/
 
-    // Source selection
+
+    // Source 1 selection
     typedef enum logic [1:0] {
         SRC1_SEL_0,          // Value '0'
         SRC1_SEL_RS1,        // Register source 1
         SRC1_SEL_PC          // Current program counter
     } src1_sel_t;
 
+    // Source 2 selection
     typedef enum logic [1:0] {
         SRC2_SEL_0,          // Value '0'
         SRC2_SEL_RS2,        // Register source 2
         SRC2_SEL_IMM         // Immediate
     } src2_sel_t;
 
+    // Immediate type selection
     typedef enum logic [2:0]{
         IMM_SEL_0,
         IMM_SEL_I,
@@ -292,34 +293,37 @@ package secv_pkg;
     // Function unit input interface
     typedef struct packed {
         // Control
-        logic               ena;    // Enable unit, input is valid
+        logic               ena;    // Enable unit (input is valid)
 
-        // Operands
-        inst_t              inst;   // Fetched instruction
-        logic   [XLEN-1:0]  src1;     // 1st source operand
-        logic   [XLEN-1:0]  src2;     // 2nd source operand
+        // Payload
+        inst_t              inst;   // Instruction
+        funit_op_t          op;     // Operation
+        logic   [XLEN-1:0]  src1;   // 1st source operand
+        logic   [XLEN-1:0]  src2;   // 2nd source operand
     } funit_in_t;
 
+    // Function unit output interface
+    typedef struct packed {
+        // Control
+        logic               rdy;    // Unit ready, operation completed
+        logic               err;    // Error occured
+
+        // Payload
+        logic   [XLEN-1:0]  res;    // Result
+        logic               res_wb; // Result is valid (write back)
+    } funit_out_t;
+
+    // FU input defaults
     function automatic funit_in_t funit_in_default();
         funit_in_t fu;
         fu.ena      = 1'b0;
-        fu.inst     =  'b0;
+        fu.op       =  'b0;
         fu.src1     =  'b0;
         fu.src2     =  'b0;
         return fu;
     endfunction
 
-    // Function unit output interface
-    typedef struct packed {
-        // Control
-        logic               rdy;        // Unit ready, operation completed
-        logic               err;        // Error occured
-
-        // Result
-        logic   [XLEN-1:0]  res;        // Result
-        logic               res_wb;     // Result is valid (write back)
-    } funit_out_t;
-
+    // FU output defaults
     function automatic funit_out_t funit_out_default();
         funit_out_t fu;
         fu.rdy      = 1'b0;

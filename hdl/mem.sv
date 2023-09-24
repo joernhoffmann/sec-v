@@ -45,17 +45,13 @@ module mem #(
     input  logic                    dmem_ack_i
 );
 
-    // Internal signals
-    opcode_t opcode;
-    funct3_t funct3;
-    logic err;
+    // Signals
     logic [XLEN-1 : 0] dmem_dat;
+    mem_op_t op = fu_i.op.mem;
+    logic load, err;
 
-    // Memory access logic
-    assign opcode = fu_i.inst.r_type.opcode;
-    assign funct3 = fu_i.inst.r_type.funct3;
-
-    always_comb begin
+    // Mem access
+    always_comb begin : mem_access
         // Bus signals
         dmem_cyc_o = 'b0;
         dmem_stb_o = 'b0;
@@ -65,89 +61,87 @@ module mem #(
         dmem_we_o  = 'b0;
 
         // Data signals
-        dmem_dat    = 'b0;
-        err = 'b0;
+        dmem_dat = 'b0;
+        load     = 1'b0;
+        err      = 1'b0;
 
         if (fu_i.ena) begin
             dmem_cyc_o = 1'b1;
             dmem_stb_o = 1'b1;
             dmem_adr_o = ADR_WIDTH'(fu_i.src1);
 
-            unique if (opcode == OPCODE_LOAD) begin
-                unique case(funct3)
-                    FUNCT3_LOAD_LB: begin
-                        dmem_dat   = sext8(dmem_dat_i[ 7:0]);
-                        dmem_sel_o = 'b01;
-                    end
+            unique case(op)
+                // Loads
+                MEM_OP_LB: begin
+                    dmem_dat   = sext8(dmem_dat_i[ 7:0]);
+                    dmem_sel_o = 'b01;
+                    load       = 1'b1;
+                end
 
-                    FUNCT3_LOAD_LH:  begin
-                        dmem_dat = sext16(dmem_dat_i[15:0]);
-                        dmem_sel_o = 'b011;
-                    end
+                MEM_OP_LH:  begin
+                    dmem_dat = sext16(dmem_dat_i[15:0]);
+                    dmem_sel_o = 'b011;
+                    load       = 1'b1;
+                end
 
-                    FUNCT3_LOAD_LW:  begin
-                        dmem_dat = sext32(dmem_dat_i[31:0]);
-                        dmem_sel_o = 'b01111;
-                    end
+                MEM_OP_LW:  begin
+                    dmem_dat = sext32(dmem_dat_i[31:0]);
+                    dmem_sel_o = 'b01111;
+                    load       = 1'b1;
+                end
 
-                    FUNCT3_LOAD_LD: begin
-                        dmem_dat = dmem_dat_i;
-                        dmem_sel_o = 'b01111_1111;
-                    end
+                MEM_OP_LD: begin
+                    dmem_dat = dmem_dat_i;
+                    dmem_sel_o = 'b01111_1111;
+                    load       = 1'b1;
+                end
 
-                    FUNCT3_LOAD_LBU: begin
-                        dmem_dat[ 7:0] = dmem_dat_i[ 7:0];
-                        dmem_sel_o = 'b01;
-                    end
+                MEM_OP_LBU: begin
+                    dmem_dat[ 7:0] = dmem_dat_i[ 7:0];
+                    dmem_sel_o = 'b01;
+                    load       = 1'b1;
+                end
 
-                    FUNCT3_LOAD_LHU: begin
-                        dmem_dat[15:0] = dmem_dat_i[15:0];
-                        dmem_sel_o = 'b011;
-                    end
+                MEM_OP_LHU: begin
+                    dmem_dat[15:0] = dmem_dat_i[15:0];
+                    dmem_sel_o = 'b011;
+                    load       = 1'b1;
+                end
 
-                    FUNCT3_LOAD_LWU: begin
-                        dmem_dat[31:0] = dmem_dat_i[31:0];
-                        dmem_sel_o = 'b01111_1111;
-                    end
+                MEM_OP_LWU: begin
+                    dmem_dat[31:0] = dmem_dat_i[31:0];
+                    dmem_sel_o = 'b01111_1111;
+                    load       = 1'b1;
+                end
 
-                    default:
-                        err = 1'b1;
-                endcase
-            end
+                // Stores
+                MEM_OP_SB: begin
+                    dmem_dat_o[ 7:0] = fu_i.src2[7:0];
+                    dmem_sel_o       = 'b01;
+                    dmem_we_o        = 'b1;
+                end
 
-            else if (opcode == OPCODE_STORE) begin
-                unique case(funct3)
-                    FUNCT3_STORE_SB: begin
-                        dmem_dat_o[ 7:0] = fu_i.src2[7:0];
-                        dmem_sel_o       = 'b01;
-                        dmem_we_o        = 'b1;
-                    end
+                MEM_OP_SH: begin
+                    dmem_dat_o[15:0] = fu_i.src2[15:0];
+                    dmem_sel_o       = 'b011;
+                    dmem_we_o        = 'b1;
+                end
 
-                    FUNCT3_STORE_SH: begin
-                        dmem_dat_o[15:0] = fu_i.src2[15:0];
-                        dmem_sel_o       = 'b011;
-                        dmem_we_o        = 'b1;
-                    end
+                MEM_OP_SW: begin
+                    dmem_dat_o[31:0] = fu_i.src2[31:0];
+                    dmem_sel_o       = 'b01111;
+                    dmem_we_o        = 'b1;
+                end
 
-                    FUNCT3_STORE_SW: begin
-                        dmem_dat_o[31:0] = fu_i.src2[31:0];
-                        dmem_sel_o       = 'b01111;
-                        dmem_we_o        = 'b1;
-                    end
+                MEM_OP_SD: begin
+                    dmem_dat_o = fu_i.src2;
+                    dmem_sel_o = 'b01111_1111;
+                    dmem_we_o  = 'b1;
+                end
 
-                    FUNCT3_STORE_SD: begin
-                        dmem_dat_o = fu_i.src2;
-                        dmem_sel_o = 'b01111_1111;
-                        dmem_we_o  = 'b1;
-                    end
-
-                    default:
-                        err = 1'b1;
-                endcase
-            end
-
-            else
-                err = 1'b1;
+                default:
+                    err = 1'b1;
+            endcase
         end
     end
 
@@ -156,19 +150,13 @@ module mem #(
         fu_o = funit_out_default();
 
         if (fu_i.ena) begin
-                // Module is ready if unit enabled and
-                //  (a) operation valid and data memory has acknowledged
-                //  (b) operation invalid
-                fu_o.rdy = (!err && dmem_ack_i) || err;
-
-                // Error output
+                // Control output
+                fu_o.rdy = err || dmem_ack_i;
                 fu_o.err = err;
 
-            // Operand output
-            if (opcode == OPCODE_LOAD && !err) begin
-                fu_o.res    = dmem_dat;
-                fu_o.res_wb = 1'b1;
-            end
+                // Result output
+                fu_o.res = dmem_dat;
+                fu_o.res_wb = load && !err;
         end
     end
 endmodule
