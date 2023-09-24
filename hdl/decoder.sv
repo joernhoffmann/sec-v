@@ -139,7 +139,7 @@ module decoder (
             end
 
             default:
-                ;
+                err = 1'b1;
         endcase
     end
 

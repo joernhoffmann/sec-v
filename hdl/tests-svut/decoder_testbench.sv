@@ -158,6 +158,7 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_U);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_IMM);
         `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 
     `UNIT_TEST("AUIPC")
@@ -169,6 +170,7 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_U);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
         `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 
     `UNIT_TEST("JAL")
@@ -180,6 +182,7 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_J);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_NXTPC);
         `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 
     `UNIT_TEST("JALR")
@@ -191,6 +194,7 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_NXTPC);
         `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 
     `UNIT_TEST("BRNANCH")
@@ -202,6 +206,7 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_B);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_NONE);
         `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_BRANCH);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 
     `UNIT_TEST("LOAD")
@@ -213,6 +218,7 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
         `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 
     `UNIT_TEST("STORE")
@@ -224,6 +230,7 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_S);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
         `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 
     `UNIT_TEST("ALU_OP")
@@ -235,6 +242,7 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_0);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
         `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 
     `UNIT_TEST("ALU_OP_32")
@@ -246,6 +254,7 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_0);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
         `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 
     `UNIT_TEST("ALU_OP_IMM")
@@ -257,6 +266,7 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
         `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 
     `UNIT_TEST("ALU_OP_IMM_32")
@@ -268,23 +278,34 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
         `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 
    `UNIT_TEST("Check selection of FUNIT_NONE with wrong opcode")
         inst_i = {25'bx, 7'b00000_00};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+        `FAIL_IF_NOT_EQUAL(err,      1'b1);
 
         inst_i = {25'bx, 7'b00000_01};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+        `FAIL_IF_NOT_EQUAL(err,      1'b1);
 
         inst_i = {25'bx, 7'b00000_10};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+        `FAIL_IF_NOT_EQUAL(err,      1'b1);
 
         inst_i = {25'bx, 7'b11100_11};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+        `FAIL_IF_NOT_EQUAL(err,      1'b1);
 
         inst_i = {25'bx, 7'b11111_11};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+        `FAIL_IF_NOT_EQUAL(err,      1'b1);
     `UNIT_TEST_END
 
     // -------------------------------------------------------------------------------------------------------------- //
