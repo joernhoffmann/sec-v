@@ -151,54 +151,123 @@ module decoder_testbench();
     // -------------------------------------------------------------------------------------------------------------- //
     `UNIT_TEST("Check LUI")
         inst_i = {25'bx, OPCODE_LUI};
-
         #1
-        `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+        `FAIL_IF_NOT_EQUAL(funit_o,  FUNIT_NONE);
         `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_0);
         `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_0);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_U);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
     `UNIT_TEST_END
 
-
-    `UNIT_TEST("Check LOAD")
-        inst_i = {25'bx, OPCODE_LOAD};
-
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_MEM);
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_MEM);
-
-        inst_i = {25'bx, OPCODE_STORE};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_MEM);
-    `UNIT_TEST_END
-
-    `UNIT_TEST("Check selection of ALU")
-        inst_i = {25'bx, OPCODE_OP};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_ALU);
-
-        inst_i = {25'bx, OPCODE_OP_32};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_ALU);
-
-        inst_i = {25'bx, OPCODE_OP_IMM};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_ALU);
-
-        inst_i = {25'bx, OPCODE_OP_IMM_32};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_ALU);
-
+    `UNIT_TEST("AUIPC")
         inst_i = {25'bx, OPCODE_AUIPC};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_ALU);
-
-        inst_i = {25'bx, OPCODE_BRANCH};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_ALU);
-
-        inst_i = {25'bx, OPCODE_JAL};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_ALU);
-
-        inst_i = {25'bx, OPCODE_JALR};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_ALU);
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o,  FUNIT_ALU);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_PC);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_U);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Check selection of FUNIT_NONE")
-        inst_i = {25'bx, OPCODE_LUI};
-        #1 `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
+    `UNIT_TEST("JAL")
+        inst_i = {25'bx, OPCODE_JAL};
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o,  FUNIT_ALU);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_PC);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_J);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("JALR")
+        inst_i = {25'bx, OPCODE_JALR};
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o,  FUNIT_ALU);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_RS1);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("BRNANCH")
+        inst_i = {25'bx, OPCODE_BRANCH};
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o,  FUNIT_ALU);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_PC);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_B);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_NONE);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_BRANCH);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("LOAD")
+        inst_i = {25'bx, OPCODE_LOAD};
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o,  FUNIT_MEM);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_RS1);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("STORE")
+        inst_i = {25'bx, OPCODE_STORE};
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o,  FUNIT_MEM);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_RS1);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_S);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("ALU_OP")
+        inst_i = {25'bx, OPCODE_OP};
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o,  FUNIT_ALU);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_RS1);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_RS2);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_0);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("ALU_OP_32")
+        inst_i = {25'bx, OPCODE_OP_32};
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o,  FUNIT_ALU);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_RS1);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_RS2);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_0);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("ALU_OP_IMM")
+        inst_i = {25'bx, OPCODE_OP_IMM};
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o,  FUNIT_ALU);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_RS1);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("ALU_OP_IMM_32")
+        inst_i = {25'bx, OPCODE_OP_IMM_32};
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o,  FUNIT_ALU);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_RS1);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
     `UNIT_TEST_END
 
    `UNIT_TEST("Check selection of FUNIT_NONE with wrong opcode")
