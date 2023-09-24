@@ -244,11 +244,12 @@ package secv_pkg;
         MEM_OP_SD
     } mem_op_t;
 
+    // --- Function unit interface ---------------------------------------------------------------------------------- //
+    // Funit operation (input)
     typedef union packed {
-        alu_op_t     alu;
-        mem_op_t     mem;
+        alu_op_t alu;
+        mem_op_t mem;
     } funit_op_t;
-
 
     // Source 1 selection
     typedef enum logic [1:0] {
@@ -289,14 +290,12 @@ package secv_pkg;
         PC_SEL_BRANCH       // Branch decision unit
      } pc_sel_t;
 
-    // --- Function unit interface ---------------------------------------------------------------------------------- //
     // Function unit input interface
     typedef struct packed {
         // Control
         logic               ena;    // Enable unit (input is valid)
 
         // Payload
-        inst_t              inst;   // Instruction
         funit_op_t          op;     // Operation
         logic   [XLEN-1:0]  src1;   // 1st source operand
         logic   [XLEN-1:0]  src2;   // 2nd source operand

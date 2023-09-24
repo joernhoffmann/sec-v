@@ -117,7 +117,6 @@ module secv #(
         .err_o      (dec_err)
     );
 
-
     // Immediate muxer
     imm_t imm;
     always_comb begin : imm_mux
@@ -141,9 +140,27 @@ module secv #(
         .err_o      (alu_dec_err)
     );
 
+    // MEM decoder
+    mem_op_t mem_op;
+    logic mem_dec_err;
+    alu_decoder mem_dec0 (
+        .inst_i     (inst),
+        .op_o       (mem_op),
+        .err_o      (mem_dec_err)
+    );
 
-    // --- Other internal units ------------------------------------------------------------------------------------- //
+    // Funit operation selection
+    funit_op_t funit_op;
+    always_comb begin : decoder_mux
+        unique case (funit)
+            FUNIT_NONE  : funit_op      = 'b0;
+            FUNIT_ALU   : funit_op.alu  = alu_op;
+            FUNIT_MEM   : funit_op.mem  = mem_op;
+            default     : funit_op      = 'b0;
+        endcase
+    end
 
+    // --- Internal units (other) ----------------------------------------------------------------------------------- //
     // Branch decision unit
     logic brn_take, brn_err;
     branch brn0 (
@@ -301,7 +318,7 @@ module secv #(
         // Function unit input
         funit_in = funit_in_default();
         funit_in.ena  = 1'b0;
-        funit_in.inst = inst;
+        funit_in.op   = funit_op;
         funit_in.src1 = rs1_dat;
         funit_in.src2 = rs2_dat;
 
