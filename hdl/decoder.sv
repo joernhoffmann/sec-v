@@ -29,12 +29,12 @@ module decoder (
     output regadr_t     rs1_adr_o,  // Source register 1 address
     output regadr_t     rs2_adr_o,  // Source register 2 address
     output regadr_t     rd_adr_o,   // Dest.  register address
-    output imm_sel_t    imm_sel_o,  // Immediate operand type
 
     // Muxer
     output  funit_t     funit_o,    // Function unit
-    output  src1_sel_t  src1_sel_o,   // Source 1 selection
-    output  src2_sel_t  src2_sel_o,   // Source 2 selection
+    output  src1_sel_t  src1_sel_o, // Source 1 selection
+    output  src2_sel_t  src2_sel_o, // Source 2 selection
+    output imm_sel_t    imm_sel_o,  // Immediate operand type
     output  rd_sel_t    rd_sel_o,   // Dest. register selection
     output  pc_sel_t    pc_sel_o,   // PC register selector
 
@@ -88,6 +88,7 @@ module decoder (
                 src1_sel    = SRC1_SEL_PC;
                 src2_sel    = SRC2_SEL_IMM;
                 imm_sel     = IMM_SEL_J;
+                pc_sel      = PC_SEL_FUNIT;
                 rd_sel      = RD_SEL_NXTPC;
             end
 
@@ -96,6 +97,7 @@ module decoder (
                 src1_sel    = SRC1_SEL_RS1;
                 src2_sel    = SRC2_SEL_IMM;
                 imm_sel     = IMM_SEL_I;
+                pc_sel      = PC_SEL_FUNIT;
                 rd_sel      = RD_SEL_NXTPC;
             end
 
@@ -142,8 +144,6 @@ module decoder (
                 err = 1'b1;
         endcase
     end
-
-
 
     // --- Output --------------------------------------------------------------------------------------------------- //
     // Opcode

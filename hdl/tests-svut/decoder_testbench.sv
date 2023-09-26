@@ -181,7 +181,7 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_J);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_NXTPC);
-        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_FUNIT);
         `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 
@@ -193,7 +193,7 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_NXTPC);
-        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_FUNIT);
         `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 

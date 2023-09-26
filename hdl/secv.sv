@@ -7,17 +7,24 @@
  * Purpose  : Main core and control logic of the SEC-V processor.
  *
  * Todo
- *  [ ] Improve main fsm
- *  [ ] Seperate units (e.g. main fsm, pipeline etc.)
- *  [ ] Introduce more data types (e. g. wishbone, function unit, function unit array)
- *  [ ] Implement pipeline
- *      [ ] a) regular pipelin
- *      [ ] b) interleaved multi threading
- *  [ ] Add Out-of-order or superscalar processing
- *  [ ] Add security functions
- *  [ ] Add unit-tests
- *  [ ] Add formal verification
- *
+ *  [ ] Code improvements
+*       [ ] Improve main fsm
+ *      [ ] Seperate units (e.g. main fsm, pipeline etc.)
+ *      [ ] Introduce more data types (e. g. wishbone, function unit, function unit array)
+ *  [ ] Micro-arch improvements
+ *      [ ] Implement pipeline
+ *          [ ] a) regular pipelin
+ *          [ ] b) interleaved multi threading
+ *      [ ] Add Out-of-order or superscalar processing
+ *      [ ] Add security functions (mem tagging)
+ *  [ ] ISA extension
+ *      [ ] Add CSR
+ *      [ ] Add bit manipulation
+ *      [ ] Add crypto
+ *  [ ] Testing
+ *      [ ] Add unit-tests
+ *      [ ] Add formal verification
+ *      [ ] Add verilator stuff
  *
  * History
  *  v1.0    - Initial version
