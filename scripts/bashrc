@@ -9,7 +9,7 @@ fi
 SVUT=$HOME/lib/svut
 if [ -d $SVUT_PATH ]; then
 	export $SVUT
-	export PATH=$SVUT_PATH:$PATH
+	export PATH=$SVUT:$PATH
 fi
 
 # Verible

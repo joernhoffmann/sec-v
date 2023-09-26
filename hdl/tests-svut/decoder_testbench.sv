@@ -8,11 +8,9 @@
  * Purpose  : Tests SEC-V decoder
  */
 
-// Mandatory file to be able to launch SVUT flow
 `include "svut_h.sv"
-
-// Specify the module to load or on files.f
 `include "../decoder.sv"
+`timescale 1 ns / 100 ps
 
 module decoder_testbench();
     `SVUT_SETUP

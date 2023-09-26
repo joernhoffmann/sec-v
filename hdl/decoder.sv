@@ -88,8 +88,8 @@ module decoder (
                 src1_sel    = SRC1_SEL_PC;
                 src2_sel    = SRC2_SEL_IMM;
                 imm_sel     = IMM_SEL_J;
-                pc_sel      = PC_SEL_FUNIT;
                 rd_sel      = RD_SEL_NXTPC;
+                pc_sel      = PC_SEL_FUNIT;
             end
 
             OPCODE_JALR: begin
@@ -97,8 +97,8 @@ module decoder (
                 src1_sel    = SRC1_SEL_RS1;
                 src2_sel    = SRC2_SEL_IMM;
                 imm_sel     = IMM_SEL_I;
-                pc_sel      = PC_SEL_FUNIT;
                 rd_sel      = RD_SEL_NXTPC;
+                pc_sel      = PC_SEL_FUNIT;
             end
 
             OPCODE_BRANCH: begin
