@@ -46,7 +46,7 @@ module alu_decoder (
         err = 1'b0;
 
         // Check if ALU is addressed
-        if (opcode_op    || opcode_op_imm || opcode_op_32 || opcode_op_imm_32)
+        if (opcode_op || opcode_op_imm || opcode_op_32 || opcode_op_imm_32)
         begin
             // Decode operation to perform
             case(funct3)
@@ -62,26 +62,35 @@ module alu_decoder (
                 FUNCT3_ALU_ADD:
                     if (opcode_op)
                         case (funct7)
-                            FUNCT7_00h: op = ALU_OP_ADD;
-                            FUNCT7_20h: op = ALU_OP_SUB;
+                            FUNCT7_00h: op  = ALU_OP_ADD;
+                            FUNCT7_20h: op  = ALU_OP_SUB;
                             default:    err = 1'b1;
                         endcase
 
                     else if (opcode_op_imm)
-                        op = ALU_OP_ADD;
+                        case (funct7)
+                            FUNCT7_00h: op  = ALU_OP_ADD;
+                            default:    err = 1'b1;
+                        endcase
 
                     else if (opcode_op_32)
                         case (funct7)
-                            FUNCT7_00h: op = ALU_OP_ADDW;
-                            FUNCT7_20h: op = ALU_OP_SUBW;
+                            FUNCT7_00h: op  = ALU_OP_ADDW;
+                            FUNCT7_20h: op  = ALU_OP_SUBW;
                             default:    err = 1'b1;
                         endcase
 
                     else if(opcode_op_imm_32)
-                        op = ALU_OP_ADDW;
+                        case (funct7)
+                            FUNCT7_00h: op  = ALU_OP_ADDW;
+                            default:    err = 1'b1;
+                        endcase
 
                 FUNCT3_ALU_SLL:
-                    op = ALU_OP_SLLW;
+                    if(opcode_op || opcode_op_imm)
+                        op = ALU_OP_SLL;
+                    else // (opcode_op_32 || opcode_op_imm_32)
+                        op = ALU_OP_SLLW;
 
                 FUNCT3_ALU_SRL:
                     if (opcode_op || opcode_op_imm)
@@ -91,7 +100,7 @@ module alu_decoder (
                             default:    err = 1'b1;
                         endcase
 
-                    else if (opcode_op_32 || opcode_op_imm_32)
+                    else // (opcode_op_32 || opcode_op_imm_32)
                         case (funct7)
                             FUNCT7_00h: op = ALU_OP_SRLW;
                             FUNCT7_20h: op = ALU_OP_SRAW;
