@@ -4,8 +4,10 @@
 # 	brew install riscv-tools
 #
 # Linux (todo)
-#	Use newlib
-#   Use riscv6464-unknown-elf-*
+# sudo apt-get update
+# sudo apt-get install gcc-riscv64-unknown-elf
+# sudo apt-get install gdb-riscv64-unknown-elf
+# sudo apt-get install libnewlib-dev
 
 # Define the RISC-V toolchain and flags
 CC = riscv64-unknown-elf-gcc
@@ -14,8 +16,16 @@ OBJCOPY = riscv64-unknown-elf-objcopy
 
 # Compile Flags
 # CFLAGS = -march=rv32i -nostartfiles
-CFLAGS = -march=rv64i -nostartfiles
+CFLAGS = -march=rv64i -nostartfiles -std=c11 -Wall -g -O2
 LDFLAGS = -T link_script.ld
+
+# Use newlib
+# NEWLIB_DIR = /path/to/your/newlib
+# NEWLIB_LIB_DIR = $(NEWLIB_DIR)/lib
+# NEWLIB_INC_DIR = $(NEWLIB_DIR)/include
+# CFLAGS += -I$(NEWLIB_INC_DIR)
+# LDFLAGS += -L$(NEWLIB_LIB_DIR) -lc
+LDFLAGS += -lc -lgcc
 
 # Define the source files
 SRC = io_write.c
