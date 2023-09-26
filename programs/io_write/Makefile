@@ -7,6 +7,7 @@
 # sudo apt-get update
 # sudo apt-get install gcc-riscv64-unknown-elf
 # sudo apt-get install gdb-riscv64-unknown-elf
+# sudo apt-get install binutils-riscv64-unknown-elf
 # sudo apt-get install libnewlib-dev
 
 # Define the RISC-V toolchain and flags
