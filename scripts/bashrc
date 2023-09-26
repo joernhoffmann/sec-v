@@ -1,13 +1,13 @@
 # SVUnit
 SVUNIT_INSTALL=$HOME/lib/svunit
-if [ -d $SVUnit_PATH ]; then
+if [ -d $SVUNIT_INSTALL ]; then
 	export SVUNIT_INSTALL
 	export PATH=$SVUNIT_INSTALL"/bin":$PATH
 fi
 
 # SVUnit
 SVUT=$HOME/lib/svut
-if [ -d $SVUT_PATH ]; then
+if [ -d $SVUT ]; then
 	export $SVUT
 	export PATH=$SVUT:$PATH
 fi
