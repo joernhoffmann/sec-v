@@ -26,7 +26,8 @@ module alu_core #(
     input   logic [XLEN-1:0]    b_i,    // 2nd operand
 
     // Output
-    output  logic [XLEN-1:0]    res_o   // Result
+    output  logic [XLEN-1:0]    res_o,  // Result
+    output  logic               err_o
 );
 
     // Main logic
@@ -35,6 +36,8 @@ module alu_core #(
     assign b32 = b_i[31:0];
 
     always_comb begin
+    err_o = 1'b0;
+    res_o = 'b0;
         unique case(op_i)
             // Logic
             ALU_OP_AND:
@@ -87,8 +90,10 @@ module alu_core #(
             ALU_OP_SLTU:
                 res_o = $unsigned(a_i) < $unsigned(b_i) ? 'h1 : 'h0;
 
-            default:
-                res_o = 0;
+            default: begin
+                res_o =  '0;
+                err_o = 1'b1;
+            end
         endcase
     end
 endmodule

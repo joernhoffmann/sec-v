@@ -37,7 +37,8 @@ module alu #(
         .op_i   (fu_i.op),
         .a_i    (fu_i.src1),
         .b_i    (fu_i.src2),
-        .res_o  (res)
+        .res_o  (res),
+        .err_o  (err)
     );
 
     // Output
