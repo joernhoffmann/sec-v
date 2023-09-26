@@ -241,8 +241,6 @@ module alu_core_testbench();
         b_i 	= ~0-1;
         op_i 	= ALU_OP_SRA;
         #1 `FAIL_IF_NOT_EQUAL(res_o, ~0);
-        $display("sra %h", res_o);
-
     `UNIT_TEST_END
 
     // -----------------------------------------------------------------------------------------------------------------
