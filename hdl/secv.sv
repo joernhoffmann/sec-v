@@ -10,15 +10,19 @@
  *  [ ] Improve main fsm
  *  [ ] Seperate units (e.g. main fsm, pipeline etc.)
  *  [ ] Introduce more data types (e. g. wishbone, function unit, function unit array)
- *  [ ] Improve pipeline,  implement
- *      [ ] a) regular pipeline processing
- *      [ ] b) interleaved multi threading pipeline
- *      [ ] c) Out-of-order or superscalar processing
+ *  [ ] Implement pipeline
+ *      [ ] a) regular pipelin
+ *      [ ] b) interleaved multi threading
+ *  [ ] Add Out-of-order or superscalar processing
  *  [ ] Add security functions
+ *  [ ] Add unit-tests
+ *  [ ] Add formal verification
+ *
  *
  * History
  *  v1.0    - Initial version
  *  v1.1    - Add function unit bus
+ *  v1.2    - Add muxer, reduce funit signals
  */
 `include "secv_pkg.svh"
 import secv_pkg::*;
@@ -77,12 +81,12 @@ module secv #(
         .rd_wb_i      (rd_wb)
     );
 
-    // ---Decoder --------------------------------------------------------------------------------------------------- //
-    inst_t   inst;
-    opcode_t opcode;
-    funct3_t funct3;
-    funct7_t funct7;
-
+    // --- Decoder -------------------------------------------------------------------------------------------------- //
+    // General decoder
+    inst_t      inst;
+    opcode_t    opcode;
+    funct3_t    funct3;
+    funct7_t    funct7;
     funit_t     funit;
     src1_sel_t  src1_sel;
     src2_sel_t  src2_sel;
@@ -91,7 +95,7 @@ module secv #(
     rd_sel_t    rd_sel;
     logic       dec_err;
 
-    // General decoder
+    assign inst = ir;
     decoder dec0 (
         .inst_i     (inst),
 
@@ -116,20 +120,6 @@ module secv #(
         // Errors
         .err_o      (dec_err)
     );
-
-    // Immediate muxer
-    imm_t imm;
-    always_comb begin : imm_mux
-        unique case (imm_sel)
-            IMM_SEL_0 : imm = '0;
-            IMM_SEL_I : imm = decode_imm_i(inst);
-            IMM_SEL_S : imm = decode_imm_s(inst);
-            IMM_SEL_B : imm = decode_imm_b(inst);
-            IMM_SEL_U : imm = decode_imm_u(inst);
-            IMM_SEL_J : imm = decode_imm_j(inst);
-            default   : imm = '0;
-        endcase
-    end
 
     // ALU decoder
     alu_op_t alu_op;
@@ -160,7 +150,7 @@ module secv #(
         endcase
     end
 
-    // --- Internal units (other) ----------------------------------------------------------------------------------- //
+    // --- Internal units ------------------------------------------------------------------------------------------- //
     // Branch decision unit
     logic brn_take, brn_err;
     branch brn0 (
@@ -195,13 +185,13 @@ module secv #(
         .dmem_ack_i (dmem_ack_i)
     );
 
-    // --- Function unit bus ---------------------------------------------------------------------------------------- //
+    // Function unit bus
     funit_in_t  funit_in_bus[FUNIT_COUNT];
     funit_out_t funit_out_bus[FUNIT_COUNT];
     funit_in_t  funit_in;
     funit_out_t funit_out;
 
-    // Connect input of selected function unit
+    // Input of selected function unit
     always_comb begin
         // Set default inputs
         for (int idx = 0; idx < FUNIT_COUNT; idx++)
@@ -210,50 +200,8 @@ module secv #(
         funit_in_bus[funit] = funit_in;
     end
 
-    // Connect output of selected function unit
+    // Output of selected function unit
     assign funit_out = funit_out_bus[funit];
-
-    // -------------------------------------------------------------------------------------------------------------- //
-    // Main state machine
-    // -------------------------------------------------------------------------------------------------------------- //
-    typedef enum logic [3:0] {
-        STATE_IDLE,
-        STATE_FETCH,
-        STATE_DECODE,
-        STATE_EXECUTE,
-        STATE_WB
-    } state_t;
-    state_t state, state_next;
-
-    // Program counter
-    logic [XLEN-1:0] pc, pc_next;   // Program counter (register)
-    logic [XLEN-1:0] nxtpc;         // Next pc
-    logic [XLEN-1:0] wbstage_pc;        // PC to be written back in wb-stage
-    assign nxtpc = pc + 4;
-
-    // Instruction register
-    logic [ILEN-1:0] ir, ir_next;
-    assign inst = ir;
-
-    // Register updates
-    always_ff @( posedge clk_i) begin
-        if (rst_i) begin
-            state <= STATE_IDLE;
-            pc    <= 'b0;
-            ir    <= INST_NOP;
-        end
-
-        else begin
-            state <= state_next;
-            pc    <= pc_next;
-            ir    <= ir_next;
-        end
-    end
-
-    // Branch target computation
-    // If branch taken, take address from funtion unit else progress with next instruction.
-    logic [XLEN-1:0] brn_target;
-    assign brn_target = brn_take ? funit_out.res : nxtpc;
 
     // --- MUXer ---------------------------------------------------------------------------------------------------- //
     // Source 1 selection
@@ -278,6 +226,20 @@ module secv #(
         endcase
     end
 
+    // Immediate muxer
+    imm_t imm;
+    always_comb begin : imm_mux
+        unique case (imm_sel)
+            IMM_SEL_0 : imm = '0;
+            IMM_SEL_I : imm = decode_imm_i(inst);
+            IMM_SEL_S : imm = decode_imm_s(inst);
+            IMM_SEL_B : imm = decode_imm_b(inst);
+            IMM_SEL_U : imm = decode_imm_u(inst);
+            IMM_SEL_J : imm = decode_imm_j(inst);
+            default   : imm = '0;
+        endcase
+    end
+
     // Destination register update (wb-stage)
     logic [XLEN-1:0] wbstage_rd_dat;
     always_comb begin: rd_mux
@@ -291,6 +253,7 @@ module secv #(
     end
 
     // Program counter update (wb-stage)
+    logic [XLEN-1:0] wbstage_pc;
     always_comb begin: wbstage_pc_mux
         unique case (pc_sel)
             PC_SEL_NXTPC  : wbstage_pc = nxtpc;         // Write-back next pc
@@ -299,6 +262,43 @@ module secv #(
             default       : wbstage_pc = nxtpc;
         endcase
     end
+
+    // -------------------------------------------------------------------------------------------------------------- //
+    // Main state machine
+    // -------------------------------------------------------------------------------------------------------------- //
+    typedef enum logic [3:0] {
+        STATE_IDLE,
+        STATE_FETCH,
+        STATE_DECODE,
+        STATE_EXECUTE,
+        STATE_WB
+    } state_t;
+
+    // FSM register
+    state_t state, state_next;
+    logic [XLEN-1:0] pc, pc_next;       // Program counter register
+    logic [ILEN-1:0] ir, ir_next;       // Instruction register
+    logic [XLEN-1:0] nxtpc;             // Next pc
+
+    assign nxtpc = pc + 4;
+    always_ff @( posedge clk_i) begin: fsm_regs
+        if (rst_i) begin
+            state <= STATE_IDLE;
+            pc    <= 'b0;
+            ir    <= INST_NOP;
+        end
+
+        else begin
+            state <= state_next;
+            pc    <= pc_next;
+            ir    <= ir_next;
+        end
+    end
+
+    // Branch target computation
+    // If branch, take address from funit else progress with next address
+    logic [XLEN-1:0] brn_target;
+    assign brn_target = brn_take ? funit_out.res : nxtpc;
 
     // --- Next state logic ----------------------------------------------------------------------------------------- //
     always_comb begin : main_fsm
