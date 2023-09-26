@@ -163,7 +163,6 @@ module gpr_testbench();
 
         read_rs1(.adr(address), .dat(rs1_dat));
         read_rs2(.adr(address), .dat(rs2_dat));
-
         `FAIL_IF_NOT_EQUAL(rs1_dat, 'b0);
         `FAIL_IF_NOT_EQUAL(rs2_dat, 'b0);
     `UNIT_TEST_END
