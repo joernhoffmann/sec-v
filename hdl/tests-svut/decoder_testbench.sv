@@ -10,7 +10,6 @@
 
 `include "svut_h.sv"
 `include "../decoder.sv"
-`timescale 1 ns / 100 ps
 
 module decoder_testbench();
     `SVUT_SETUP

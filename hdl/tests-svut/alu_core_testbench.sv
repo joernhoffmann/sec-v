@@ -4,14 +4,10 @@
  *
  * Project  : SEC-V
  * Author   : J. Hoffmann <joern@bitaggregat.de>
- *
- * Purpose  : Tests of the SEC-V ALU
+ * Purpose  : Tests of the SEC-V ALU.
  */
 
-// Mandatory file to be able to launch SVUT flow
 `include "svut_h.sv"
-
-// Specify the module to load or on files.f
 `include "../alu_core.sv"
 
 module alu_core_testbench();
