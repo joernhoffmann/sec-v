@@ -16,7 +16,7 @@ module decoder_testbench();
 
     inst_t              inst_i;
 
-    // Operadns
+    // Operands
     regadr_t    rs1_o;
     regadr_t    rs2_o;
     regadr_t    rd_o;
@@ -304,10 +304,6 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
         `FAIL_IF_NOT_EQUAL(err,      1'b1);
     `UNIT_TEST_END
-
-    // -------------------------------------------------------------------------------------------------------------- //
-    // ALU operation decoding
-    // -------------------------------------------------------------------------------------------------------------- //
     `TEST_SUITE_END
 
 
