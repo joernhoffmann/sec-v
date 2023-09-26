@@ -88,9 +88,6 @@ module branch_testbench();
     `UNIT_TEST_END
 
     // BEQ
-    // <
-    // >
-
     `UNIT_TEST("Test BEQ a == b jumps")
         funct3_i = FUNCT3_BRANCH_BEQ;
         rs1_i    = 1;
@@ -110,8 +107,34 @@ module branch_testbench();
     `UNIT_TEST_END
 
     // BNE
+    `UNIT_TEST("Test BNE a != b jumps")
+        funct3_i = FUNCT3_BRANCH_BNE;
+        rs1_i    = 1;
+        rs2_i    = 2;
+        #1
+        `FAIL_IF_NOT_EQUAL(take_o, 1);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("Test BEQ a == b not jumps")
+        funct3_i = FUNCT3_BRANCH_BNE;
+        rs1_i    = 1;
+        rs2_i    = 1;
+        #1
+        `FAIL_IF_NOT_EQUAL(take_o, 0);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
 
     // BLT
+    `UNIT_TEST("Test BLT -a == -b not jumps")
+        funct3_i = FUNCT3_BRANCH_BLT;
+        rs1_i    = -1;
+        rs2_i    = -1;
+        #1
+        `FAIL_IF_NOT_EQUAL(take_o, 0);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
     `UNIT_TEST("Test BLT -a < b jumps")
         funct3_i = FUNCT3_BRANCH_BLT;
         rs1_i    = -1;
@@ -120,7 +143,6 @@ module branch_testbench();
         `FAIL_IF_NOT_EQUAL(take_o, 1);
         `FAIL_IF(err_o);
     `UNIT_TEST_END
-
 
     `UNIT_TEST("Test BLT -a < -b jumps")
         funct3_i = FUNCT3_BRANCH_BLT;
@@ -131,7 +153,43 @@ module branch_testbench();
         `FAIL_IF(err_o);
     `UNIT_TEST_END
 
+    `UNIT_TEST("Test BLT -a > -b not jumps")
+        funct3_i = FUNCT3_BRANCH_BLT;
+        rs1_i    = -1;
+        rs2_i    = -2;
+        #1
+        `FAIL_IF_NOT_EQUAL(take_o, 0);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
     // BGE
+
+    `UNIT_TEST("Test BGE -a < b not jumps")
+        funct3_i = FUNCT3_BRANCH_BGE;
+        rs1_i    = -1;
+        rs2_i    =  2;
+        #1
+        `FAIL_IF_NOT_EQUAL(take_o, 0);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("Test BGE -a > -b jumps")
+        funct3_i = FUNCT3_BRANCH_BGE;
+        rs1_i    = -1;
+        rs2_i    = -2;
+        #1
+        `FAIL_IF_NOT_EQUAL(take_o, 1);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("Test BGE -a => -b jumps")
+        funct3_i = FUNCT3_BRANCH_BGE;
+        rs1_i    = -2;
+        rs2_i    = -2;
+        #1
+        `FAIL_IF_NOT_EQUAL(take_o, 1);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END    
 
     // BLTU
     `UNIT_TEST("Test BLTU -a < b not jumps")
@@ -171,7 +229,32 @@ module branch_testbench();
     `UNIT_TEST_END
 
     // BGEU
+    `UNIT_TEST("Test BGEU a < b not jumps")
+        funct3_i = FUNCT3_BRANCH_BGEU;
+        rs1_i    = 1;
+        rs2_i    = 2;
+        #1
+        `FAIL_IF_NOT_EQUAL(take_o, 0);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
 
+   `UNIT_TEST("Test BGEU a > b jumps")
+        funct3_i = FUNCT3_BRANCH_BGEU;
+        rs1_i    = 2;
+        rs2_i    = 1;
+        #1
+        `FAIL_IF_NOT_EQUAL(take_o, 1);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END    
+
+   `UNIT_TEST("Test BGEU a >= b jumps")
+        funct3_i = FUNCT3_BRANCH_BGEU;
+        rs1_i    = 2;
+        rs2_i    = 2;
+        #1
+        `FAIL_IF_NOT_EQUAL(take_o, 1);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END  
 
 
     `TEST_SUITE_END
