@@ -198,7 +198,7 @@ package secv_pkg;
     // --- Function unit operations --------------------------------------------------------------------------------- //
     // ALU
     typedef enum bit [3:0] {
-        ALU_OP_NONE = 0,
+        ALU_OP_NONE,
 
         // Logic
         ALU_OP_AND,

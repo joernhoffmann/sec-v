@@ -36,9 +36,13 @@ module alu_core #(
     assign b32 = b_i[31:0];
 
     always_comb begin
-    err_o = 1'b0;
-    res_o = 'b0;
+        res_o =  'b0;
+        err_o = 1'b0;
+
         unique case(op_i)
+            ALU_OP_NONE:
+                res_o = 'b0;
+
             // Logic
             ALU_OP_AND:
                 res_o = a_i & b_i;
@@ -90,8 +94,9 @@ module alu_core #(
             ALU_OP_SLTU:
                 res_o = $unsigned(a_i) < $unsigned(b_i) ? 'h1 : 'h0;
 
+            // ALU operation could not be decoded
             default: begin
-                res_o =  '0;
+                res_o =  'b0;
                 err_o = 1'b1;
             end
         endcase

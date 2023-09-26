@@ -20,6 +20,7 @@ module alu_core_testbench();
 
     /* verilator lint_off UNOPTFLAT */
     logic [XLEN-1:0] 	res_o;
+    logic err_o;
 
     alu_core #(
         .XLEN   (XLEN)
@@ -27,7 +28,8 @@ module alu_core_testbench();
         .op_i 	 (op_i),
         .a_i     (a_i),
         .b_i     (b_i),
-        .res_o   (res_o)
+        .res_o   (res_o),
+        .err_o   (err_o)
     );
 
 /*
@@ -73,6 +75,28 @@ module alu_core_testbench();
     //
     //    - `LAST_STATUS: tied to 1 is last macro did experience a failure, else tied to 0
 
+    // ----------------------------------------------------------------------------------------------------------------
+    // MISC
+    // ----------------------------------------------------------------------------------------------------------------
+    `UNIT_TEST("NONE returns 0")
+        a_i 	= 1;
+        b_i 	= 2;
+        op_i 	= ALU_OP_NONE;
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+/*  Currently all opcodes defined
+    `UNIT_TEST("Invalid opcode returns 0 and error")
+        a_i 	= 1;
+        b_i 	= 2;
+        op_i 	= alu_op_t'('b1);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(!err_o);
+    `UNIT_TEST_END
+*/
 
     // ----------------------------------------------------------------------------------------------------------------
     // ADD - Addition
@@ -81,28 +105,36 @@ module alu_core_testbench();
         a_i 	= 0;
         b_i 	= 0;
         op_i 	= ALU_OP_ADD;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("ADD positive integers")
         a_i 	= 1;
         b_i 	= 2;
         op_i 	= ALU_OP_ADD;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 3);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 3);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("ADD positive and negative integer")
         a_i 	= 1;
         b_i 	= -3;
         op_i 	= ALU_OP_ADD;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, -2);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, -2);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("ADD with overflow")
         a_i 	= ~0;
         b_i 	= 1;
         op_i 	= ALU_OP_ADD;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -112,42 +144,54 @@ module alu_core_testbench();
         a_i 	= 0;
         b_i 	= 0;
         op_i 	= ALU_OP_ADDW;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("ADDW positive integers")
         a_i 	= 1;
         b_i 	= 2;
         op_i 	= ALU_OP_ADDW;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 3);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 3);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("ADDW positive and negative integer")
         a_i 	= 1;
         b_i 	= -3;
         op_i 	= ALU_OP_ADDW;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, -2);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, -2);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("ADDW with overflow")
         a_i 	= ~0;
         b_i 	= 1;
         op_i 	= ALU_OP_ADDW;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("ADDW generates sign extend")
         a_i 	= {32'b0, -32'd2};
         b_i 	=  1;
         op_i 	= ALU_OP_ADDW;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, {XLEN{1'b1}});
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, {XLEN{1'b1}});
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("ADDW overflows and stays in range")
         a_i 	= {32'b0, {32{1'b1}}};
         b_i 	=  128;
         op_i 	= ALU_OP_ADDW;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 128-1);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 128-1);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -157,35 +201,45 @@ module alu_core_testbench();
         a_i 	= 0;
         b_i 	= 0;
         op_i 	= ALU_OP_SUB;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SUB with positive integers")
         a_i 	= 1;
         b_i 	= 2;
         op_i 	= ALU_OP_SUB;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, -1);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, -1);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SUB with positive and negative number")
         a_i 	= 1;
         b_i 	= -3;
         op_i 	= ALU_OP_SUB;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 4);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 4);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SUB with overflow")
         a_i 	= ~0;
         b_i 	= -1;
         op_i 	= ALU_OP_SUB;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SUB of maximum negative values")
         a_i 	= ~0;
         b_i 	= ~0;
         op_i 	= ALU_OP_SUB;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -195,21 +249,27 @@ module alu_core_testbench();
         a_i 	= ~0;
         b_i 	= XLEN-1;
         op_i 	= ALU_OP_SRL;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 1);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 1);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SRL shift-out all bits")
         a_i 	= ~0;
         b_i 	= XLEN;
         op_i 	= ALU_OP_SRL;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SRL shift-out all bits with large shift amount")
         a_i 	= ~0;
         b_i 	= ~0-1;
         op_i 	= ALU_OP_SRL;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -219,28 +279,36 @@ module alu_core_testbench();
         a_i 	= 1 << XLEN-1;	    // Set MSB to 1
         b_i 	= XLEN-1;
         op_i 	= ALU_OP_SRA;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, ~0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, ~0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SRA shift-in single bit")
         a_i 	= 1 << XLEN-1;	    // Set MSB to 1
         b_i 	= 1;
         op_i 	= ALU_OP_SRA;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, { 2'b11, {XLEN-2{1'b0}}});
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, { 2'b11, {XLEN-2{1'b0}}});
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SRA shift-out all bits")
         a_i 	= 1 << XLEN-1;
         b_i 	= XLEN;
         op_i 	= ALU_OP_SRA;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, ~0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, ~0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SRA shift-out all bits with large shift amount")
         a_i 	= 1 << XLEN-1;
         b_i 	= ~0-1;
         op_i 	= ALU_OP_SRA;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, ~0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, ~0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -257,21 +325,27 @@ module alu_core_testbench();
         a_i 	= -1;
         b_i 	= 0;
         op_i 	= ALU_OP_SLT;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 1);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 1);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SLT check larger")
         a_i 	= 2;
         b_i 	= 0;
         op_i 	= ALU_OP_SLT;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SLT check less than both neg")
         a_i 	= 1 << XLEN-1;
         b_i 	= 1 << XLEN-1 | 1 << XLEN-2;
         op_i 	= ALU_OP_SLT;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 1);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 1);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -281,28 +355,36 @@ module alu_core_testbench();
         a_i 	= 0;
         b_i 	= 0;
         op_i 	= ALU_OP_SLTU;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SLTU check less than")
         a_i 	= 0;
         b_i 	= 2;
         op_i 	= ALU_OP_SLTU;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 1);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 1);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SLTU check larger")
         a_i 	= 128;
         b_i 	= 0;
         op_i 	= ALU_OP_SLTU;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `UNIT_TEST("SLTU check not using signed negative")
         a_i 	= -1;
         b_i 	= 0;
         op_i 	= ALU_OP_SLTU;
-        #1 `FAIL_IF_NOT_EQUAL(res_o, 0);
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     `TEST_SUITE_END
