@@ -88,6 +88,9 @@ module branch_testbench();
     `UNIT_TEST_END
 
     // BEQ
+    // <
+    // >
+
     `UNIT_TEST("Test BEQ a == b jumps")
         funct3_i = FUNCT3_BRANCH_BEQ;
         rs1_i    = 1;
@@ -166,7 +169,6 @@ module branch_testbench();
         `FAIL_IF_NOT_EQUAL(take_o, 0);
         `FAIL_IF(err_o);
     `UNIT_TEST_END
-
 
     // BGEU
 
