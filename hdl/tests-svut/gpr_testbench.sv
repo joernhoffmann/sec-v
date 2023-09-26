@@ -25,6 +25,9 @@ module gpr_testbench();
     logic [XLEN-1:0]    rd_dat_i;
     logic               rd_wb_i;
 
+    regadr_t address;
+    logic [XLEN-1: 0] rd_dat, rs1_dat, rs2_dat;
+
     gpr #(
     .XLEN (XLEN)
     ) dut (
@@ -39,10 +42,10 @@ module gpr_testbench();
         .rd_wb_i   (rd_wb_i)
     );
 
-
     // To create a clock:
-    // initial aclk = 0;
-    // always #2 aclk = ~aclk;
+    parameter int PERIOD = 2;
+    initial clk_i = 0;
+    always #PERIOD clk_i = ~clk_i;
 
     // To dump data for visualization:
     // initial begin
@@ -55,13 +58,60 @@ module gpr_testbench();
 
     task setup(msg="");
     begin
-        // setup() runs when a test begins
+        reset();
     end
     endtask
 
     task teardown(msg="");
     begin
         // teardown() runs when a test ends
+    end
+    endtask
+
+    task reset();
+    begin
+        @(posedge clk_i)
+        rst_i = 1'b1;
+        #PERIOD;
+        rst_i = 1'b0;
+    end
+    endtask
+
+    // Write data to register via destination register
+    task write_rd;
+        input  regadr_t            adr;
+        input  logic    [XLEN-1:0] dat;
+    begin
+        @(posedge clk_i);
+        rd_adr_i = adr;
+        rd_dat_i = dat;
+        rd_wb_i  = 1'b1;
+        #1
+        rd_wb_i  = 1'b0;
+    end
+    endtask
+
+    // Read register via source register 1 address
+    task read_rs1;
+        input  regadr_t         adr;
+        output logic [XLEN-1:0] dat;
+    begin
+        @(posedge clk_i);
+        rs1_adr_i = adr;
+        #1
+        dat = rs1_dat_o;
+    end
+    endtask
+
+    // Read register via source register 2 address
+    task read_rs2;
+        input  regadr_t         adr;
+        output logic [XLEN-1:0] dat;
+    begin
+        @(posedge clk_i);
+        rs2_adr_i = adr;
+        #1
+        dat = rs2_dat_o;
     end
     endtask
 
@@ -87,16 +137,54 @@ module gpr_testbench();
     //
     //    - `LAST_STATUS: tied to 1 is last macro did experience a failure, else tied to 0
 
-    `UNIT_TEST("TESTCASE_NAME")
+    // Reset check
+    `UNIT_TEST("Check random value written to r0..r32 return 0 if read after reset")
+        for (int i = 0; i < REG_COUNT; i++) begin
+            address = i;
+            rd_dat = i*2;
+            write_rd(.adr(address), .dat(rd_dat));
+        end
 
-        // Describe here the testcase scenario
-        //
-        // Because SVUT uses long nested macros, it's possible
-        // some local variable declaration leads to compilation issue.
-        // You should declare your variables after the IOs declaration to avoid that.
+        reset();
 
+        for (int i = 0; i < REG_COUNT; i++) begin
+            read_rs1(.adr(address), .dat(rs1_dat));
+            read_rs2(.adr(address), .dat(rs2_dat));
+            `FAIL_IF_NOT_EQUAL(rs1_dat, 'b0);
+            `FAIL_IF_NOT_EQUAL(rs2_dat, 'b0);
+        end
     `UNIT_TEST_END
 
+    // Register 0
+    `UNIT_TEST("Check random value written to r0 returns 0 if read")
+        address = 0;
+        rd_dat = 'h42;
+        write_rd(.adr(address), .dat(rd_dat));
+
+        read_rs1(.adr(address), .dat(rs1_dat));
+        read_rs2(.adr(address), .dat(rs2_dat));
+
+        `FAIL_IF_NOT_EQUAL(rs1_dat, 'b0);
+        `FAIL_IF_NOT_EQUAL(rs2_dat, 'b0);
+    `UNIT_TEST_END
+
+    // Register [1..32]
+    `UNIT_TEST("Check random value written to r1..r32 could be read")
+        for (int i = 1; i < REG_COUNT; i++) begin
+            address = i;
+            rd_dat = i*2;
+            write_rd(.adr(address), .dat(rd_dat));
+        end
+
+        for (int i = 1; i < REG_COUNT; i++) begin
+            address = i;
+            rd_dat = i*2;
+            read_rs1(.adr(address), .dat(rs1_dat));
+            read_rs2(.adr(address), .dat(rs2_dat));
+            `FAIL_IF_NOT_EQUAL(rs1_dat, rd_dat);
+            `FAIL_IF_NOT_EQUAL(rs2_dat, rd_dat);
+        end
+    `UNIT_TEST_END
     `TEST_SUITE_END
 
 endmodule
