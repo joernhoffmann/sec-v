@@ -1,7 +1,14 @@
-# Verilator
-VERILATOR_PATH=$HOME/lib/verilator/bin
-if [ -d $VERILATOR_PATH ]; then
-	export PATH=$VERILATOR_PATH:$PATH
+# SVUnit
+SVUNIT_INSTALL=$HOME/lib/svunit
+if [ -d $SVUnit_PATH ]; then
+	export SVUNIT_INSTALL
+	export PATH=$SVUNIT_INSTALL"/bin":$PATH
+fi
+
+# SVUnit
+SVUT_PATH=$HOME/lib/svut
+if [ -d $SVUT_PATH ]; then
+	export PATH=$SVUT_PATH:$PATH
 fi
 
 # Verible
@@ -10,9 +17,8 @@ if [ -d $VERIBLE_PATH ]; then
 	export PATH=$VERIBLE_PATH:$PATH
 fi
 
-# SVUnit
-SVUNIT_INSTALL=$HOME/lib/svunit
-if [ -d $SVUNIT_INSTALL ]; then
-	export SVUNIT_INSTALL
-	export PATH=$PATH:$SVUNIT_INSTALL"/bin"
+# Verilator
+VERILATOR_PATH=$HOME/lib/verilator/bin
+if [ -d $VERILATOR_PATH ]; then
+	export PATH=$VERILATOR_PATH:$PATH
 fi
