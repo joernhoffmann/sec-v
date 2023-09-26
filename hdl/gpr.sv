@@ -36,12 +36,14 @@ module gpr #(
     input   logic               rd_wb_i
 );
 
+    // Register array
     logic [XLEN-1 : 0] regfile [REG_COUNT];
 
     // Write logic
     always_ff @(posedge clk_i) begin
         if (rst_i)
-            regfile <= '{default: 0};
+            for (int idx=0; idx < REG_COUNT; idx++)
+                regfile[idx] <= 'b0;
 
         else if (rd_adr_i != 'b0 && rd_wb_i)
             regfile[rd_adr_i] <= rd_dat_i;
