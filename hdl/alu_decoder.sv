@@ -7,7 +7,6 @@
  * Purpose  : Decodes the ALU operation from RISC-V instruction.
  *
  * Todo
- *  [ ] Add unit tests
  *  [ ] Add formal verification
  *
  * History

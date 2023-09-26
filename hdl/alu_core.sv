@@ -8,9 +8,9 @@
  *
  * Todo
  *  [ ] Improve shift operations with barrel shifter
- *  [ ] Use a separate flag for 32-bit operations.
- *  [ ] Use single sext32() for 32-bit operations
- *  [ ] Add unit tests
+ *  [ ] Code improvements
+ *      [ ] Consider using a separate flag for 32-bit operations
+ *      [ ] Consider single sext32() for 32-bit operations
  *
  * History
  *  v1.0    - Initial version
