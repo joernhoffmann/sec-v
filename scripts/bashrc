@@ -6,8 +6,9 @@ if [ -d $SVUnit_PATH ]; then
 fi
 
 # SVUnit
-SVUT_PATH=$HOME/lib/svut
+SVUT=$HOME/lib/svut
 if [ -d $SVUT_PATH ]; then
+	export $SVUT
 	export PATH=$SVUT_PATH:$PATH
 fi
 

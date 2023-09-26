@@ -8,25 +8,29 @@
  * Purpose  : Verilator main to support verilated testbenches.
  */
 
-
+#include "build/Vbranch_testbench.h"
 #include "build/Vdecode_testbench.h"
 #include "verilated.h"
 
 int main(int argc, char** argv, char** env) {
 
     Verilated::commandArgs(argc, argv);
-    Vdecode_testbench* top = new Vdecode_testbench;
+    Vbranch_testbench* brn = new Vbranch_testbench;
+    Vdecode_testbench* dec = new Vdecode_testbench;
+    
     int timer = 0;
 
     // Simulate until $finish()
     while (!Verilated::gotFinish()) {
 
         // Evaluate model;
-        top->eval();
+        brn->eval();
+        dec->eval();
     }
 
     // Final model cleanup
-    top->final();
+    brn->final();
+    dec->final();
 
     // Destroy model
     delete top;
@@ -34,3 +38,4 @@ int main(int argc, char** argv, char** env) {
     // Return good completion status
     return 0;
 }
+
