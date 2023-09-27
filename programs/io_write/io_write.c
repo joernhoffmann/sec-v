@@ -1,9 +1,14 @@
-#include <stdint.h>
+#define LED_ADDR 0x80000000UL
 
 int main() {
-    volatile uint64_t *mem = (uint64_t *)0x10000000;
-    uint64_t value         = 0xDEADBEEF;
+    volatile long *led_adr = (long *) LED_ADDR;
 
-    *mem = value;
-    return 0;
+    while (1) {
+        for (int value = 0; value < 0xff; value++)
+            *led_adr = value;
+
+        // Delay
+        for (int i = 0; i < 65535; i++)
+            ;
+    }
 }

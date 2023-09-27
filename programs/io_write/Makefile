@@ -30,7 +30,7 @@ all: $(HEX)
 disasm: $(ELF)
 	$(OBJDUMP) -S -d $<
 
-$(HEX): $(ELF) $(ASM)
+$(HEX): $(ELF)
 	$(OBJCOPY) -O ihex $< $@
 
 $(ELF): $(SRC) $(LINKER_SCRIPT)
