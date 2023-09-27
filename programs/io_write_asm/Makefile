@@ -23,25 +23,25 @@ LDFLAGS = -T $(LINKER_SCRIPT)
 
 # Source files
 SRC = io_write.asm
+OBJ = $(SRC:.asm=.o)
 ELF = $(SRC:.asm=.elf)
 HEX = $(SRC:.asm=.hex)
-EXE = $(SRC:.asm=.o)
 
 all: $(HEX)
 
-exe: $(EXE)
-
-$(EXE):$(ELF) $(LINKER_SCRIPT)
-	$(LD) $(LDFLAGS) $< -o io_write.o
+disasm: $(ELF)
+	$(OBJDUMP) -D $<
 
 $(HEX): $(ELF)
 	$(OBJCOPY) -O ihex $< $@
 
-$(ELF): $(SRC) $(LINKER_SCRIPT)
+$(ELF):$(OBJ) $(LINKER_SCRIPT)
+	$(LD) $(LDFLAGS) $< -o $@
+
+$(OBJ): $(SRC)
 	$(AS) $(CFLAGS) -o $@ $<
 
-
 clean:
-	rm -f $(ELF) $(HEX) $(EXE)
+	rm -f $(ELF) $(HEX) $(ELF)
 
 .PHONY: all clean

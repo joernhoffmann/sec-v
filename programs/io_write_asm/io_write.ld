@@ -1,6 +1,6 @@
 MEMORY
 {
-    ROM (rx)    : ORIGIN = 0x00000000, LENGTH = 0x400   /* 1k   */
+    ROM (rx)    : ORIGIN = 0x10000000, LENGTH = 0x400   /* 1k   */
     RAM (wrx)   : ORIGIN = 0x00001000, LENGTH = 0x400   /* 1k   */
     IO  (rw)    : ORIGIN = 0x00010000, LENGTH = 0xFFFF  /* 64k  */
 }

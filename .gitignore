@@ -14,5 +14,4 @@ svut.out
 
 # Program output
 *.elf
-*.asm
 *.hex

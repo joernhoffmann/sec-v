@@ -24,12 +24,11 @@ LDFLAGS = -T $(LINKER_SCRIPT)
 SRC = io_write.c
 ELF = $(SRC:.c=.elf)
 HEX = $(SRC:.c=.hex)
-ASM = $(SRC:.c=.asm)
 
 all: $(HEX)
 
-$(ASM): $(ELF)
-	$(OBJDUMP) -S -d $< > $@
+disasm: $(ELF)
+	$(OBJDUMP) -S -d $<
 
 $(HEX): $(ELF) $(ASM)
 	$(OBJCOPY) -O ihex $< $@
