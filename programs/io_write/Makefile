@@ -16,7 +16,7 @@ OBJCOPY = riscv64-unknown-elf-objcopy
 OBJDUMP = riscv64-unknown-elf-objdump
 
 # Compile Flags
-CFLAGS = -march=rv64i -mabi=lp64 -Wall -O0 -specs=picolibc.specs
+CFLAGS = -march=rv64i -mabi=lp64 -Wall -g -O0 -specs=picolibc.specs
 LINKER_SCRIPT = io_write.ld
 LDFLAGS = -T $(LINKER_SCRIPT)
 
@@ -30,7 +30,7 @@ ASM = $(SRC:.c=.asm)
 all: $(HEX)
 
 $(ASM): $(ELF)
-	$(OBJDUMP) -d $< > $@
+	$(OBJDUMP) -S -d $< > $@
 
 $(HEX): $(ELF) $(ASM)
 	$(OBJCOPY) -O ihex $< $@
@@ -38,7 +38,6 @@ $(HEX): $(ELF) $(ASM)
 
 $(ELF): $(SRC) $(LINKER_SCRIPT)
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
 
 clean:
 	rm -f $(ELF) $(HEX)
