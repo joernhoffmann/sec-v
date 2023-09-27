@@ -34,7 +34,6 @@ $(ASM): $(ELF)
 $(HEX): $(ELF) $(ASM)
 	$(OBJCOPY) -O ihex $< $@
 
-
 $(ELF): $(SRC) $(LINKER_SCRIPT)
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 

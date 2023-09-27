@@ -12,18 +12,27 @@
 
 # RISC-V toolchain and flags
 AS = riscv64-unknown-elf-as
+LD = riscv64-unknown-elf-ld
 OBJCOPY = riscv64-unknown-elf-objcopy
 OBJDUMP = riscv64-unknown-elf-objdump
 
 # Compile Flags
-CFLAGS = -march=rv64i
+CFLAGS 	= -march=rv64i
+LINKER_SCRIPT = io_write.ld
+LDFLAGS = -T $(LINKER_SCRIPT)
 
 # Source files
 SRC = io_write.asm
 ELF = $(SRC:.asm=.elf)
 HEX = $(SRC:.asm=.hex)
+EXE = $(SRC:.asm=.o)
 
 all: $(HEX)
+
+exe: $(EXE)
+
+$(EXE):$(ELF) $(LINKER_SCRIPT)
+	$(LD) $(LDFLAGS) $< -o io_write.o
 
 $(HEX): $(ELF)
 	$(OBJCOPY) -O ihex $< $@
@@ -31,7 +40,8 @@ $(HEX): $(ELF)
 $(ELF): $(SRC) $(LINKER_SCRIPT)
 	$(AS) $(CFLAGS) -o $@ $<
 
+
 clean:
-	rm -f $(ELF) $(HEX)
+	rm -f $(ELF) $(HEX) $(EXE)
 
 .PHONY: all clean
