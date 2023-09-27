@@ -42,6 +42,6 @@ $(OBJ): $(SRC)
 	$(AS) $(CFLAGS) -o $@ $<
 
 clean:
-	rm -f $(ELF) $(HEX) $(ELF)
+	rm -f $(ELF) $(HEX) $(ELF) $(OBJ)
 
 .PHONY: all clean

@@ -26,7 +26,7 @@ SECTIONS
         _sdata = .;         /* Start of .data */
         *(.data)
         *(.data.*)
-        . = ALIGN(4);
+        . = ALIGN(8);
         _edata = .;         /* End of .data */
     } > RAM AT> ROM         /* Section copied from rom to ram */
 
