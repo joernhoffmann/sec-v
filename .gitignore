@@ -1,11 +1,18 @@
-hdl/tests/svut.out
-.hdl_checker
+# IDEs
 .vscode
-obj_dir
+
+# Tool artifacts
 .*.f
 .*.sv
+.hdl_checker
+obj_dir
 run.log
 tests.xml
 qrun.out
 svut.out
 .DS_Store
+
+# Program output
+*.elf
+*.asm
+*.hex

@@ -13,6 +13,7 @@
 # RISC-V toolchain and flags
 CC = riscv64-unknown-elf-gcc
 OBJCOPY = riscv64-unknown-elf-objcopy
+OBJDUMP = riscv64-unknown-elf-objdump
 
 # Compile Flags
 CFLAGS = -march=rv64i -mabi=lp64 -Wall -O0 -specs=picolibc.specs
@@ -24,15 +25,20 @@ LDFLAGS = -T $(LINKER_SCRIPT)
 SRC = io_write.c
 ELF = $(SRC:.c=.elf)
 HEX = $(SRC:.c=.hex)
-
+ASM = $(SRC:.c=.asm)
 
 all: $(HEX)
 
-$(HEX): $(ELF)
+$(ASM): $(ELF)
+	$(OBJDUMP) -d $< > $@
+
+$(HEX): $(ELF) $(ASM)
 	$(OBJCOPY) -O ihex $< $@
+
 
 $(ELF): $(SRC) $(LINKER_SCRIPT)
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
 
 clean:
 	rm -f $(ELF) $(HEX)
