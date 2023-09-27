@@ -181,7 +181,7 @@ package secv_pkg;
     // -------------------------------------------------------------------------------------------------------------- //
     // Function units
     // -------------------------------------------------------------------------------------------------------------- //
-    typedef enum int{
+    typedef enum int {
         FUNIT_NONE,     // No function unit
         FUNIT_ALU,      // Arithmetic logic unit (ADD, SUB etc.)
         FUNIT_MEM,      // Memory unit           (Loads, Stores, FENCE etc.)
@@ -198,7 +198,7 @@ package secv_pkg;
     // --- Function unit operations --------------------------------------------------------------------------------- //
     // ALU
     typedef enum bit [3:0] {
-        ALU_OP_NONE,
+        ALU_OP_NONE = 0,
 
         // Logic
         ALU_OP_AND,

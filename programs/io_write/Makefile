@@ -16,10 +16,9 @@ OBJCOPY = riscv64-unknown-elf-objcopy
 OBJDUMP = riscv64-unknown-elf-objdump
 
 # Compile Flags
-CFLAGS = -march=rv64i -mabi=lp64 -Wall -g -O0 -specs=picolibc.specs
+CFLAGS = -march=rv64i -mabi=lp64 -Wall -g -O2 -specs=picolibc.specs
 LINKER_SCRIPT = io_write.ld
 LDFLAGS = -T $(LINKER_SCRIPT)
-
 
 # Source files
 SRC = io_write.c
