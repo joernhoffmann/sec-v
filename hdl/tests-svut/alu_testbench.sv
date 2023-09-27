@@ -59,22 +59,24 @@ module alu_testbench();
     // -------------------------------------------------------------------------------------------------------------- //
     // General operation
     // -------------------------------------------------------------------------------------------------------------- //
-    `UNIT_TEST("Disabled ALU should always be ready")
+    `UNIT_TEST("Disabled ALU should not be ready")
         fu_i.ena    = 1'b0;
-        #1 `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
+        #1 `FAIL_IF_NOT_EQUAL(fu_o.rdy, 0);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Enabled ALU with ALU_OP_NONE should not write back")
+    `UNIT_TEST("Enabled ALU with ALU_OP_NONE should write-back zero")
         fu_i.ena    = 1'b1;
         fu_i.op     = ALU_OP_NONE;
+        fu_i.src1   = 1;
+        fu_i.src2   = 2;
         #1
         `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
         `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
         `FAIL_IF_NOT_EQUAL(fu_o.res, 0);
-        `FAIL_IF_NOT_EQUAL(fu_o.res_wb, 0);
+        `FAIL_IF_NOT_EQUAL(fu_o.res_wb, 1);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Enabled ALU with ALU_OP_ADD shoud write back")
+    `UNIT_TEST("Enabled ALU with ALU_OP_ADD should write-back")
         fu_i.ena    = 1'b1;
         fu_i.op     = ALU_OP_ADD;
         fu_i.src1   = 1;
