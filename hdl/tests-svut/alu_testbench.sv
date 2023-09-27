@@ -54,60 +54,37 @@ module alu_testbench();
     end
     endtask
 
-    `TEST_SUITE("ALU Tests (64-bit)")
-    //  Available macros:"
-    //
-    //    - `MSG("message"):       Print a raw white message
-    //    - `INFO("message"):      Print a blue message with INFO: prefix
-    //    - `SUCCESS("message"):   Print a green message if SUCCESS: prefix
-    //    - `WARNING("message"):   Print an orange message with WARNING: prefix and increment warning counter
-    //    - `CRITICAL("message"):  Print a purple message with CRITICAL: prefix and increment critical counter
-    //    - `ERROR("message"):     Print a red message with ERROR: prefix and increment error counter
-    //
-    //    - `FAIL_IF(aSignal):                 Increment error counter if evaluaton is true
-    //    - `FAIL_IF_NOT(aSignal):             Increment error coutner if evaluation is false
-    //    - `FAIL_IF_EQUAL(aSignal, 23):       Increment error counter if evaluation is equal
-    //    - `FAIL_IF_NOT_EQUAL(aSignal, 45):   Increment error counter if evaluation is not equal
-    //    - `ASSERT(aSignal):                  Increment error counter if evaluation is not true
-    //    - `ASSERT((aSignal == 0)):           Increment error counter if evaluation is not true
-    //
-    //  Available flag:
-    //
-    //    - `LAST_STATUS: tied to 1 is last macro did experience a failure, else tied to 0
+    `TEST_SUITE("ALU_WRAPPER")
 
-    // Enable
-        `UNIT_TEST("enable off")
-            fu_i.ena    = 1'b0;
-            #1 `FAIL_IF_NOT_EQUAL(fu_o.rdy, 0);
-        `UNIT_TEST_END
+    // -------------------------------------------------------------------------------------------------------------- //
+    // General operation
+    // -------------------------------------------------------------------------------------------------------------- //
+    `UNIT_TEST("Disabled ALU should always be ready")
+        fu_i.ena    = 1'b0;
+        #1 `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
+    `UNIT_TEST_END
 
-    // Operation
-        // op 0 = NO_ALU operation - invalid op value not possible because the 4 bit op variable is used completely
-        // Therefor no error bit can be set 
-        `UNIT_TEST("enable on - invalid op")
-            fu_i.ena    = 1'b1;
-            fu_i.op     = 0;
-            #1 `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
-            #1 `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
-            #1 `FAIL_IF_NOT_EQUAL(fu_o.res, 0);
-            #1 `FAIL_IF_NOT_EQUAL(fu_o.res_wb, 1);
-        `UNIT_TEST_END
+    `UNIT_TEST("Enabled ALU with ALU_OP_NONE should not write back")
+        fu_i.ena    = 1'b1;
+        fu_i.op     = ALU_OP_NONE;
+        #1
+        `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
+        `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
+        `FAIL_IF_NOT_EQUAL(fu_o.res, 0);
+        `FAIL_IF_NOT_EQUAL(fu_o.res_wb, 0);
+    `UNIT_TEST_END
 
-        `UNIT_TEST("enable on - valid op ALU_ADD")
-            fu_i.ena    = 1'b1;
-            fu_i.op     = 4;
-            fu_i.src1   = 1;
-            fu_i.src2   = 1;
-            #1 `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
-            #1 `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
-            #1 `FAIL_IF_NOT_EQUAL(fu_o.res, 2);
-            #1 `FAIL_IF_NOT_EQUAL(fu_o.res_wb, 1);       
-        `UNIT_TEST_END
-
-        
-
-
-
+    `UNIT_TEST("Enabled ALU with ALU_OP_ADD shoud write back")
+        fu_i.ena    = 1'b1;
+        fu_i.op     = ALU_OP_ADD;
+        fu_i.src1   = 1;
+        fu_i.src2   = 2;
+        #1
+        `FAIL_IF_NOT_EQUAL(fu_o.rdy,    1);
+        `FAIL_IF_NOT_EQUAL(fu_o.err,    0);
+        `FAIL_IF_NOT_EQUAL(fu_o.res,    3);
+        `FAIL_IF_NOT_EQUAL(fu_o.res_wb, 1);
+    `UNIT_TEST_END
     `TEST_SUITE_END
 
 endmodule

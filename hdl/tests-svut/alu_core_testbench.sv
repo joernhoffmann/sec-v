@@ -54,7 +54,7 @@ module alu_core_testbench();
     end
     endtask
 
-    `TEST_SUITE("ALU Tests (64-bit)")
+    `TEST_SUITE("ALU_CORE")
     //  Available macros:"
     //
     //    - `MSG("message"):       Print a raw white message

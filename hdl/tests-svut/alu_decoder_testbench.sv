@@ -54,7 +54,7 @@ module alu_decoder_testbench();
     end
     endtask
 
-    `TEST_SUITE("TESTSUITE_NAME")
+    `TEST_SUITE("ALU_DECODER")
 
     //  Available macros:"
     //

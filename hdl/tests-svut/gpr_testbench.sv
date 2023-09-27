@@ -64,7 +64,7 @@ module gpr_testbench();
 
     task teardown(msg="");
     begin
-        // teardown() runs when a test ends
+        ;
     end
     endtask
 
@@ -115,29 +115,11 @@ module gpr_testbench();
     end
     endtask
 
-    `TEST_SUITE("TESTSUITE_NAME")
+    `TEST_SUITE("GPR")
 
-    //  Available macros:"
-    //
-    //    - `MSG("message"):       Print a raw white message
-    //    - `INFO("message"):      Print a blue message with INFO: prefix
-    //    - `SUCCESS("message"):   Print a green message if SUCCESS: prefix
-    //    - `WARNING("message"):   Print an orange message with WARNING: prefix and increment warning counter
-    //    - `CRITICAL("message"):  Print a purple message with CRITICAL: prefix and increment critical counter
-    //    - `ERROR("message"):     Print a red message with ERROR: prefix and increment error counter
-    //
-    //    - `FAIL_IF(aSignal):                 Increment error counter if evaluaton is true
-    //    - `FAIL_IF_NOT(aSignal):             Increment error coutner if evaluation is false
-    //    - `FAIL_IF_EQUAL(aSignal, 23):       Increment error counter if evaluation is equal
-    //    - `FAIL_IF_NOT_EQUAL(aSignal, 45):   Increment error counter if evaluation is not equal
-    //    - `ASSERT(aSignal):                  Increment error counter if evaluation is not true
-    //    - `ASSERT((aSignal == 0)):           Increment error counter if evaluation is not true
-    //
-    //  Available flag:
-    //
-    //    - `LAST_STATUS: tied to 1 is last macro did experience a failure, else tied to 0
-
-    // Reset check
+    // -------------------------------------------------------------------------------------------------------------- //
+    // Reset
+    // -------------------------------------------------------------------------------------------------------------- //
     `UNIT_TEST("Check random value written to r0..r32 return 0 if read after reset")
         for (int i = 0; i < REG_COUNT; i++) begin
             address = i;
@@ -155,7 +137,9 @@ module gpr_testbench();
         end
     `UNIT_TEST_END
 
+    // -------------------------------------------------------------------------------------------------------------- //
     // Register 0
+    // -------------------------------------------------------------------------------------------------------------- //
     `UNIT_TEST("Check random value written to r0 returns 0 if read")
         address = 0;
         rd_dat = 'h42;
@@ -167,7 +151,9 @@ module gpr_testbench();
         `FAIL_IF_NOT_EQUAL(rs2_dat, 'b0);
     `UNIT_TEST_END
 
+    // -------------------------------------------------------------------------------------------------------------- //
     // Register [1..32]
+    // -------------------------------------------------------------------------------------------------------------- //
     `UNIT_TEST("Check random value written to r1..r32 could be read")
         for (int i = 1; i < REG_COUNT; i++) begin
             address = i;
@@ -185,5 +171,4 @@ module gpr_testbench();
         end
     `UNIT_TEST_END
     `TEST_SUITE_END
-
 endmodule
