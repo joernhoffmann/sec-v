@@ -1,15 +1,16 @@
 #!/bin/bash
 SVUT=$HOME/lib/svut/svutRun
+TESTS_AVAIL=("alu_core" "alu_decoder" "alu" "branch" "decoder" "gpr")
 
 # Check if arguments given
 if [ -z "$*" ]; then
-    tests=("alu_core" "alu_decoder" "alu" "branch" "decoder" "gpr")
+    TESTS=$TEST_AVAIL
 else
-    tests=$*
+    TESTS=$*
 fi
 
 # Run tests
-for name in $tests
+for name in $TESTS
 do
     if [ "$name" == "alu_core" ]; then
         $SVUT -test alu_core_testbench.sv
@@ -30,7 +31,7 @@ do
         $SVUT -test gpr_testbench.sv
 
     else
-        echo "Test $name unknown"
-
+        echo "Test '$name' unknown."
+        echo "Tests : ${TESTS_AVAIL[*]}"
     fi
 done
