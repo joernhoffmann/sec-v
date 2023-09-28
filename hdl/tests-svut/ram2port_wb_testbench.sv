@@ -47,7 +47,8 @@ module ram2port_wb_testbench();
         .ADDR_WIDTH (ADDR_WIDTH),
         .INST_WIDTH (INST_WIDTH),
         .DATA_WIDTH (DATA_WIDTH),
-        .RESET_MEM (RESET_MEM)
+        .RESET_MEM (RESET_MEM),
+        .FILENAME ("io_write.hex")
     )
     dut
     (

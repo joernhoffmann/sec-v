@@ -15,6 +15,7 @@ AS = riscv64-unknown-elf-as
 LD = riscv64-unknown-elf-ld
 OBJCOPY = riscv64-unknown-elf-objcopy
 OBJDUMP = riscv64-unknown-elf-objdump
+ELF2HEX = riscv64-unknown-elf-elf2hex
 
 # Compile Flags
 CFLAGS 	= -march=rv64i
@@ -26,13 +27,17 @@ SRC = io_write.asm
 OBJ = $(SRC:.asm=.o)
 ELF = $(SRC:.asm=.elf)
 HEX = $(SRC:.asm=.hex)
+IHEX = $(SRC:.asm=.ihex)
 
-all: $(HEX)
+all: $(HEX) $(IHEX)
 
 disasm: $(ELF)
 	$(OBJDUMP) -D $<
 
 $(HEX): $(ELF)
+	$(ELF2HEX) --bit-width 64 --input $< --output $@
+
+$(IHEX): $(ELF)
 	$(OBJCOPY) -O ihex $< $@
 
 $(ELF):$(OBJ) $(LINKER_SCRIPT)
@@ -42,6 +47,6 @@ $(OBJ): $(SRC)
 	$(AS) $(CFLAGS) -o $@ $<
 
 clean:
-	rm -f $(ELF) $(HEX) $(ELF) $(OBJ)
+	rm -f $(ELF) $(HEX) $(IHEX) $(ELF) $(OBJ)
 
 .PHONY: all clean

@@ -15,6 +15,7 @@ module ram2port_wb #(
     parameter int INST_WIDTH    = 32,
     parameter int DATA_WIDTH    = 64,
     parameter logic RESET_MEM   = 0,
+    parameter string FILENAME   = "",
 
     localparam int ISEL_WIDTH = INST_WIDTH / 8,
     localparam int DSEL_WIDTH = DATA_WIDTH / 8
@@ -49,6 +50,15 @@ module ram2port_wb #(
         initial begin
             for (int idx=0; idx < 2**ADDR_WIDTH; idx++)
                 memory[idx] = 'b0;
+        end
+
+        // Load file
+        initial begin
+            if (FILENAME.len() != 0) begin
+                $display("Load hex file %s", FILENAME);
+                $readmemh(FILENAME, memory);
+            end
+
         end
 
         // Assertions

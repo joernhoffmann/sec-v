@@ -14,6 +14,7 @@
 CC = riscv64-unknown-elf-gcc
 OBJCOPY = riscv64-unknown-elf-objcopy
 OBJDUMP = riscv64-unknown-elf-objdump
+ELF2HEX = riscv64-unknown-elf-elf2hex
 
 # Compile Flags
 CFLAGS = -march=rv64i -mabi=lp64 -Wall -g -O2 -specs=picolibc.specs
@@ -24,19 +25,23 @@ LDFLAGS = -T $(LINKER_SCRIPT)
 SRC = io_write.c
 ELF = $(SRC:.c=.elf)
 HEX = $(SRC:.c=.hex)
+IHEX = $(SRC:.c=.ihex)
 
-all: $(HEX)
+all: $(HEX) $(IHEX)
 
 disasm: $(ELF)
 	$(OBJDUMP) -S -d $<
 
 $(HEX): $(ELF)
+	$(ELF2HEX) --bit-width 64 --input $< --output $@
+
+$(IHEX): $(ELF)
 	$(OBJCOPY) -O ihex $< $@
 
 $(ELF): $(SRC) $(LINKER_SCRIPT)
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 clean:
-	rm -f $(ELF) $(HEX)
+	rm -f $(ELF) $(HEX) $(IHEX)
 
 .PHONY: all clean

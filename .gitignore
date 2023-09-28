@@ -15,4 +15,5 @@ svut.out
 # Program output
 *.elf
 *.hex
+*.ihex
 *.o

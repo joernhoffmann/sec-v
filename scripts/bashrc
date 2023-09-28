@@ -23,3 +23,9 @@ VERILATOR_PATH=$HOME/lib/verilator/bin
 if [ -d $VERILATOR_PATH ]; then
 	export PATH=$VERILATOR_PATH:$PATH
 fi
+
+# elf2hex
+ELF2HEX_PATH=$HOME/lib/elf2hex
+if [ -d $ELF2HEX_PATH ]; then
+	export PATH=$ELF2HEX_PATH:$PATH
+fi
