@@ -12,6 +12,7 @@ module alu_core_unit_test;
   parameter XLEN=64;
   logic [XLEN-1 : 0] a_i, b_i, res_o;
   alu_op_t op_i;
+  logic err_o;
 
   //===================================
   // This is the UUT that we're
@@ -20,10 +21,11 @@ module alu_core_unit_test;
   alu_core #(
     .XLEN   (XLEN)
   ) dut (
+    .op_i   (op_i),
     .a_i    (a_i),
     .b_i    (b_i),
     .res_o  (res_o),
-    .op_i   (op_i)
+    .err_o  (err_o)
   );
 
 
