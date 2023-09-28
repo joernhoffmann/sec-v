@@ -43,7 +43,6 @@ module ram2port_wb #(
 
 );
     logic [DATA_WIDTH-1 : 0] memory [2**ADDR_WIDTH];
-    logic [INST_WIDTH-1 : 0] imem;
 
     `ifndef SYNTHESIS
         // Memory initialization
@@ -83,15 +82,19 @@ module ram2port_wb #(
         end
     `endif
 
-    // Select instruction memory word
-    assign imem = adr1_i[0] ? memory[adr1_i][63:32] : memory[adr1_i][31:0];
+    always @(posedge clk_i) begin
+        // Blocked assignements (selections)
+        logic [ADDR_WIDTH-1 : 0] dmem_adr;
+        logic [INST_WIDTH-1 : 0] imem;
+        dmem_adr = {adr1_i[ADDR_WIDTH-1:1], 1'b0};
+        imem     = (adr1_i[0] == 1) ? memory[dmem_adr][63:32] : memory[dmem_adr][31:0];
 
-    always_ff @(posedge clk_i) begin
-        // Prevent lateches
+        // Prevent latches
         dat1_o <= 'b0;
         dat2_o <= 'b0;
         ack1_o <= 1'b0;
         ack2_o <= 1'b0;
+
 
         // Reset condition
         if (rst_i) begin
@@ -108,7 +111,7 @@ module ram2port_wb #(
         else begin
             // IMEM addressed
             if (cyc1_i && stb1_i) begin
-                for (int byte_idx = 0; byte_idx < ISEL_WIDTH-1; byte_idx++)
+                for (int byte_idx = 0; byte_idx < ISEL_WIDTH; byte_idx++)
                     if (sel1_i[byte_idx])
                         dat1_o[byte_idx*8 +: 8] <= imem[byte_idx*8 +: 8];
                     else
@@ -119,6 +122,7 @@ module ram2port_wb #(
 
             // DMEM addressed
             if (cyc2_i && stb2_i) begin
+                // Write
                 if (we2_i) begin
                     for (int byte_idx = 0; byte_idx < DSEL_WIDTH; byte_idx++)
                         if (sel2_i[byte_idx])
@@ -127,6 +131,7 @@ module ram2port_wb #(
                     ack2_o <= 1'b1;
                 end
 
+                // Read
                 else begin
                     for (int byte_idx = 0; byte_idx < DSEL_WIDTH; byte_idx++)
                         if (sel2_i[byte_idx])
