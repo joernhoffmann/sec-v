@@ -40,9 +40,6 @@ module alu_core #(
         err_o = 1'b0;
 
         unique case(op_i)
-            ALU_OP_NONE:
-                res_o = 'b0;
-
             // Logic
             ALU_OP_AND:
                 res_o = a_i & b_i;

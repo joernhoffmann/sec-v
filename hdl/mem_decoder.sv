@@ -64,6 +64,6 @@ module mem_decoder (
     end
 
     // Ouptut
-    assign op_o     = op;
-    assign err_o    = err;
+    assign op_o = op;
+    assign err_o = err;
 endmodule

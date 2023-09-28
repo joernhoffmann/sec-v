@@ -76,15 +76,15 @@ module alu_core_testbench();
     //    - `LAST_STATUS: tied to 1 is last macro did experience a failure, else tied to 0
 
     // ----------------------------------------------------------------------------------------------------------------
-    // MISC
+    // Misc
     // ----------------------------------------------------------------------------------------------------------------
-    `UNIT_TEST("NONE returns 0")
+    `UNIT_TEST("NONE returns 0 and error")
         a_i 	= 1;
         b_i 	= 2;
         op_i 	= ALU_OP_NONE;
         #1
         `FAIL_IF_NOT_EQUAL(res_o, 0);
-        `FAIL_IF(err_o);
+        `FAIL_IF_NOT(err_o);
     `UNIT_TEST_END
 
 /*  Currently all opcodes defined

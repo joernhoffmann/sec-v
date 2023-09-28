@@ -64,16 +64,16 @@ module alu_testbench();
         #1 `FAIL_IF_NOT_EQUAL(fu_o.rdy, 0);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Enabled ALU with ALU_OP_NONE should write-back zero")
+    `UNIT_TEST("Enabled ALU with ALU_OP_NONE not write-back and signal error")
         fu_i.ena    = 1'b1;
         fu_i.op     = ALU_OP_NONE;
         fu_i.src1   = 1;
         fu_i.src2   = 2;
         #1
         `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
-        `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
+        `FAIL_IF_NOT_EQUAL(fu_o.err, 1);
         `FAIL_IF_NOT_EQUAL(fu_o.res, 0);
-        `FAIL_IF_NOT_EQUAL(fu_o.res_wb, 1);
+        `FAIL_IF_NOT_EQUAL(fu_o.res_wb, 0);
     `UNIT_TEST_END
 
     `UNIT_TEST("Enabled ALU with ALU_OP_ADD should write-back")
