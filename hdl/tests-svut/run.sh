@@ -4,7 +4,7 @@ TESTS_AVAIL=("alu_core" "alu_decoder" "alu" "branch" "decoder" "gpr")
 
 # Check if arguments given
 if [ -z "$*" ]; then
-    TESTS=$TEST_AVAIL
+    TESTS=$TESTS_AVAIL
 else
     TESTS=$*
 fi
