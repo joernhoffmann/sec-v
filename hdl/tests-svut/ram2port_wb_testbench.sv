@@ -45,6 +45,7 @@ module ram2port_wb_testbench();
     logic [ADDR_WIDTH-1 : 0] adr;
     logic [ISEL_WIDTH-1 : 0] sel1;
     logic [DSEL_WIDTH-1 : 0] sel2;
+    logic [INST_WIDTH-1 : 0] dat1;
     logic [DATA_WIDTH-1 : 0] dat2;
 
     ram2port_wb
