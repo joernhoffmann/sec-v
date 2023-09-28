@@ -1,6 +1,6 @@
 #!/bin/bash
 SVUT=$HOME/lib/svut/svutRun
-TESTS_AVAIL=("alu_core" "alu_decoder" "alu" "branch" "decoder" "gpr" "ram2port")
+TESTS_AVAIL=("alu_core" "alu_decoder" "alu" "branch" "decoder" "gpr" "ram2port_wb")
 
 # Check if arguments given
 TESTS=""
@@ -34,7 +34,7 @@ do
     elif [ "$name" == "gpr" ]; then
         $SVUT -test gpr_testbench.sv && success=$((success+1))
 
-    elif [ "$name" == "ram2port" ]; then
+    elif [ "$name" == "ram2port_wb" ]; then
         $SVUT -test ram2port_wb_testbench.sv && success=$((success+1))
 
     else

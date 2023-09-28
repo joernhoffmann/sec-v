@@ -70,9 +70,10 @@ module ram2port_wb_testbench();
     );
 
 
-    // To create a clock:
-    // initial aclk = 0;
-    // always #2 aclk = ~aclk;
+    // Clock
+    parameter int CLK_PERIOD = 2;
+    initial clk_i = 0;
+    always #CLK_PERIOD clk_i = ~clk_i;
 
     // To dump data for visualization:
     // initial begin
@@ -85,13 +86,86 @@ module ram2port_wb_testbench();
 
     task setup(msg="");
     begin
-        // setup() runs when a test begins
+        reset();
     end
     endtask
 
     task teardown(msg="");
     begin
         // teardown() runs when a test ends
+    end
+    endtask
+
+    // -------------------------------------------------------------------------------------------------------------- //
+    // Helper tasks
+    // -------------------------------------------------------------------------------------------------------------- //
+    task reset();
+    begin
+        @(posedge clk_i)
+        rst_i = 1'b1;
+        #CLK_PERIOD;
+        rst_i = 1'b0;
+    end
+    endtask
+
+    // Read instruction memory
+    task read_dat1;
+        input  logic    [ADDR_WIDTH-1:0]   adr;
+        input  logic    [DSEL_WIDTH-1:0]   sel;
+        output logic    [DATA_WIDTH-1:0]   dat;
+    begin
+        @(posedge clk_i);
+        cyc1_i = 1'b1;
+        stb1_i = 1'b1;
+        sel1_i = sel;
+        adr1_i = adr;
+
+        #CLK_PERIOD;
+        dat = dat1_o;
+    end
+    endtask
+
+    // Read data memory
+    task read_dat2;
+        input  logic    [ADDR_WIDTH-1:0]   adr;
+        input  logic    [DSEL_WIDTH-1:0]   sel;
+        output logic    [DATA_WIDTH-1:0]   dat;
+    begin
+        @(posedge clk_i);
+        cyc2_i = 1'b1;
+        stb2_i = 1'b1;
+        sel2_i = sel;
+        adr2_i = adr;
+        we2_i  = 1'b0;
+        dat2_i =  'b0;
+
+        #CLK_PERIOD;
+        dat = dat2_o;
+    end
+    endtask
+
+
+    // Write data memory
+    task write_dat2;
+        input  logic    [ADDR_WIDTH-1:0]   adr;
+        input  logic    [DATA_WIDTH-1:0]   dat;
+        input  logic    [DSEL_WIDTH-1:0]   sel;
+    begin
+        @(posedge clk_i);
+        cyc2_i = 1'b1;
+        stb2_i = 1'b1;
+        sel2_i = sel;
+        adr2_i = adr;
+        we2_i = 1'b1;
+        dat2_i = dat;
+        #CLK_PERIOD;
+
+        cyc2_i = 1'b0;
+        stb2_i = 1'b0;
+        sel2_i = '0;
+        adr2_i = '0;
+         we2_i = 1'b0;
+        dat2_i = '0;
     end
     endtask
 
@@ -119,11 +193,6 @@ module ram2port_wb_testbench();
 
     `UNIT_TEST("TESTCASE_NAME")
 
-        // Describe here the testcase scenario
-        //
-        // Because SVUT uses long nested macros, it's possible
-        // some local variable declaration leads to compilation issue.
-        // You should declare your variables after the IOs declaration to avoid that.
 
     `UNIT_TEST_END
 
