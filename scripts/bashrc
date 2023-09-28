@@ -5,7 +5,7 @@ if [ -d $SVUNIT_INSTALL ]; then
 	export PATH=$SVUNIT_INSTALL"/bin":$PATH
 fi
 
-# SVUnit
+# SVUT
 SVUT=$HOME/lib/svut
 if [ -d $SVUT ]; then
 	export $SVUT

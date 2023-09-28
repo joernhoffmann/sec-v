@@ -14,6 +14,7 @@
 #include "build/Vbranch_testbench.h"
 #include "build/Vdecode_testbench.h"
 #include "build/Vgpr_testbench.h"
+#include "build/Vram_2port_wb_testbench.h"
 #include "verilated.h"
 
 int main(int argc, char** argv, char** env) {
@@ -21,11 +22,12 @@ int main(int argc, char** argv, char** env) {
 
     Verilated::commandArgs(argc, argv);
 
-    Valu_core_testbench   *alu     = new Valu_core_testbench;
-    Valu_decode_testbench *alu_dec = new Valu_decode_testbench;
-    Vbranch_testbench     *brn     = new Vbranch_testbench;
-    Vdecode_testbench     *dec     = new Vdecode_testbench;
-    Vgpr_testbench        *gpr     = new Vgpr_testbench;
+    Valu_core_testbench     *alu     = new Valu_core_testbench;
+    Valu_decode_testbench   *alu_dec = new Valu_decode_testbench;
+    Vbranch_testbench       *brn     = new Vbranch_testbench;
+    Vdecode_testbench       *dec     = new Vdecode_testbench;
+    Vgpr_testbench          *gpr     = new Vgpr_testbench;
+    Vram_2port_wb_testbench *ram2p   = new Vram_2port_wb_testbench;
 
     int timer = 0;
 
@@ -37,7 +39,8 @@ int main(int argc, char** argv, char** env) {
         alu_dec->eval();
         brn->eval();
         dec->eval();
-        gpr->eval();
+        gp->eval();
+        ram2p->eval();
     }
 
     // Final model cleanup
@@ -46,6 +49,7 @@ int main(int argc, char** argv, char** env) {
     brn->final();
     dec->final();
     gpr->final();
+    ram2p->final();
 
     // Destroy model
     delete alu;
@@ -53,6 +57,7 @@ int main(int argc, char** argv, char** env) {
     delete brn;
     delete dec;
     delete gpr;
+    delete ram2p;
 
     // Return good completion status
     return 0;
