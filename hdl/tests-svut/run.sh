@@ -1,6 +1,6 @@
 #!/bin/bash
 SVUT=$HOME/lib/svut/svutRun
-TESTS_AVAIL=("alu_core" "alu_decoder" "alu" "branch" "decoder" "gpr" "ram2port_wb" "mem_decoder")
+TESTS_AVAIL=("alu_core" "alu_decoder" "alu" "branch" "decoder" "gpr" "ram2port_wb" "mem_decoder" "secv")
 
 # Check if arguments given
 TESTS=""
@@ -39,6 +39,10 @@ do
 
     elif [ "$name" == "mem_decoder" ]; then
         $SVUT -test mem_decoder_testbench.sv && success=$((success+1))
+
+    elif [ "$name" == "secv" ]; then
+        $SVUT -test secv_testbench.sv && success=$((success+1))
+
 
     else
         echo "Test name '$name' unknown"

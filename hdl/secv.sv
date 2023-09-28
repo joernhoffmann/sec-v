@@ -41,8 +41,8 @@ module secv #(
     parameter int IADR_WIDTH = 8,        // Instruction memory address width
     parameter int DADR_WIDTH = 8,        // Data memory address width
 
-    localparam int ISEL_WIDTH = ILEN/8,  // Instruction memory byte selection width
-    localparam int DSEL_WIDTH = XLEN/8   // Data memory byte selection width
+    parameter int ISEL_WIDTH = ILEN/8,  // Instruction memory byte selection width
+    parameter int DSEL_WIDTH = XLEN/8   // Data memory byte selection width
 ) (
     input   logic   clk_i,
     input   logic   rst_i,
@@ -150,10 +150,10 @@ module secv #(
     funit_op_t funit_op;
     always_comb begin : decoder_mux
         unique case (funit)
-            FUNIT_NONE  : funit_op      = 'b0;
+            FUNIT_NONE  : funit_op      = '0;
             FUNIT_ALU   : funit_op.alu  = alu_op;
             FUNIT_MEM   : funit_op.mem  = mem_op;
-            default     : funit_op      = 'b0;
+            default     : funit_op      = '0;
         endcase
     end
 
@@ -215,10 +215,10 @@ module secv #(
     logic [XLEN-1:0] src1;
     always_comb begin: src1_mux
         unique case (src1_sel)
-            SRC1_SEL_0   : src1 = 'b0;
+            SRC1_SEL_0   : src1 = '0;
             SRC1_SEL_RS1 : src1 = rs1_dat;
             SRC1_SEL_PC  : src1 = pc;
-            default      : src1 = 'b0;
+            default      : src1 = '0;
         endcase
     end
 
@@ -226,10 +226,10 @@ module secv #(
     logic [XLEN-1:0] src2;
     always_comb begin: src2_mux
         unique case (src2_sel)
-            SRC2_SEL_0   : src2 = 'b0;
+            SRC2_SEL_0   : src2 = '0;
             SRC2_SEL_RS2 : src2 = rs2_dat;
             SRC2_SEL_IMM : src2 = imm;
-            default      : src2 = 'b0;
+            default      : src2 = '0;
         endcase
     end
 
@@ -251,11 +251,11 @@ module secv #(
     logic [XLEN-1:0] wbstage_rd_dat;
     always_comb begin: rd_mux
         unique case (rd_sel)
-            RD_SEL_NONE  : wbstage_rd_dat = 'b0;
+            RD_SEL_NONE  : wbstage_rd_dat = '0;
             RD_SEL_FUNIT : wbstage_rd_dat = funit_out.res;
             RD_SEL_IMM   : wbstage_rd_dat = imm;
             RD_SEL_NXTPC : wbstage_rd_dat = nxtpc;
-            default      : wbstage_rd_dat = 'b0;
+            default      : wbstage_rd_dat = '0;
         endcase
     end
 
@@ -291,7 +291,7 @@ module secv #(
     always_ff @( posedge clk_i) begin: fsm_regs
         if (rst_i) begin
             state <= STATE_IDLE;
-            pc    <= 'b0;
+            pc    <= '0;
             ir    <= INST_NOP;
         end
 
@@ -317,9 +317,9 @@ module secv #(
         // Prevent latches
         imem_cyc_o = 1'b0;
         imem_stb_o = 1'b0;
-        imem_adr_o =  'b0;
-        imem_sel_o =  'b0;
-        rd_dat     =  'b0;
+        imem_adr_o =   '0;
+        imem_sel_o =   '0;
+        rd_dat     =   '0;
         rd_wb      = 1'b0;
 
         // Function unit input
@@ -339,7 +339,7 @@ module secv #(
                 // Access instruction memory
                 imem_cyc_o = 1'b1;
                 imem_stb_o = 1'b1;
-                imem_sel_o =  'b1;
+                imem_sel_o =   '1;
                 imem_adr_o = pc[IADR_WIDTH-1 : 0];
 
                 if (imem_ack_i) begin

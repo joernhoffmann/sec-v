@@ -36,7 +36,7 @@ module alu_core #(
     assign b32 = b_i[31:0];
 
     always_comb begin
-        res_o =  'b0;
+        res_o =   '0;
         err_o = 1'b0;
 
         unique case(op_i)
@@ -93,7 +93,7 @@ module alu_core #(
 
             // ALU operation could not be decoded
             default: begin
-                res_o =  'b0;
+                res_o =   '0;
                 err_o = 1'b1;
             end
         endcase

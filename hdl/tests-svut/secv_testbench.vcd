@@ -1,0 +1,696 @@
+$date
+	Thu Sep 28 22:59:01 2023
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	100ps
+$end
+$scope module secv_testbench $end
+$var wire 1 ! imem_stb_o $end
+$var wire 4 " imem_sel_o [3:0] $end
+$var wire 32 # imem_dat_i [31:0] $end
+$var wire 1 $ imem_cyc_o $end
+$var wire 8 % imem_adr_o [7:0] $end
+$var wire 1 & imem_ack_i $end
+$var wire 1 ' dmem_we_o $end
+$var wire 1 ( dmem_stb_o $end
+$var wire 8 ) dmem_sel_o [7:0] $end
+$var wire 64 * dmem_dat_o [63:0] $end
+$var wire 64 + dmem_dat_i [63:0] $end
+$var wire 1 , dmem_cyc_o $end
+$var wire 8 - dmem_adr_o [7:0] $end
+$var wire 1 . dmem_ack_i $end
+$var parameter 32 / DADR_WIDTH $end
+$var parameter 32 0 DSEL_WIDTH $end
+$var parameter 32 1 IADR_WIDTH $end
+$var parameter 32 2 ILEN $end
+$var parameter 32 3 ISEL_WIDTH $end
+$var parameter 32 4 XLEN $end
+$var reg 1 5 clk_i $end
+$var reg 1 6 rst_i $end
+$var integer 32 7 svut_critical [31:0] $end
+$var integer 32 8 svut_error [31:0] $end
+$var integer 32 9 svut_error_total [31:0] $end
+$var integer 32 : svut_nb_test [31:0] $end
+$var integer 32 ; svut_nb_test_success [31:0] $end
+$var integer 32 < svut_status [31:0] $end
+$var integer 32 = svut_test_number [31:0] $end
+$var integer 32 > svut_warning [31:0] $end
+$scope module dut $end
+$var wire 1 5 clk_i $end
+$var wire 67 ? funit_out [66:0] $end
+$var wire 1 6 rst_i $end
+$var wire 2 @ src2_sel [1:0] $end
+$var wire 2 A src1_sel [1:0] $end
+$var wire 64 B rs2_dat [63:0] $end
+$var wire 5 C rs2_adr [4:0] $end
+$var wire 64 D rs1_dat [63:0] $end
+$var wire 5 E rs1_adr [4:0] $end
+$var wire 2 F rd_sel [1:0] $end
+$var wire 5 G rd_adr [4:0] $end
+$var wire 2 H pc_sel [1:0] $end
+$var wire 7 I opcode [6:0] $end
+$var wire 64 J nxtpc [63:0] $end
+$var wire 4 K mem_op [3:0] $end
+$var wire 1 L mem_dec_err $end
+$var wire 32 M inst [31:0] $end
+$var wire 3 N imm_sel [2:0] $end
+$var wire 32 O imem_dat_i [31:0] $end
+$var wire 1 & imem_ack_i $end
+$var wire 32 P funit [31:0] $end
+$var wire 7 Q funct7 [6:0] $end
+$var wire 3 R funct3 [2:0] $end
+$var wire 1 ' dmem_we_o $end
+$var wire 1 ( dmem_stb_o $end
+$var wire 8 S dmem_sel_o [7:0] $end
+$var wire 64 T dmem_dat_o [63:0] $end
+$var wire 64 U dmem_dat_i [63:0] $end
+$var wire 1 , dmem_cyc_o $end
+$var wire 8 V dmem_adr_o [7:0] $end
+$var wire 1 . dmem_ack_i $end
+$var wire 1 W dec_err $end
+$var wire 64 X brn_target [63:0] $end
+$var wire 1 Y brn_take $end
+$var wire 1 Z brn_err $end
+$var wire 4 [ alu_op [3:0] $end
+$var wire 1 \ alu_dec_err $end
+$var parameter 32 ] DADR_WIDTH $end
+$var parameter 32 ^ DSEL_WIDTH $end
+$var parameter 32 _ IADR_WIDTH $end
+$var parameter 32 ` ILEN $end
+$var parameter 32 a ISEL_WIDTH $end
+$var parameter 32 b XLEN $end
+$var reg 133 c funit_in [132:0] $end
+$var reg 8 d imem_adr_o [7:0] $end
+$var reg 1 $ imem_cyc_o $end
+$var reg 4 e imem_sel_o [3:0] $end
+$var reg 1 ! imem_stb_o $end
+$var reg 64 f imm [63:0] $end
+$var reg 32 g ir [31:0] $end
+$var reg 32 h ir_next [31:0] $end
+$var reg 64 i pc [63:0] $end
+$var reg 64 j pc_next [63:0] $end
+$var reg 64 k rd_dat [63:0] $end
+$var reg 1 l rd_wb $end
+$var reg 64 m src1 [63:0] $end
+$var reg 64 n src2 [63:0] $end
+$var reg 4 o state [3:0] $end
+$var reg 4 p state_next [3:0] $end
+$var reg 64 q wbstage_pc [63:0] $end
+$var reg 64 r wbstage_rd_dat [63:0] $end
+$var reg 4 s funit_op [3:0] $end
+$scope module alu0 $end
+$var wire 133 t fu_i [132:0] $end
+$var wire 64 u res [63:0] $end
+$var wire 1 v err $end
+$var parameter 32 w XLEN $end
+$var reg 67 x fu_o [66:0] $end
+$scope module alu0 $end
+$var wire 64 y a_i [63:0] $end
+$var wire 64 z b_i [63:0] $end
+$var wire 4 { op_i [3:0] $end
+$var wire 32 | b32 [31:0] $end
+$var wire 32 } a32 [31:0] $end
+$var parameter 32 ~ XLEN $end
+$var reg 1 v err_o $end
+$var reg 64 !" res_o [63:0] $end
+$upscope $end
+$upscope $end
+$scope module alu_dec0 $end
+$var wire 1 \ err_o $end
+$var wire 32 "" inst_i [31:0] $end
+$var wire 4 #" op_o [3:0] $end
+$var wire 1 $" opcode_op_imm_32 $end
+$var wire 1 %" opcode_op_imm $end
+$var wire 1 &" opcode_op_32 $end
+$var wire 1 '" opcode_op $end
+$var wire 7 (" opcode [6:0] $end
+$var wire 7 )" funct7 [6:0] $end
+$var wire 3 *" funct3 [2:0] $end
+$var reg 1 +" err $end
+$var reg 4 ," op [3:0] $end
+$scope begin decode_alu $end
+$upscope $end
+$upscope $end
+$scope module brn0 $end
+$var wire 1 Z err_o $end
+$var wire 1 Y take_o $end
+$var wire 64 -" rs2_i [63:0] $end
+$var wire 64 ." rs1_i [63:0] $end
+$var wire 3 /" funct3_i [2:0] $end
+$var parameter 32 0" XLEN $end
+$var reg 1 1" err $end
+$var reg 1 2" take $end
+$upscope $end
+$scope module dec0 $end
+$var wire 1 W err_o $end
+$var wire 3 3" funct3_o [2:0] $end
+$var wire 7 4" funct7_o [6:0] $end
+$var wire 32 5" funit_o [31:0] $end
+$var wire 3 6" imm_sel_o [2:0] $end
+$var wire 32 7" inst_i [31:0] $end
+$var wire 7 8" opcode_o [6:0] $end
+$var wire 2 9" pc_sel_o [1:0] $end
+$var wire 2 :" rd_sel_o [1:0] $end
+$var wire 2 ;" src1_sel_o [1:0] $end
+$var wire 2 <" src2_sel_o [1:0] $end
+$var wire 5 =" rs2_adr_o [4:0] $end
+$var wire 5 >" rs1_adr_o [4:0] $end
+$var wire 5 ?" rd_adr_o [4:0] $end
+$var wire 7 @" opcode [6:0] $end
+$var wire 7 A" funct7 [6:0] $end
+$var wire 3 B" funct3 [2:0] $end
+$var reg 1 C" err $end
+$var reg 3 D" imm_sel [2:0] $end
+$var reg 2 E" pc_sel [1:0] $end
+$var reg 2 F" rd_sel [1:0] $end
+$var reg 2 G" src1_sel [1:0] $end
+$var reg 2 H" src2_sel [1:0] $end
+$var integer 32 I" funit [31:0] $end
+$scope begin decode_op $end
+$upscope $end
+$upscope $end
+$scope module gpr0 $end
+$var wire 1 5 clk_i $end
+$var wire 5 J" rd_adr_i [4:0] $end
+$var wire 64 K" rd_dat_i [63:0] $end
+$var wire 1 l rd_wb_i $end
+$var wire 5 L" rs1_adr_i [4:0] $end
+$var wire 5 M" rs2_adr_i [4:0] $end
+$var wire 1 6 rst_i $end
+$var wire 64 N" rs2_dat_o [63:0] $end
+$var wire 64 O" rs1_dat_o [63:0] $end
+$var parameter 32 P" XLEN $end
+$scope begin $ivl_for_loop6 $end
+$var integer 32 Q" idx [31:0] $end
+$upscope $end
+$upscope $end
+$scope module mem0 $end
+$var wire 133 R" fu_i [132:0] $end
+$var wire 64 S" dmem_dat_i [63:0] $end
+$var wire 1 . dmem_ack_i $end
+$var parameter 32 T" ADR_WIDTH $end
+$var parameter 32 U" SEL_WIDTH $end
+$var parameter 32 V" XLEN $end
+$var reg 8 W" dmem_adr_o [7:0] $end
+$var reg 1 , dmem_cyc_o $end
+$var reg 64 X" dmem_dat [63:0] $end
+$var reg 64 Y" dmem_dat_o [63:0] $end
+$var reg 8 Z" dmem_sel_o [7:0] $end
+$var reg 1 ( dmem_stb_o $end
+$var reg 1 ' dmem_we_o $end
+$var reg 1 [" err $end
+$var reg 67 \" fu_o [66:0] $end
+$var reg 1 ]" load $end
+$var reg 4 ^" op [3:0] $end
+$scope begin mem_access $end
+$upscope $end
+$upscope $end
+$scope module mem_dec0 $end
+$var wire 1 L err_o $end
+$var wire 32 _" inst_i [31:0] $end
+$var wire 4 `" op_o [3:0] $end
+$var wire 1 a" opcode_op_imm_32 $end
+$var wire 1 b" opcode_op_imm $end
+$var wire 1 c" opcode_op_32 $end
+$var wire 1 d" opcode_op $end
+$var wire 7 e" opcode [6:0] $end
+$var wire 7 f" funct7 [6:0] $end
+$var wire 3 g" funct3 [2:0] $end
+$var reg 1 h" err $end
+$var reg 4 i" op [3:0] $end
+$scope begin decode_alu $end
+$upscope $end
+$upscope $end
+$scope begin $ivl_for_loop5 $end
+$var integer 32 j" idx [31:0] $end
+$upscope $end
+$scope begin decoder_mux $end
+$upscope $end
+$scope begin fsm_regs $end
+$upscope $end
+$scope begin imm_mux $end
+$upscope $end
+$scope begin main_fsm $end
+$upscope $end
+$scope begin rd_mux $end
+$upscope $end
+$scope begin src1_mux $end
+$upscope $end
+$scope begin src2_mux $end
+$upscope $end
+$scope begin wbstage_pc_mux $end
+$upscope $end
+$upscope $end
+$scope module ram $end
+$var wire 8 k" adr_i [7:0] $end
+$var wire 1 5 clk_i $end
+$var wire 1 , cyc_i $end
+$var wire 64 l" dat_i [63:0] $end
+$var wire 1 6 rst_i $end
+$var wire 8 m" sel_i [7:0] $end
+$var wire 1 ( stb_i $end
+$var wire 1 ' we_i $end
+$var parameter 32 n" ADDR_WIDTH $end
+$var parameter 32 o" DATA_WIDTH $end
+$var parameter 1 p" RESET_MEM $end
+$var parameter 32 q" SEL_WIDTH $end
+$var reg 1 . ack_o $end
+$var reg 64 r" dat_o [63:0] $end
+$scope begin $ivl_for_loop1 $end
+$var integer 32 s" idx [31:0] $end
+$upscope $end
+$scope begin $ivl_for_loop2 $end
+$var integer 32 t" idx [31:0] $end
+$upscope $end
+$scope begin $ivl_for_loop3 $end
+$var integer 32 u" byte_idx [31:0] $end
+$upscope $end
+$scope begin $ivl_for_loop4 $end
+$var integer 32 v" byte_idx [31:0] $end
+$upscope $end
+$upscope $end
+$scope module rom $end
+$var wire 8 w" adr_i [7:0] $end
+$var wire 1 5 clk_i $end
+$var wire 1 $ cyc_i $end
+$var wire 1 6 rst_i $end
+$var wire 4 x" sel_i [3:0] $end
+$var wire 1 ! stb_i $end
+$var parameter 32 y" ADDR_WIDTH $end
+$var parameter 32 z" DATA_WIDTH $end
+$var parameter 32 {" SEL_WIDTH $end
+$var reg 1 & ack_o $end
+$var reg 32 |" dat_o [31:0] $end
+$scope begin $ivl_for_loop0 $end
+$var integer 32 }" byte_idx [31:0] $end
+$upscope $end
+$upscope $end
+$scope task reset $end
+$upscope $end
+$scope task run $end
+$var reg 1 ~" msg $end
+$upscope $end
+$scope task setup $end
+$var reg 1 !# msg $end
+$upscope $end
+$scope task teardown $end
+$var reg 1 "# msg $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+b100 {"
+b100000 z"
+b1000 y"
+b1000 q"
+1p"
+b1000000 o"
+b1000 n"
+b1000000 V"
+b1000 U"
+b1000 T"
+b1000000 P"
+b1000000 0"
+b1000000 ~
+b1000000 w
+b1000000 b
+b100 a
+b100000 `
+b1000 _
+b1000 ^
+b1000 ]
+b1000000 4
+b100 3
+b100000 2
+b1000 1
+b1000 0
+b1000 /
+$end
+#0
+$dumpvars
+x"#
+0!#
+0~"
+b0 }"
+bx |"
+b0 x"
+b0 w"
+b0 v"
+b0 u"
+b0 t"
+b100000000 s"
+bx r"
+b0 m"
+b0 l"
+b0 k"
+b11 j"
+b0 i"
+1h"
+bx g"
+bx f"
+bx e"
+xd"
+xc"
+xb"
+xa"
+b0 `"
+bx _"
+bx ^"
+0]"
+b0 \"
+0["
+b0 Z"
+b0 Y"
+b0 X"
+b0 W"
+bx S"
+b0 R"
+b0 Q"
+bx O"
+bx N"
+bx M"
+bx L"
+b0 K"
+bx J"
+b0 I"
+b0 H"
+b0 G"
+b0 F"
+b0 E"
+b0 D"
+1C"
+bx B"
+bx A"
+bx @"
+bx ?"
+bx >"
+bx ="
+b0 <"
+b0 ;"
+b0 :"
+b0 9"
+bx 8"
+bx 7"
+b0 6"
+b0 5"
+bx 4"
+bx 3"
+02"
+11"
+bx /"
+bx ."
+bx -"
+b0 ,"
+1+"
+bx *"
+bx )"
+bx ("
+x'"
+x&"
+x%"
+x$"
+b0 #"
+bx ""
+b0 !"
+b0 }
+b0 |
+b0 {
+b0 z
+b0 y
+b0 x
+1v
+b0 u
+b0 t
+b0 s
+b0 r
+bx q
+bx p
+bx o
+b0 n
+b0 m
+0l
+b0 k
+bx j
+bx i
+bx h
+bx g
+b0 f
+b0 e
+b0 d
+b0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx c
+1\
+b0 [
+1Z
+0Y
+bx X
+1W
+b0 V
+bx U
+b0 T
+b0 S
+bx R
+bx Q
+b0 P
+bx O
+b0 N
+bx M
+1L
+b0 K
+bx J
+bx I
+b0 H
+bx G
+b0 F
+bx E
+bx D
+bx C
+bx B
+b0 A
+b0 @
+bz ?
+b0 >
+b0 =
+b0 <
+b0 ;
+b0 :
+b0 9
+b0 8
+b0 7
+x6
+05
+x.
+b0 -
+0,
+bx +
+b0 *
+b0 )
+0(
+0'
+x&
+b0 %
+0$
+bx #
+b0 "
+0!
+$end
+#20
+b100 {
+b0 }
+0v
+b0 |
+1Y
+b0 y
+b0 z
+12"
+0Z
+01"
+b0 D
+b0 ."
+b0 O"
+b0 B
+b0 -"
+b0 N"
+b100 s
+b10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 t
+b100 [
+b100 #"
+b100 ,"
+0\
+0+"
+b0 *"
+b0 )"
+b1 F
+b1 :"
+b1 F"
+b1 N
+b1 6"
+b1 D"
+b10 @
+b10 <"
+b10 H"
+b1 A
+b1 ;"
+b1 G"
+b0 ?
+b1 P
+b1 5"
+b1 I"
+0W
+0C"
+b0 R
+b0 /"
+b0 3"
+b0 B"
+b0 Q
+b0 4"
+b0 A"
+b0 E
+b0 >"
+b0 L"
+b0 C
+b0 ="
+b0 M"
+b0 G
+b0 ?"
+b0 J"
+b100 K
+b100 `"
+b100 i"
+0L
+0h"
+b0 g"
+b0 f"
+b11 j"
+0'"
+1%"
+0&"
+0$"
+b10011 ("
+b10011 I
+b10011 8"
+b10011 @"
+0d"
+1b"
+0c"
+0a"
+b10011 e"
+b0 X
+b100 q
+b10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 c
+b10011 h
+b0 j
+b1 p
+b10011 M
+b10011 g
+b10011 ""
+b10011 7"
+b10011 _"
+b100 J
+b0 i
+b0 o
+0&
+b0 #
+b0 O
+b0 |"
+0.
+b0 +
+b0 U
+b0 S"
+b0 r"
+b100000000 t"
+b100000 Q"
+16
+15
+#40
+05
+#60
+b10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 t
+b11 j"
+b1111 "
+b1111 e
+b1111 x"
+1!
+1$
+b10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 c
+b1 o
+b100000000 t"
+b100000 Q"
+b1 :
+06
+15
+#80
+05
+#100
+b10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 t
+b11 j"
+b10 p
+b1100101000000000000010010011 h
+b10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 c
+b1111 "
+b1111 e
+b1111 x"
+1!
+1$
+1&
+b1100101000000000000010010011 #
+b1100101000000000000010010011 O
+b1100101000000000000010010011 |"
+b100 }"
+15
+#120
+05
+#140
+1v
+b0 {
+b0 s
+1\
+1+"
+b0 [
+b0 #"
+b0 ,"
+1L
+1h"
+b0 K
+b0 `"
+b0 i"
+b110 )"
+b110 Q
+b110 4"
+b110 A"
+b1010 C
+b1010 ="
+b1010 M"
+b1 G
+b1 ?"
+b1 J"
+b110 f"
+b11001010 n
+b0 t
+b11 j"
+b11001010 f
+b11 p
+b0 c
+b0 "
+b0 e
+b0 x"
+0!
+0$
+b1100101000000000000010010011 M
+b1100101000000000000010010011 g
+b1100101000000000000010010011 ""
+b1100101000000000000010010011 7"
+b1100101000000000000010010011 _"
+b10 o
+1&
+b1100101000000000000010010011 #
+b1100101000000000000010010011 O
+b1100101000000000000010010011 |"
+b100 }"
+15
+#160
+05
+#180

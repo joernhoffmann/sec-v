@@ -17,8 +17,8 @@ module ram2port_wb #(
     parameter logic RESET_MEM   = 0,
     parameter string FILENAME   = "",
 
-    localparam int ISEL_WIDTH = INST_WIDTH / 8,
-    localparam int DSEL_WIDTH = DATA_WIDTH / 8
+    parameter int ISEL_WIDTH = INST_WIDTH/8,
+    parameter int DSEL_WIDTH = DATA_WIDTH/8
 ) (
     // Control
     input  logic                    clk_i,

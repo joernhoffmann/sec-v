@@ -13,8 +13,8 @@
  * History
  *  v1.0    - Initial version
  */
-
 `ifndef SECV_PKG
+`timescale 1ns / 100 ps
 `define SECV_PKG
 
 package secv_pkg;
@@ -369,9 +369,9 @@ package secv_pkg;
     function automatic funit_in_t funit_in_default();
         funit_in_t fu;
         fu.ena      = 1'b0;
-        fu.op       =  'b0;
-        fu.src1     =  'b0;
-        fu.src2     =  'b0;
+        fu.op       =  '0;
+        fu.src1     =  '0;
+        fu.src2     =  '0;
         return fu;
     endfunction
 
@@ -380,7 +380,7 @@ package secv_pkg;
         funit_out_t fu;
         fu.rdy      = 1'b0;
         fu.err      = 1'b0;
-        fu.res      =  'b0;
+        fu.res      =   '0;
         fu.res_wb   = 1'b0;
         return fu;
     endfunction

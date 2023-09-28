@@ -28,7 +28,7 @@ import secv_pkg::*;
 module mem #(
     parameter int XLEN = secv_pkg::XLEN,
     parameter int ADR_WIDTH = 8,
-    localparam int SEL_WIDTH = XLEN/8
+    parameter int SEL_WIDTH = XLEN/8
 ) (
     // Function unit interface
     input  funit_in_t  fu_i,
@@ -47,21 +47,21 @@ module mem #(
 
     // Signals
     logic [XLEN-1 : 0] dmem_dat;
-    mem_op_t op = fu_i.op.mem;
+    mem_op_t op = mem_op_t'(fu_i.op.mem);
     logic load, err;
 
     // Mem access
     always_comb begin : mem_access
         // Bus signals
-        dmem_cyc_o = 'b0;
-        dmem_stb_o = 'b0;
-        dmem_sel_o = 'b0;
-        dmem_adr_o = 'b0;
-        dmem_dat_o = 'b0;
-        dmem_we_o  = 'b0;
+        dmem_cyc_o = 1'b0;
+        dmem_stb_o = 1'b0;
+        dmem_sel_o =   '0;
+        dmem_adr_o =   '0;
+        dmem_dat_o =   '0;
+        dmem_we_o  = 1'b0;
 
         // Data signals
-        dmem_dat = 'b0;
+        dmem_dat = '0;
         load     = 1'b0;
         err      = 1'b0;
 

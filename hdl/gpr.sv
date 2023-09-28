@@ -43,13 +43,13 @@ module gpr #(
     always_ff @(posedge clk_i) begin
         if (rst_i)
             for (int idx=0; idx < REG_COUNT; idx++)
-                regfile[idx] <= 'b0;
+                regfile[idx] <= '0;
 
-        else if (rd_adr_i != 'b0 && rd_wb_i)
+        else if (rd_adr_i != '0 && rd_wb_i)
             regfile[rd_adr_i] <= rd_dat_i;
     end
 
     // Read logic
-    assign rs1_dat_o = (rs1_adr_i == 'b0) ? 'b0 : regfile[rs1_adr_i];
-    assign rs2_dat_o = (rs2_adr_i == 'b0) ? 'b0 : regfile[rs2_adr_i];
+    assign rs1_dat_o = (rs1_adr_i == '0) ? '0 : regfile[rs1_adr_i];
+    assign rs2_dat_o = (rs2_adr_i == '0) ? '0 : regfile[rs2_adr_i];
 endmodule
