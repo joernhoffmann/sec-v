@@ -105,9 +105,8 @@ module ram_2port_wb #(
                     memory[idx] <= 'b0;
         end
 
-        // Non reset
         else begin
-            // IMEM adressed
+            // IMEM addressed
             if (cyc1_i && stb1_i) begin
                 for (int byte_idx = 0; byte_idx < ISEL_WIDTH-1; byte_idx++)
                     if (sel1_i[byte_idx])
