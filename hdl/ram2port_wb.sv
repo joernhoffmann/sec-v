@@ -83,7 +83,7 @@ module ram2port_wb #(
     `endif
 
     always @(posedge clk_i) begin
-        // Blocked assignements (selections)
+        // Blocked assignments (selections)
         logic [ADDR_WIDTH-1 : 0] dmem_adr;
         logic [INST_WIDTH-1 : 0] imem;
         dmem_adr = {adr1_i[ADDR_WIDTH-1:1], 1'b0};
@@ -94,7 +94,6 @@ module ram2port_wb #(
         dat2_o <= 'b0;
         ack1_o <= 1'b0;
         ack2_o <= 1'b0;
-
 
         // Reset condition
         if (rst_i) begin
