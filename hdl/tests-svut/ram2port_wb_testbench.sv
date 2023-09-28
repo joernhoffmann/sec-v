@@ -244,7 +244,7 @@ module ram2port_wb_testbench();
         `FAIL_IF_NOT_EQUAL(ram_out, 64'hffffffdd_ffff33ff);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Read from port1 returns previous write from port2")
+    `UNIT_TEST("Read from port1 returns correctly aligned previous write to port2")
         reset();
         adr    = 'h22;
         ram_in = 64'haabbccdd_11223344;
@@ -264,10 +264,5 @@ module ram2port_wb_testbench();
         `FAIL_IF_NOT_EQUAL(ack2_o, 1'b1);
         `FAIL_IF_NOT_EQUAL(rom_out, 32'haabbccdd);
     `UNIT_TEST_END
-
-
-
-
     `TEST_SUITE_END
-
 endmodule
