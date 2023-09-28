@@ -42,7 +42,7 @@ module gpr_testbench();
         .rd_wb_i   (rd_wb_i)
     );
 
-    // To create a clock:
+    // Clock
     parameter int PERIOD = 2;
     initial clk_i = 0;
     always #PERIOD clk_i = ~clk_i;
@@ -68,6 +68,9 @@ module gpr_testbench();
     end
     endtask
 
+    // -------------------------------------------------------------------------------------------------------------- //
+    // Helper tasks
+    // -------------------------------------------------------------------------------------------------------------- //
     task reset();
     begin
         @(posedge clk_i)
@@ -77,7 +80,7 @@ module gpr_testbench();
     end
     endtask
 
-    // Write data to register via destination register
+    // Write destination register
     task write_rd;
         input  regadr_t            adr;
         input  logic    [XLEN-1:0] dat;
@@ -91,7 +94,7 @@ module gpr_testbench();
     end
     endtask
 
-    // Read register via source register 1 address
+    // Read source register 1
     task read_rs1;
         input  regadr_t         adr;
         output logic [XLEN-1:0] dat;
@@ -103,7 +106,7 @@ module gpr_testbench();
     end
     endtask
 
-    // Read register via source register 2 address
+    // Read source register 2
     task read_rs2;
         input  regadr_t         adr;
         output logic [XLEN-1:0] dat;
@@ -115,11 +118,10 @@ module gpr_testbench();
     end
     endtask
 
+    // -------------------------------------------------------------------------------------------------------------- //
+    // Tests
+    // -------------------------------------------------------------------------------------------------------------- //
     `TEST_SUITE("GPR")
-
-    // -------------------------------------------------------------------------------------------------------------- //
-    // Reset
-    // -------------------------------------------------------------------------------------------------------------- //
     `UNIT_TEST("Check random value written to r0..r32 return 0 if read after reset")
         for (int i = 0; i < REG_COUNT; i++) begin
             address = i;
@@ -137,9 +139,7 @@ module gpr_testbench();
         end
     `UNIT_TEST_END
 
-    // -------------------------------------------------------------------------------------------------------------- //
-    // Register 0
-    // -------------------------------------------------------------------------------------------------------------- //
+    // Register [0]
     `UNIT_TEST("Check random value written to r0 returns 0 if read")
         address = 0;
         rd_dat = 'h42;
@@ -151,9 +151,7 @@ module gpr_testbench();
         `FAIL_IF_NOT_EQUAL(rs2_dat, 'b0);
     `UNIT_TEST_END
 
-    // -------------------------------------------------------------------------------------------------------------- //
     // Register [1..32]
-    // -------------------------------------------------------------------------------------------------------------- //
     `UNIT_TEST("Check random value written to r1..r32 could be read")
         for (int i = 1; i < REG_COUNT; i++) begin
             address = i;
