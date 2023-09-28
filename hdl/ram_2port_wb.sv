@@ -48,7 +48,8 @@ module ram_2port_wb #(
     `ifndef SYNTHESIS
         // Memory initialization
         initial begin
-            memory = '{default: 'b0};
+            for (int idx=0; idx < 2**ADDR_WIDTH; idx++)
+                memory[idx] = 'b0;
         end
 
         // Assertions
@@ -100,7 +101,8 @@ module ram_2port_wb #(
             ack2_o <= 1'b0;
 
             if (RESET_MEM)
-                memory <= '{default: '0};
+                for (int idx=0; idx < 2**ADDR_WIDTH; idx++)
+                    memory[idx] <= 'b0;
         end
 
         // Non reset
