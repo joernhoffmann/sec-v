@@ -10,7 +10,7 @@
  *  v1.0    - Initial version
  */
 
-module ram_2port_wb #(
+module ram2port_wb #(
     parameter int ADDR_WIDTH    = 8,
     parameter int INST_WIDTH    = 32,
     parameter int DATA_WIDTH    = 64,

@@ -1,10 +1,20 @@
-// Mandatory file to be able to launch SVUT flow
+// SPDX-License-Identifier: BSD-3-clause
+/*
+ * Copyright (C) Jörn Hoffmann, 2023
+ *
+ * Project  : SEC-V
+ * Author   : J. Hoffmann <joern@bitaggregat.de>
+ * Purpose  : 2-port RAM testbench
+ *
+ * History
+ *  v1.0    - Initial version
+ */
+
 `include "svut_h.sv"
-// Specify the module to load or on files.f
-`include "ram_2port_wb.sv"
+`include "ram2port_wb.sv"
 `timescale 1 ns / 100 ps
 
-module ram_2port_wb_testbench();
+module ram2port_wb_testbench();
 
     `SVUT_SETUP
 
@@ -32,7 +42,7 @@ module ram_2port_wb_testbench();
     logic [DATA_WIDTH-1 : 0] dat2_o;
     logic                    ack2_o;
 
-    ram_2port_wb
+    ram2port_wb
     #(
         .ADDR_WIDTH (ADDR_WIDTH),
         .INST_WIDTH (INST_WIDTH),
