@@ -51,13 +51,66 @@ package secv_pkg;
     typedef logic signed [XLEN-1:0] imm_t;
 
     // Instruction formats
-    typedef struct packed {funct7_t funct7;                                 regadr_t rs2;   regadr_t rs1;   funct3_t funct3;    regadr_t rd;                                opcode_t opcode;} inst_r_t;
-    typedef struct packed {logic [11: 0] imm_11_0;                                          regadr_t rs1;   funct3_t funct3;    regadr_t rd;                                opcode_t opcode;} inst_i_t;
-    typedef struct packed {logic [11: 5] imm_11_5;  logic [ 4:0] shamt;                     regadr_t rs1;   funct3_t funct3;    regadr_t rd;                                opcode_t opcode;} inst_i_shft_t;
-    typedef struct packed {logic [11: 5] imm_11_5;                          regadr_t rs2;   regadr_t rs1;   funct3_t funct3;    logic [4:0] imm_4_0;                        opcode_t opcode;} inst_s_t;
-    typedef struct packed {logic [12:12] imm_12;    logic [10:5] imm_10_5;  regadr_t rs2;   regadr_t rs1;   funct3_t funct3;    logic [4:1] imm_4_1; logic [11:11] imm_11;  opcode_t opcode;} inst_b_t;
-    typedef struct packed {logic [31:12] imm_31_12;                                                                             regadr_t rd;                                opcode_t opcode;} inst_u_t;
-    typedef struct packed {logic [20:20] imm_20;    logic [10:1] imm_10_1;  logic [11:11]   imm_11; logic [19:12] imm_19_12;    regadr_t rd;                                opcode_t opcode;} inst_j_t;
+    typedef struct packed {
+        funct7_t        funct7;
+        regadr_t        rs2;
+        regadr_t        rs1;
+        funct3_t        funct3;
+        regadr_t        rd;
+        opcode_t        opcode;
+    } inst_r_t;
+
+    typedef struct packed {
+        logic [11: 0]   imm_11_0;
+        regadr_t        rs1;
+        funct3_t        funct3;
+        regadr_t        rd;
+        opcode_t        opcode;
+    } inst_i_t;
+
+    typedef struct packed {
+        logic [11: 5]   imm_11_5;
+        logic [ 4: 0]   shamt;
+        regadr_t        rs1;
+        funct3_t        funct3;
+        regadr_t        rd;
+        opcode_t        opcode;
+    } inst_i_shft_t;
+
+    typedef struct packed {
+        logic [11: 5]   imm_11_5;
+        regadr_t        rs2;
+        regadr_t        rs1;
+        funct3_t        funct3;
+        logic [4: 0]    imm_4_0;
+        opcode_t opcode;
+    } inst_s_t;
+
+    typedef struct packed {
+        logic [12:12]   imm_12;
+        logic [10:5]    imm_10_5;
+        regadr_t        rs2;
+        regadr_t        rs1;
+        funct3_t        funct3;
+        logic [4:1]     imm_4_1;
+        logic [11:11]   imm_11;
+        opcode_t        opcode;
+    } inst_b_t;
+
+    typedef struct packed {
+        logic [31:12] imm_31_12;
+        regadr_t rd;
+        opcode_t opcode;
+    } inst_u_t;
+
+    typedef struct packed {
+        logic [20:20]   imm_20;
+        logic [10:1]    imm_10_1;
+        logic [11:11]   imm_11;
+        logic [19:12]   imm_19_12;
+        regadr_t        rd;
+        opcode_t        opcode;
+    } inst_j_t;
 
     // Instruction type
     typedef union packed {
