@@ -22,9 +22,9 @@
  * History
  *  v1.0    - Initial version
  */
-`timescale 1ns / 100ps
 
-module ram_wb #(
+module ram_wb
+#(
     parameter int ADDR_WIDTH = 8,
     parameter int DATA_WIDTH = 32,
     parameter bit RESET_MEM  = 0,
@@ -79,9 +79,13 @@ module ram_wb #(
             ack_o <= 1'b0;
 
             if (RESET_MEM)
+`ifdef VERILATOR
+                memory <= '{default:'0};
+`else
                 for (int idx=0; idx < 2**ADDR_WIDTH; idx++)
                     memory[idx] <= '0;
-        end
+`endif
+            end
 
         // Module addressed
         else if (cyc_i && stb_i) begin

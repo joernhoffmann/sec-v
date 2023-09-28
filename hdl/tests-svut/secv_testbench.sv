@@ -10,7 +10,6 @@
 `include "mem.sv"
 `include "secv.sv"
 `include "gpr.sv"
-`timescale 1ns / 100ps
 
 module secv_testbench();
     `SVUT_SETUP
@@ -43,6 +42,17 @@ module secv_testbench();
     logic [XLEN-1 : 0]          dmem_dat_i;
     logic                       dmem_ack_i;
 
+    // Debug
+    funit_op_t                  op_dbg;
+    logic [ILEN-1       : 0]    ir_dbg;
+    inst_t                      inst_dbg;
+    state_t                     state_dbg;
+    src1_sel_t                  src1_sel_dbg;
+    src2_sel_t                  src2_sel_dbg;
+    funit_t                     funit_dbg;
+    funit_in_t                  funit_in_dbg;
+    funit_out_t                 funit_out_dbg;
+
     secv #(
         .ILEN       (ILEN),
         .XLEN       (XLEN),
@@ -69,7 +79,15 @@ module secv_testbench();
         .dmem_we_o  (dmem_we_o),
         .dmem_dat_o (dmem_dat_o),
         .dmem_dat_i (dmem_dat_i),
-        .dmem_ack_i (dmem_ack_i)
+        .dmem_ack_i (dmem_ack_i),
+
+        .op_dbg     (op_dbg),
+        .ir_dbg     (ir_dbg),
+        .inst_dbg   (inst_dbg),
+        .funit_dbg  (funit_dbg),
+        .state_dbg  (state_dbg),
+        .funit_in_dbg (funit_in_dbg),
+        .funit_out_dbg (funit_out_dbg)
     );
 
     rom_wb rom (
@@ -163,7 +181,7 @@ module secv_testbench();
     //    - `LAST_STATUS: tied to 1 is last macro did experience a failure, else tied to 0
 
     `UNIT_TEST("Test program execution")
-        #100;
+        #1000;
 
     `UNIT_TEST_END
 

@@ -22,7 +22,6 @@
  * History
  *  v1.0    - Initial version
  */
-`timescale 1ns / 100ps
 
 module rom_wb #(
     parameter int ADDR_WIDTH = 8,
@@ -70,7 +69,7 @@ module rom_wb #(
 
     always_ff @(posedge clk_i) begin
         // Prevent lateches
-        dat_o <= 'b0;
+        dat_o <=  'b0;
         ack_o <= 1'b0;
 
         // Reset condition

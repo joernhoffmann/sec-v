@@ -43,6 +43,8 @@ do
     elif [ "$name" == "secv" ]; then
         $SVUT -test secv_testbench.sv && success=$((success+1))
 
+    elif [ "$name" == "secv_verilator" ]; then
+        $SVUT -sim verilator -test secv_testbench.sv && success=$((success+1))
 
     else
         echo "Test name '$name' unknown"

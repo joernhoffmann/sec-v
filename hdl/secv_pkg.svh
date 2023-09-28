@@ -14,7 +14,6 @@
  *  v1.0    - Initial version
  */
 `ifndef SECV_PKG
-`timescale 1ns / 100 ps
 `define SECV_PKG
 
 package secv_pkg;
@@ -22,6 +21,15 @@ package secv_pkg;
     parameter int XLEN = 64;                            // Data width
     parameter int REG_COUNT = 32;                       // Number of general purpose integer registers
     parameter int REG_ADDR_WIDTH = $clog2(REG_COUNT);   // Width to address registers
+
+    // States
+    typedef enum logic [3:0] {
+        STATE_IDLE,
+        STATE_FETCH,
+        STATE_DECODE,
+        STATE_EXECUTE,
+        STATE_WB
+    } state_t;
 
     // -------------------------------------------------------------------------------------------------------------- //
     // Instruction

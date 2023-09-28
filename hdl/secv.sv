@@ -63,7 +63,18 @@ module secv #(
     output  logic                       dmem_we_o,
     output  logic [XLEN-1 : 0]          dmem_dat_o,
     input   logic [XLEN-1 : 0]          dmem_dat_i,
-    input   logic                       dmem_ack_i
+    input   logic                       dmem_ack_i,
+
+    // Debug
+    output  logic [ILEN-1 : 0]          ir_dbg,
+    output  inst_t                      inst_dbg,
+    output  state_t                     state_dbg,
+    output  funit_t                     funit_dbg,
+    output  src1_sel_t                  src1_sel_dbg,
+    output  src2_sel_t                  src2_sel_dbg,
+    output  funit_op_t                  op_dbg,
+    output  funit_in_t                  funit_in_dbg,
+    output  funit_out_t                 funit_out_dbg
 );
     // --- General purpose register file ---------------------------------------------------------------------------- //
     logic [XLEN-1:0] rs1_dat, rs2_dat, rd_dat;
@@ -148,12 +159,12 @@ module secv #(
 
     // Funit operation selection
     funit_op_t funit_op;
-    always_comb begin : decoder_mux
+    always_comb begin : funit_op_mux
         unique case (funit)
-            FUNIT_NONE  : funit_op      = '0;
-            FUNIT_ALU   : funit_op.alu  = alu_op;
-            FUNIT_MEM   : funit_op.mem  = mem_op;
-            default     : funit_op      = '0;
+            FUNIT_NONE  : funit_op = '0;
+            FUNIT_ALU   : funit_op = alu_op;
+            FUNIT_MEM   : funit_op = mem_op;
+            default     : funit_op = '0;
         endcase
     end
 
@@ -198,16 +209,10 @@ module secv #(
     funit_in_t  funit_in;
     funit_out_t funit_out;
 
-    // Input of selected function unit
+    // I/O of selected function unit
     always_comb begin
-        // Set default inputs
-        for (int idx = 0; idx < FUNIT_COUNT; idx++)
-            funit_in_bus[idx] = funit_in_default();
-
         funit_in_bus[funit] = funit_in;
     end
-
-    // Output of selected function unit
     assign funit_out = funit_out_bus[funit];
 
     // --- MUXer ---------------------------------------------------------------------------------------------------- //
@@ -263,9 +268,9 @@ module secv #(
     logic [XLEN-1:0] wbstage_pc;
     always_comb begin: wbstage_pc_mux
         unique case (pc_sel)
-            PC_SEL_NXTPC  : wbstage_pc = nxtpc;         // Write-back next pc
-            PC_SEL_FUNIT  : wbstage_pc = funit_out.res;       // Write-back funit output
-            PC_SEL_BRANCH : wbstage_pc = brn_target;    // Write-back branch target
+            PC_SEL_NXTPC  : wbstage_pc = nxtpc;             // Write-back next pc
+            PC_SEL_FUNIT  : wbstage_pc = funit_out.res;     // Write-back funit output
+            PC_SEL_BRANCH : wbstage_pc = brn_target;        // Write-back branch target
             default       : wbstage_pc = nxtpc;
         endcase
     end
@@ -273,14 +278,6 @@ module secv #(
     // -------------------------------------------------------------------------------------------------------------- //
     // Main state machine
     // -------------------------------------------------------------------------------------------------------------- //
-    typedef enum logic [3:0] {
-        STATE_IDLE,
-        STATE_FETCH,
-        STATE_DECODE,
-        STATE_EXECUTE,
-        STATE_WB
-    } state_t;
-
     // FSM register
     state_t state, state_next;
     logic [XLEN-1:0] pc, pc_next;       // Program counter register
@@ -326,8 +323,8 @@ module secv #(
         funit_in = funit_in_default();
         funit_in.ena  = 1'b0;
         funit_in.op   = funit_op;
-        funit_in.src1 = rs1_dat;
-        funit_in.src2 = rs2_dat;
+        funit_in.src1 = src1;
+        funit_in.src2 = src2;
 
         // State transistion
         unique case (state)
@@ -340,7 +337,7 @@ module secv #(
                 imem_cyc_o = 1'b1;
                 imem_stb_o = 1'b1;
                 imem_sel_o =   '1;
-                imem_adr_o = pc[IADR_WIDTH-1 : 0];
+                imem_adr_o = pc[9 : 2];
 
                 if (imem_ack_i) begin
                     ir_next = imem_dat_i;
@@ -366,6 +363,7 @@ module secv #(
             end
 
             STATE_WB: begin
+                funit_in.ena = 1'b1;
                 rd_dat     = wbstage_rd_dat;
                 pc_next    = wbstage_pc;
                 state_next = STATE_FETCH;
@@ -388,4 +386,16 @@ module secv #(
                 state_next = state;
         endcase
     end
+
+// Debug
+assign inst_dbg  = inst;
+assign ir_dbg = ir;
+assign state_dbg = state;
+assign funit_dbg = funit;
+assign src1_sel_dbg = src1_sel;
+assign src2_sel_dbg = src2_sel;
+assign op_dbg = funit_op;
+assign funit_in_dbg = funit_in;
+assign funit_out_dbg = funit_out;
+
 endmodule
