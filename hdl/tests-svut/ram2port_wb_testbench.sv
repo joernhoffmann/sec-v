@@ -78,14 +78,16 @@ module ram2port_wb_testbench();
     logic [INST_WIDTH-1 : 0] rom_out;
 
     // Clock
-    parameter int CLK_PERIOD = 2;
+    parameter int CLK_HALF   = 1;
+    parameter int CLK_PERIOD = CLK_HALF * 2;
+
     initial clk_i = 0;
-    always #CLK_PERIOD clk_i = ~clk_i;
+    always #CLK_HALF clk_i = ~clk_i;
 
     // To dump data for visualization:
     // initial begin
-    //     $dumpfile("ram_2port_wb_testbench.vcd");
-    //     $dumpvars(0, ram_2port_wb_testbench);
+    //     $dumpfile("ram2port_wb_testbench.vcd");
+    //     $dumpvars(0, ram2port_wb_testbench);
     // end
 
     // Setup time format when printing with $realtime()
@@ -110,7 +112,8 @@ module ram2port_wb_testbench();
     begin
         @(posedge clk_i)
         rst_i = 1'b1;
-        #CLK_PERIOD;
+
+        @(posedge clk_i)
         rst_i = 1'b0;
     end
     endtask
@@ -119,7 +122,6 @@ module ram2port_wb_testbench();
     task read_dat1;
         input  logic    [ADDR_WIDTH-1:0]   adr;
         input  logic    [ISEL_WIDTH-1:0]   sel;
-        output logic    [INST_WIDTH-1:0]   dat;
     begin
         @(posedge clk_i);
         cyc1_i = 1'b1;
@@ -127,10 +129,7 @@ module ram2port_wb_testbench();
         sel1_i = sel;
         adr1_i = adr;
 
-        @(posedge clk_i);
-        dat = dat1_o;
-
-        #CLK_PERIOD;
+        #CLK_HALF;
     end
     endtask
 
@@ -138,7 +137,6 @@ module ram2port_wb_testbench();
     task read_dat2;
         input  logic    [ADDR_WIDTH-1:0]   adr;
         input  logic    [DSEL_WIDTH-1:0]   sel;
-        output logic    [DATA_WIDTH-1:0]   dat;
     begin
         @(posedge clk_i);
         cyc2_i = 1'b1;
@@ -147,10 +145,7 @@ module ram2port_wb_testbench();
         adr2_i = adr;
          we2_i = 1'b0;
 
-        @(posedge clk_i);
-        dat = dat2_o;
-
-        #CLK_PERIOD;
+        #CLK_HALF;
     end
     endtask
 
@@ -169,7 +164,7 @@ module ram2port_wb_testbench();
          we2_i = 1'b1;
         dat2_i = dat;
 
-        #CLK_PERIOD;
+        #CLK_HALF;
         cyc2_i = 1'b0;
         stb2_i = 1'b0;
         sel2_i = '0;
@@ -209,9 +204,9 @@ module ram2port_wb_testbench();
         write_dat2(.adr(adr), .sel(8'b1111_1111), .dat(ram_in));
         `FAIL_IF_NOT_EQUAL(ack2_o, 1'b1);
 
-        read_dat2(.adr(adr), .sel(8'b1111_1111), .dat(ram_out));
+        read_dat2(.adr(adr), .sel(8'b1111_1111));
         `FAIL_IF_NOT_EQUAL(ack2_o, 1'b1);
-        `FAIL_IF_NOT_EQUAL(ram_out, ram_in);
+        `FAIL_IF_NOT_EQUAL(dat2_o, ram_in);
     `UNIT_TEST_END
 
     `UNIT_TEST("Write to port2 with byte selection succeeds")
@@ -222,9 +217,9 @@ module ram2port_wb_testbench();
         write_dat2(.adr(adr), .sel(8'b1001_1011), .dat(ram_in));
         `FAIL_IF_NOT_EQUAL(ack2_o, 1'b1);
 
-        read_dat2(.adr(adr), .sel(8'b1111_1111), .dat(ram_out));
+        read_dat2(.adr(adr), .sel(8'b1111_1111));
         `FAIL_IF_NOT_EQUAL(ack2_o, 1'b1);
-        `FAIL_IF_NOT_EQUAL(ram_out, 64'hff0000ff_ff00ffff);
+        `FAIL_IF_NOT_EQUAL(dat2_o, 64'hff0000ff_ff00ffff);
     `UNIT_TEST_END
 
     `UNIT_TEST("Write two times to port2 with byte selection succeeds")
@@ -239,9 +234,9 @@ module ram2port_wb_testbench();
         write_dat2(.adr(adr), .sel(8'b1110_1101), .dat(ram_in));
         `FAIL_IF_NOT_EQUAL(ack2_o, 1'b1);
 
-        read_dat2(.adr(adr), .sel(8'b1111_1111), .dat(ram_out));
+        read_dat2(.adr(adr), .sel(8'b1111_1111));
         `FAIL_IF_NOT_EQUAL(ack2_o, 1'b1);
-        `FAIL_IF_NOT_EQUAL(ram_out, 64'hffffffdd_ffff33ff);
+        `FAIL_IF_NOT_EQUAL(dat2_o, 64'hffffffdd_ffff33ff);
     `UNIT_TEST_END
 
     `UNIT_TEST("Read from port1 returns correctly aligned previous write to port2")
@@ -252,17 +247,17 @@ module ram2port_wb_testbench();
         write_dat2(.adr(adr), .sel(8'b1111_1111), .dat(ram_in));
         `FAIL_IF_NOT_EQUAL(ack2_o, 1'b1);
 
-        read_dat2(.adr(adr), .sel(8'b1111_1111), .dat(ram_out));
+        read_dat2(.adr(adr), .sel(8'b1111_1111));
         `FAIL_IF_NOT_EQUAL(ack2_o, 1'b1);
-        `FAIL_IF_NOT_EQUAL(ram_out, ram_in);
+        `FAIL_IF_NOT_EQUAL(dat2_o, ram_in);
 
-        read_dat1(.adr(adr), .sel(4'b1111), .dat(rom_out));
+        read_dat1(.adr(adr), .sel(4'b1111));
         `FAIL_IF_NOT_EQUAL(ack2_o, 1'b1);
-        `FAIL_IF_NOT_EQUAL(rom_out, 32'h11223344);
+        `FAIL_IF_NOT_EQUAL(dat1_o, 32'h11223344);
 
-        read_dat1(.adr('h23), .sel(4'b1111), .dat(rom_out));
+        read_dat1(.adr('h23), .sel(4'b1111));
         `FAIL_IF_NOT_EQUAL(ack2_o, 1'b1);
-        `FAIL_IF_NOT_EQUAL(rom_out, 32'haabbccdd);
+        `FAIL_IF_NOT_EQUAL(dat1_o, 32'haabbccdd);
     `UNIT_TEST_END
     `TEST_SUITE_END
 endmodule
