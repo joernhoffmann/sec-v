@@ -8,6 +8,7 @@
 `include "branch.sv"
 `include "decoder.sv"
 `include "mem.sv"
+`include "mem_decoder.sv"
 `include "secv.sv"
 `include "gpr.sv"
 
@@ -42,17 +43,6 @@ module secv_testbench();
     logic [XLEN-1 : 0]          dmem_dat_i;
     logic                       dmem_ack_i;
 
-    // Debug
-    funit_op_t                  op_dbg;
-    logic [ILEN-1       : 0]    ir_dbg;
-    inst_t                      inst_dbg;
-    state_t                     state_dbg;
-    src1_sel_t                  src1_sel_dbg;
-    src2_sel_t                  src2_sel_dbg;
-    funit_t                     funit_dbg;
-    funit_in_t                  funit_in_dbg;
-    funit_out_t                 funit_out_dbg;
-
     secv #(
         .ILEN       (ILEN),
         .XLEN       (XLEN),
@@ -79,15 +69,7 @@ module secv_testbench();
         .dmem_we_o  (dmem_we_o),
         .dmem_dat_o (dmem_dat_o),
         .dmem_dat_i (dmem_dat_i),
-        .dmem_ack_i (dmem_ack_i),
-
-        .op_dbg     (op_dbg),
-        .ir_dbg     (ir_dbg),
-        .inst_dbg   (inst_dbg),
-        .funit_dbg  (funit_dbg),
-        .state_dbg  (state_dbg),
-        .funit_in_dbg (funit_in_dbg),
-        .funit_out_dbg (funit_out_dbg)
+        .dmem_ack_i (dmem_ack_i)
     );
 
     rom_wb rom (

@@ -63,18 +63,7 @@ module secv #(
     output  logic                       dmem_we_o,
     output  logic [XLEN-1 : 0]          dmem_dat_o,
     input   logic [XLEN-1 : 0]          dmem_dat_i,
-    input   logic                       dmem_ack_i,
-
-    // Debug
-    output  logic [ILEN-1 : 0]          ir_dbg,
-    output  inst_t                      inst_dbg,
-    output  state_t                     state_dbg,
-    output  funit_t                     funit_dbg,
-    output  src1_sel_t                  src1_sel_dbg,
-    output  src2_sel_t                  src2_sel_dbg,
-    output  funit_op_t                  op_dbg,
-    output  funit_in_t                  funit_in_dbg,
-    output  funit_out_t                 funit_out_dbg
+    input   logic                       dmem_ack_i
 );
     // --- General purpose register file ---------------------------------------------------------------------------- //
     logic [XLEN-1:0] rs1_dat, rs2_dat, rd_dat;
@@ -151,7 +140,7 @@ module secv #(
     // MEM decoder
     mem_op_t mem_op;
     logic mem_dec_err;
-    alu_decoder mem_dec0 (
+    mem_decoder mem_dec0 (
         .inst_i     (inst),
         .op_o       (mem_op),
         .err_o      (mem_dec_err)
@@ -386,16 +375,4 @@ module secv #(
                 state_next = state;
         endcase
     end
-
-// Debug
-assign inst_dbg  = inst;
-assign ir_dbg = ir;
-assign state_dbg = state;
-assign funit_dbg = funit;
-assign src1_sel_dbg = src1_sel;
-assign src2_sel_dbg = src2_sel;
-assign op_dbg = funit_op;
-assign funit_in_dbg = funit_in;
-assign funit_out_dbg = funit_out;
-
 endmodule

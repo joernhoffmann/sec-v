@@ -262,27 +262,27 @@ package secv_pkg;
         ALU_OP_NONE = 0,
 
         // Logic
-        ALU_OP_AND,
-        ALU_OP_OR,
-        ALU_OP_XOR,
+        ALU_OP_AND,         // 1
+        ALU_OP_OR,          // 2
+        ALU_OP_XOR,         // 3
 
         // Arithmetic
-        ALU_OP_ADD,
-        ALU_OP_SUB,
-        ALU_OP_ADDW,
-        ALU_OP_SUBW,
+        ALU_OP_ADD,         // 4
+        ALU_OP_SUB,         // 5
+        ALU_OP_ADDW,        // 6
+        ALU_OP_SUBW,        // 7
 
         // Shifts
-        ALU_OP_SLL,
-        ALU_OP_SRL,
-        ALU_OP_SRA,
-        ALU_OP_SLLW,
-        ALU_OP_SRLW,
-        ALU_OP_SRAW,
+        ALU_OP_SLL,         // 8
+        ALU_OP_SRL,         // 9
+        ALU_OP_SRA,         // 10
+        ALU_OP_SLLW,        // 11
+        ALU_OP_SRLW,        // 12
+        ALU_OP_SRAW,        // 13
 
         // Compares
-        ALU_OP_SLT,
-        ALU_OP_SLTU
+        ALU_OP_SLT,         // 14
+        ALU_OP_SLTU         // 15
     } alu_op_t;
 
     // Mem
@@ -290,19 +290,19 @@ package secv_pkg;
         MEM_OP_NONE = 0,
 
         // Loads
-        MEM_OP_LB,
-        MEM_OP_LH,
-        MEM_OP_LW,
-        MEM_OP_LD,
-        MEM_OP_LBU,
-        MEM_OP_LHU,
-        MEM_OP_LWU,
+        MEM_OP_LB,      // 1
+        MEM_OP_LH,      // 2
+        MEM_OP_LW,      // 3
+        MEM_OP_LD,      // 4
+        MEM_OP_LBU,     // 5
+        MEM_OP_LHU,     // 6
+        MEM_OP_LWU,     // 7
 
         // Stores
-        MEM_OP_SB,
-        MEM_OP_SH,
-        MEM_OP_SW,
-        MEM_OP_SD
+        MEM_OP_SB,      // 8
+        MEM_OP_SH,      // 9
+        MEM_OP_SW,      // 10
+        MEM_OP_SD       // 11
     } mem_op_t;
 
     // --- Function unit interface ---------------------------------------------------------------------------------- //
