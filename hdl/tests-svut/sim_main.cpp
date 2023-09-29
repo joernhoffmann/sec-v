@@ -8,7 +8,7 @@ int main(int argc, char** argv, char** env) {
     int timer = 0;
 
     // Simulate until $finish()
-    // Verilated::traceEverOn(true);
+    Verilated::traceEverOn(true);
     while (!Verilated::gotFinish()) {
 
         // Evaluate model;
