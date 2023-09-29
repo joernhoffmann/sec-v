@@ -43,5 +43,6 @@ help:
 clean:
 	rm -f svut.out
 	rm -rf build
+	rm -f *.vcd
 
 .PHONY: all clean
