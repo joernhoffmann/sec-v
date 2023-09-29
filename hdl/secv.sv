@@ -98,44 +98,56 @@ module secv #(
     src1_sel_t  src1_sel;
     src2_sel_t  src2_sel;
     imm_sel_t   imm_sel;
-    pc_sel_t    pc_sel;
     rd_sel_t    rd_sel;
+    pc_sel_t    pc_sel;
     logic       dec_err;
 
     assign inst = ir;
     decoder dec0 (
-        .inst_i     (inst),
+        .inst_i         (inst),
 
         // Opcode fields
-        .opcode_o   (opcode),
-        .funct3_o   (funct3),
-        .funct7_o   (funct7),
+        .opcode_o       (opcode),
+        .funct3_o       (funct3),
+        .funct7_o       (funct7),
 
         // Operands
-        .rs1_adr_o  (rs1_adr),
-        .rs2_adr_o  (rs2_adr),
-        .rd_adr_o   (rd_adr),
-        .imm_sel_o  (imm_sel),
+        .rs1_adr_o      (rs1_adr),
+        .rs2_adr_o      (rs2_adr),
+        .rd_adr_o       (rd_adr),
 
         // Function unit
-        .funit_o    (funit),
-        .src1_sel_o (src1_sel),
-        .src2_sel_o (src2_sel),
-        .rd_sel_o   (rd_sel),
-        .pc_sel_o   (pc_sel),
+        .funit_o        (funit),
+        .alu_op_sel_o   (alu_op_sel),
+        .src1_sel_o     (src1_sel),
+        .src2_sel_o     (src2_sel),
+        .imm_sel_o      (imm_sel),
+        .rd_sel_o       (rd_sel),
+        .pc_sel_o       (pc_sel),
 
         // Errors
-        .err_o      (dec_err)
+        .err_o          (dec_err)
     );
 
     // ALU decoder
-    alu_op_t alu_op;
+    alu_op_t alu_dec_op;
     logic alu_dec_err;
     alu_decoder alu_dec0 (
         .inst_i     (inst),
-        .op_o       (alu_op),
+        .op_o       (alu_dec_op),
         .err_o      (alu_dec_err)
     );
+
+    // ALU operation selection
+    alu_op_t alu_op;
+    alu_op_sel_t alu_op_sel;
+    always_comb begin : alu_op_mux
+        unique case (alu_op_sel)
+            ALU_OP_SEL_DECODER: alu_op = alu_dec_op;
+            ALU_OP_SEL_ADD:     alu_op = ALU_OP_ADD;
+            default:            alu_op = ALU_OP_NONE;
+        endcase
+    end
 
     // MEM decoder
     mem_op_t mem_op;

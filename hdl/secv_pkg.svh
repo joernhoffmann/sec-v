@@ -312,6 +312,12 @@ package secv_pkg;
         mem_op_t mem;
     } funit_op_t;
 
+    // Select the ALU operation
+    typedef enum logic {
+        ALU_OP_SEL_DECODER,  // Decode Instruction
+        ALU_OP_SEL_ADD       // Use Add operation
+    } alu_op_sel_t;
+
     // Source 1 selection
     typedef enum logic [1:0] {
         SRC1_SEL_0,          // 0: Value '0'

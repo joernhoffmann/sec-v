@@ -31,12 +31,13 @@ module decoder (
     output regadr_t     rd_adr_o,   // Dest.  register address
 
     // Muxer
-    output  funit_t     funit_o,    // Function unit
-    output  src1_sel_t  src1_sel_o, // Source 1 selection
-    output  src2_sel_t  src2_sel_o, // Source 2 selection
-    output imm_sel_t    imm_sel_o,  // Immediate operand type
-    output  rd_sel_t    rd_sel_o,   // Dest. register selection
-    output  pc_sel_t    pc_sel_o,   // PC register selector
+    output funit_t      funit_o,        // Function unit
+    output src1_sel_t   src1_sel_o,     // Source 1 selection
+    output src2_sel_t   src2_sel_o,     // Source 2 selection
+    output imm_sel_t    imm_sel_o,      // Immediate operand type
+    output rd_sel_t     rd_sel_o,       // Dest. register selection
+    output pc_sel_t     pc_sel_o,       // PC register selector
+    output alu_op_sel_t alu_op_sel_o,   // Alu operation selection
 
     // Error codes
     output  logic       err_o       // Decoding error, invalid opcode
@@ -50,23 +51,31 @@ module decoder (
     assign funct3 = inst_i.r_type.funct3;
     assign funct7 = inst_i.r_type.funct7;
 
-    // Function unit, operands and destination selection
-    funit_t    funit;
-    src1_sel_t src1_sel;
-    src2_sel_t src2_sel;
-    imm_sel_t  imm_sel;
-    rd_sel_t   rd_sel;
-    pc_sel_t   pc_sel;
-    logic      err;
+    // Function unit selection
+    funit_t         funit;
+    alu_op_sel_t    alu_op_sel;
+
+    // Source selection
+    src1_sel_t      src1_sel;
+    src2_sel_t      src2_sel;
+    imm_sel_t       imm_sel;
+
+    // Dest. selection
+    rd_sel_t        rd_sel;
+    pc_sel_t        pc_sel;
+    logic err;
 
     always_comb begin : decode_op
-        funit     = FUNIT_NONE;
-        src1_sel  = SRC1_SEL_0;
-        src2_sel  = SRC2_SEL_0;
-        imm_sel   = IMM_SEL_0;
-        rd_sel    = RD_SEL_NONE;
-        pc_sel    = PC_SEL_NXTPC;
-        err       = 1'b0;
+        funit       = FUNIT_NONE;
+        alu_op_sel  = ALU_OP_SEL_DECODER;
+
+        src1_sel    = SRC1_SEL_0;
+        src2_sel    = SRC2_SEL_0;
+        imm_sel     = IMM_SEL_0;
+
+        rd_sel      = RD_SEL_NONE;
+        pc_sel      = PC_SEL_NXTPC;
+        err         = 1'b0;
 
         unique case (opcode)
             OPCODE_LUI: begin
@@ -77,66 +86,88 @@ module decoder (
 
             OPCODE_AUIPC: begin
                 funit       = FUNIT_ALU;
+                alu_op_sel  = ALU_OP_SEL_ADD;
+
                 src1_sel    = SRC1_SEL_PC;
                 src2_sel    = SRC2_SEL_IMM;
                 imm_sel     = IMM_SEL_U;
+
                 rd_sel      = RD_SEL_FUNIT;
             end
 
             OPCODE_JAL: begin
                 funit       = FUNIT_ALU;
+                alu_op_sel  = ALU_OP_SEL_ADD;
+
                 src1_sel    = SRC1_SEL_PC;
                 src2_sel    = SRC2_SEL_IMM;
                 imm_sel     = IMM_SEL_J;
+
                 rd_sel      = RD_SEL_NXTPC;
                 pc_sel      = PC_SEL_FUNIT;
             end
 
             OPCODE_JALR: begin
                 funit       = FUNIT_ALU;
+                alu_op_sel  = ALU_OP_SEL_ADD;
+
                 src1_sel    = SRC1_SEL_RS1;
                 src2_sel    = SRC2_SEL_IMM;
                 imm_sel     = IMM_SEL_I;
+
                 rd_sel      = RD_SEL_NXTPC;
                 pc_sel      = PC_SEL_FUNIT;
             end
 
             OPCODE_BRANCH: begin
                 funit       = FUNIT_ALU;
+                alu_op_sel  = ALU_OP_SEL_ADD;
+
                 src1_sel    = SRC1_SEL_PC;
                 src2_sel    = SRC2_SEL_IMM;
                 imm_sel     = IMM_SEL_B;
+
                 pc_sel      = PC_SEL_BRANCH;
             end
 
             OPCODE_LOAD: begin
                 funit       = FUNIT_MEM;
+
                 src1_sel    = SRC1_SEL_RS1_IMM;     // Address
                 src2_sel    = SRC2_SEL_0;           // No second operand
                 imm_sel     = IMM_SEL_I;
+
                 rd_sel      = RD_SEL_FUNIT;
             end
 
             OPCODE_STORE: begin
                 funit       = FUNIT_MEM;
+
                 src1_sel    = SRC1_SEL_RS1_IMM;     // Address
                 src2_sel    = SRC2_SEL_RS2;         // Store operand
                 imm_sel     = IMM_SEL_S;
+
                 rd_sel      = RD_SEL_NONE;
             end
 
             OPCODE_OP, OPCODE_OP_32: begin
                 funit       = FUNIT_ALU;
+                alu_op_sel  = ALU_OP_SEL_DECODER;
+
                 src1_sel    = SRC1_SEL_RS1;
                 src2_sel    = SRC2_SEL_RS2;
+
                 rd_sel      = RD_SEL_FUNIT;
             end
 
             OPCODE_OP_IMM, OPCODE_OP_IMM_32: begin
                 funit       = FUNIT_ALU;
+                alu_op_sel  = ALU_OP_SEL_DECODER;
+
                 src1_sel    = SRC1_SEL_RS1;
                 src2_sel    = SRC2_SEL_IMM;
                 imm_sel     = IMM_SEL_I;
+
                 rd_sel      = RD_SEL_FUNIT;
             end
 
@@ -158,11 +189,12 @@ module decoder (
     assign imm_sel_o = imm_sel;
 
     // Function unit
-    assign funit_o    = funit;
-    assign src1_sel_o = src1_sel;
-    assign src2_sel_o = src2_sel;
-    assign rd_sel_o   = rd_sel;
-    assign pc_sel_o   = pc_sel;
+    assign funit_o      = funit;
+    assign alu_op_sel_o = alu_op_sel;
+    assign src1_sel_o   = src1_sel;
+    assign src2_sel_o   = src2_sel;
+    assign rd_sel_o     = rd_sel;
+    assign pc_sel_o     = pc_sel;
 
     // Errors
     assign err_o = err;
