@@ -163,7 +163,7 @@ module secv_testbench();
     //    - `LAST_STATUS: tied to 1 is last macro did experience a failure, else tied to 0
 
     `UNIT_TEST("Test program execution")
-        #1000;
+        #10000;
 
     `UNIT_TEST_END
 

@@ -33,7 +33,7 @@ disasm: $(ELF)
 	$(OBJDUMP) -S -d $<
 
 $(HEX): $(ELF)
-	$(ELF2HEX) --bit-width 64 --input $< --output $@
+	$(ELF2HEX) --bit-width 32 --input $< --output $@
 
 $(IHEX): $(ELF)
 	$(OBJCOPY) -O ihex $< $@
