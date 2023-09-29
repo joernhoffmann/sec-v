@@ -367,10 +367,11 @@ package secv_pkg;
         // Control
         logic               rdy;    // Unit ready, operation completed
         logic               err;    // Error occured
+        logic               res_wb; // Result is valid (write back)
+        logic               reserved;
 
         // Payload
         logic   [XLEN-1:0]  res;    // Result
-        logic               res_wb; // Result is valid (write back)
     } funit_out_t;
 
     // FU input defaults
@@ -388,8 +389,9 @@ package secv_pkg;
         funit_out_t fu;
         fu.rdy      = 1'b0;
         fu.err      = 1'b0;
-        fu.res      =   '0;
         fu.res_wb   = 1'b0;
+        fu.reserved = 1'b0;
+        fu.res      =   '0;
         return fu;
     endfunction
 endpackage

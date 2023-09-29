@@ -61,29 +61,23 @@ module alu_decoder (
                 FUNCT3_ALU_ADD:
                     if (opcode_op)
                         case (funct7)
-                            FUNCT7_00h: op  = ALU_OP_ADD;
-                            FUNCT7_20h: op  = ALU_OP_SUB;
+                            FUNCT7_00h: op = ALU_OP_ADD;
+                            FUNCT7_20h: op = ALU_OP_SUB;
                             default:    err = 1'b1;
                         endcase
 
                     else if (opcode_op_imm)
-                        case (funct7)
-                            FUNCT7_00h: op  = ALU_OP_ADD;
-                            default:    err = 1'b1;
-                        endcase
+                        op = ALU_OP_ADD;
 
                     else if (opcode_op_32)
                         case (funct7)
-                            FUNCT7_00h: op  = ALU_OP_ADDW;
-                            FUNCT7_20h: op  = ALU_OP_SUBW;
+                            FUNCT7_00h: op = ALU_OP_ADDW;
+                            FUNCT7_20h: op = ALU_OP_SUBW;
                             default:    err = 1'b1;
                         endcase
 
                     else if(opcode_op_imm_32)
-                        case (funct7)
-                            FUNCT7_00h: op  = ALU_OP_ADDW;
-                            default:    err = 1'b1;
-                        endcase
+                            op  = ALU_OP_ADDW;
 
                 FUNCT3_ALU_SLL:
                     if(opcode_op || opcode_op_imm)
