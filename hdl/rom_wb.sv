@@ -44,7 +44,11 @@ module rom_wb #(
     `ifndef SYNTHESIS
         // Memory initialization
         initial begin
-            // hello.asm
+                $display("Load hex file %s", "hello.hex");
+                $readmemh("hello.hex", memory);
+
+    `ifdef DIRECT_LOAD
+            // hello.asm (old)
             memory[0] = 32'h0ca00093;
             memory[1] = 32'h00809093;
             memory[2] = 32'h0fe08093;
@@ -52,6 +56,7 @@ module rom_wb #(
             memory[4] = 32'h00113023;
             memory[5] = 32'h00000033;
             memory[6] = 32'hffdff06f;
+    `endif
         end
 
         // Assertions
