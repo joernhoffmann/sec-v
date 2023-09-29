@@ -47,10 +47,11 @@ module mem #(
 
     // Signals
     logic [XLEN-1 : 0] dmem_dat;
-    mem_op_t op = mem_op_t'(fu_i.op.mem);
     logic load, err;
+    mem_op_t op;
 
     // Mem access
+    assign op = mem_op_t'(fu_i.op.mem);
     always_comb begin : mem_access
         // Bus signals
         dmem_cyc_o = 1'b0;

@@ -111,18 +111,18 @@ module decoder (
 
             OPCODE_LOAD: begin
                 funit       = FUNIT_MEM;
-                src1_sel    = SRC1_SEL_RS1;
-                src2_sel    = SRC2_SEL_IMM;
+                src1_sel    = SRC1_SEL_RS1_IMM;     // Address
+                src2_sel    = SRC2_SEL_0;           // No second operand
                 imm_sel     = IMM_SEL_I;
                 rd_sel      = RD_SEL_FUNIT;
             end
 
             OPCODE_STORE: begin
                 funit       = FUNIT_MEM;
-                src1_sel    = SRC1_SEL_RS1;
-                src2_sel    = SRC2_SEL_IMM;
+                src1_sel    = SRC1_SEL_RS1_IMM;     // Address
+                src2_sel    = SRC2_SEL_RS2;         // Store operand
                 imm_sel     = IMM_SEL_S;
-                rd_sel      = RD_SEL_FUNIT;
+                rd_sel      = RD_SEL_NONE;
             end
 
             OPCODE_OP, OPCODE_OP_32: begin

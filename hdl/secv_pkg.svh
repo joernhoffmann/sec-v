@@ -314,16 +314,17 @@ package secv_pkg;
 
     // Source 1 selection
     typedef enum logic [1:0] {
-        SRC1_SEL_0,          // Value '0'
-        SRC1_SEL_RS1,        // Register source 1
-        SRC1_SEL_PC          // Current program counter
+        SRC1_SEL_0,          // 0: Value '0'
+        SRC1_SEL_RS1,        // 1: Register source 1
+        SRC1_SEL_RS1_IMM,    // 2: Register source 1 + imm (for load, store)
+        SRC1_SEL_PC          // 3: Current program counter
     } src1_sel_t;
 
     // Source 2 selection
     typedef enum logic [1:0] {
-        SRC2_SEL_0,          // Value '0'
-        SRC2_SEL_RS2,        // Register source 2
-        SRC2_SEL_IMM         // Immediate
+        SRC2_SEL_0,          // 0: Value '0'
+        SRC2_SEL_RS2,        // 1: Register source 2
+        SRC2_SEL_IMM         // 2: Immediate
     } src2_sel_t;
 
     // Immediate type selection
@@ -338,17 +339,17 @@ package secv_pkg;
 
     // Destination register selection
     typedef enum logic [1:0] {
-        RD_SEL_NONE,        // No input
-        RD_SEL_FUNIT,       // Function unit
-        RD_SEL_IMM,         // Immediate
-        RD_SEL_NXTPC        // Next pc
+        RD_SEL_NONE,        // 0: No input
+        RD_SEL_FUNIT,       // 1: Function unit
+        RD_SEL_IMM,         // 2: Immediate
+        RD_SEL_NXTPC        // 3: Next pc
     } rd_sel_t;
 
     // Program counter selection
     typedef enum logic [1:0] {
-        PC_SEL_NXTPC,       // Next pc
-        PC_SEL_FUNIT,       // Function unit
-        PC_SEL_BRANCH       // Branch decision unit
+        PC_SEL_NXTPC,       // 0: Next pc
+        PC_SEL_FUNIT,       // 1: Function unit
+        PC_SEL_BRANCH       // 2: Branch decision unit
      } pc_sel_t;
 
     // Function unit input interface

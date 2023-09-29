@@ -209,10 +209,11 @@ module secv #(
     logic [XLEN-1:0] src1;
     always_comb begin: src1_mux
         unique case (src1_sel)
-            SRC1_SEL_0   : src1 = '0;
-            SRC1_SEL_RS1 : src1 = rs1_dat;
-            SRC1_SEL_PC  : src1 = pc;
-            default      : src1 = '0;
+            SRC1_SEL_0          : src1 = '0;
+            SRC1_SEL_RS1        : src1 = rs1_dat;
+            SRC1_SEL_RS1_IMM    : src1 = rs1_dat + imm;
+            SRC1_SEL_PC         : src1 = pc;
+            default             : src1 = '0;
         endcase
     end
 
