@@ -102,3 +102,44 @@ Expanding SoC units to meet diverse requirements:
 - GPIO Port (General-Purpose Input/Output Port)
 
 The SEC-V project continues to evolve, aiming to deliver a secure and efficient RISC-V processor suitable for modern embedded systems.
+
+
+### 4. Code impression
+
+[mem_decoder.sv](hdl/mem_decoder.sv)
+```verilog
+`include "secv_pkg.svh"
+import secv_pkg::*;
+
+module branch #(
+    parameter int XLEN = secv_pkg::XLEN
+) (
+    input   funct3_t        funct3_i,
+    input   [XLEN-1 : 0]    rs1_i,
+    input   [XLEN-1 : 0]    rs2_i,
+
+    output  logic           take_o,
+    output  logic           err_o
+);
+
+    logic take, err;
+    always_comb begin
+        take = 1'b0;
+        err  = 1'b0;
+
+        unique case (funct3_i)
+            FUNCT3_BRANCH_BEQ   : take = (rs1_i          ==  rs2_i);
+            FUNCT3_BRANCH_BNE   : take = (rs1_i          !=  rs2_i);
+            FUNCT3_BRANCH_BLT   : take = ($signed(rs1_i) <   $signed(rs2_i));
+            FUNCT3_BRANCH_BGE   : take = ($signed(rs1_i) >=  $signed(rs2_i));
+            FUNCT3_BRANCH_BLTU  : take = (rs1_i          <   rs2_i);
+            FUNCT3_BRANCH_BGEU  : take = (rs1_i          >=  rs2_i);
+            default:
+                err = 1'b1;
+        endcase
+    end
+
+    // Outputs
+    assign take_o = take & !err;
+    assign err_o  = err;
+endmodule
