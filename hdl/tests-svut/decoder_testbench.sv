@@ -186,8 +186,8 @@ module decoder_testbench();
         inst_i = {25'bx, OPCODE_LOAD};
         #1
         `FAIL_IF_NOT_EQUAL(funit_o,  FUNIT_MEM);
-        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_RS1);
-        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_RS1_IMM);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_0);
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
         `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
@@ -198,10 +198,10 @@ module decoder_testbench();
         inst_i = {25'bx, OPCODE_STORE};
         #1
         `FAIL_IF_NOT_EQUAL(funit_o,  FUNIT_MEM);
-        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_RS1);
-        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_RS1_IMM);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_RS2);
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_S);
-        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_NONE);
         `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
         `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
