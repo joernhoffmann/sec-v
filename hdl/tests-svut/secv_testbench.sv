@@ -43,14 +43,11 @@ module secv_testbench();
     logic                       dmem_ack_i;
 
     secv #(
-        .ILEN       (ILEN),
-        .XLEN       (XLEN),
         .IADR_WIDTH (IADR_WIDTH),
         .DADR_WIDTH (DADR_WIDTH),
         .ISEL_WIDTH (ISEL_WIDTH),
         .DSEL_WIDTH (DSEL_WIDTH)
-    )
-    dut
+    ) dut
     (
         .clk_i      (clk_i),
         .rst_i      (rst_i),

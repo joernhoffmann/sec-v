@@ -227,14 +227,15 @@ module alu_decoder_testbench();
         `FAIL_IF(err_o);
     `UNIT_TEST_END
 
-    `UNIT_TEST("64 imm: decode SUB should fail")
+    `UNIT_TEST("64 imm: SUB should be decoded as ADD")
+        // Operation "subi" not defined in ISA
         r_inst.opcode = OPCODE_OP_IMM;
         r_inst.funct3 = FUNCT3_ALU_ADD;
         r_inst.funct7 = 7'h20;
         inst_i = r_inst;
         #1
-        `FAIL_IF_NOT_EQUAL(op_o, ALU_OP_NONE);
-        `FAIL_IF_NOT(err_o);
+        `FAIL_IF_NOT_EQUAL(op_o, ALU_OP_ADD);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     // -------------------------------------------------------------------------------------------------------------- //
@@ -280,14 +281,15 @@ module alu_decoder_testbench();
         `FAIL_IF(err_o);
     `UNIT_TEST_END
 
-    `UNIT_TEST("32 imm: decode SUBW should fail")
+    `UNIT_TEST("32 imm: SUBW should be decoded as ADDW")
+        // Operation "subwi" not defined in ISA
         r_inst.opcode = OPCODE_OP_IMM_32;
         r_inst.funct3 = FUNCT3_ALU_ADD;
         r_inst.funct7 = 7'h20;
         inst_i = r_inst;
         #1
-        `FAIL_IF_NOT_EQUAL(op_o, ALU_OP_NONE);
-        `FAIL_IF_NOT(err_o);
+        `FAIL_IF_NOT_EQUAL(op_o, ALU_OP_ADDW);
+        `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     // -------------------------------------------------------------------------------------------------------------- //

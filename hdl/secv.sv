@@ -35,9 +35,6 @@
 import secv_pkg::*;
 
 module secv #(
-    parameter int ILEN = secv_pkg::ILEN,
-    parameter int XLEN = secv_pkg::XLEN,
-
     parameter int IADR_WIDTH = 8,        // Instruction memory address width
     parameter int DADR_WIDTH = 8,        // Data memory address width
 
@@ -190,8 +187,7 @@ module secv #(
     // Data memory inteface unit
     mem  #(
         .ADR_WIDTH(DADR_WIDTH)
-    )
-    mem0 (
+    ) mem0 (
         // Control
         .fu_i (funit_in_bus[FUNIT_MEM]),
         .fu_o (funit_out_bus[FUNIT_MEM]),
