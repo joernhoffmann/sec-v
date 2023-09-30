@@ -1,6 +1,104 @@
-# SEC-V
+# SEC-V - The Secure RISC-V Processor
 
-Secure RISC-V Processor
+## 1. Description
 
-## License
-BSD-3 Clause
+The SEC-V processor is an open-source collaboration focused on creating an advanced RISC-V embedded processor. It merges research-driven methodologies with practical, commercial-grade features.
+
+The project repository contains comprehensive resources, including the SystemVerilog processor description, testbenches, programs, utility scripts, and documentation.
+
+### 1.1 Design Goals
+
+The core design principles guiding the SEC-V processor project include:
+
+1. Security: Prioritizing robust security measures
+2. Modularity / Extensibility: Supporting easy expansion and customization
+3. Testability: Ensuring straightforward verification and validation
+4. Ease of Understanding: Striving for developer-friendliness
+5. Efficiency: Optimizing performance
+6. Multi-Threading: Enabling concurrent processing for real time operating systems (RTOS)
+
+## 2. Features
+
+The SEC-V processor currently boasts the following features:
+
+### 2.1 Architecture
+
+- A 4-stage processor cycle (with ongoing pipeline development)
+- Harvard architecture
+- Wishbone-compliant instruction and data memory interfaces
+- A versatile, expandable function unit interface
+
+### 2.2 ISA
+
+- Implementation of the RV64I instruction set
+
+Currently, the processor supports the RV64I (integer) instruction set. This choice of the 64-bit variant allows for advanced security features like memory tagging, accommodates large address spaces (beneficial for DMA controllers), and enhances performance in data-intensive tasks (beneficial for network controllers and cryptographic functions).
+
+### 2.3 SoC Units
+
+- Wishbone-compatible ROM and RAM units
+
+### 2.4 Testing
+
+- Robust test benches
+- Well-crafted test programs
+
+Test benches are implemented using [SVUT](https://github.com/dpretet/svut) (SystemVerilog Unit Tests), compatible with [iverilog](https://github.com/steveicarus/iverilog) and optionally [Verilator](https://www.veripool.org/verilator/). Additionally, there are testbenches in [SVUnit](https://github.com/svunit/svunit), designed to run on major commercial simulators and Verilator.
+
+The SVUT test benches are favor for their simulation speed and open-source compatibility with iverilog.
+
+## 3. Roadmap
+
+The SEC-V project has a roadmap that outlines future developments:
+
+### 3.1 Security Features
+
+The project plans to introduce various security functions:
+
+#### 3.1.1 Deterministic
+
+- Threaded memory tagging (*research*):
+   - Supporting threading with word granularity
+- Code-injected device attestation (*research*):
+   - Implementing challenge-response methods with PUF-based techniques
+- Anti-trojan detection (*research*):
+   - Utilizing Physically Unclonable Functions (PUF)
+- Physical memory protection (PMP)
+- Separation of code and data stack (SCADS)
+- Support for control flow integrity (CFI)
+- Implementation of cryptographic and hash functions
+
+#### 3.1.2 Probabilistic
+
+- Instruction / code permutation
+- Structural permutation
+- Cache address permutation
+
+### 3.2 Architecture
+
+Future architectural improvements include:
+
+- Control and status register support (CSR):
+   - Efficiently managing interrupts, exceptions, and more
+- Configurable interleaved multi-threading (CIMT):
+   - Extending interleaved multi-threading with configurable thread counts (1 to n) and a 4-stage pipeline
+- Cache controller
+- Power management controller
+
+### 3.3 ISA Extensions
+
+These ISA extensions will enhance versatility:
+
+- C - Compressed instructions (for efficiency and energy-saving)
+- B - Bit manipulations (for enhanced efficiency)
+- M - Integer multiplication (for improved performance)
+- D - Division (for better performance)
+
+### 3.4 SoC Units
+
+Expanding SoC units to meet diverse requirements:
+
+- UART (Universal Asynchronous Receiver-Transmitter)
+- GPIO Port (General-Purpose Input/Output Port)
+
+The SEC-V project continues to evolve, aiming to deliver a secure and efficient RISC-V processor suitable for modern embedded systems.
