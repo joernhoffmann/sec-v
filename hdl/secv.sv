@@ -90,17 +90,18 @@ module secv #(
 
     // --- Decoder -------------------------------------------------------------------------------------------------- //
     // General decoder
-    inst_t      inst;
-    opcode_t    opcode;
-    funct3_t    funct3;
-    funct7_t    funct7;
-    funit_t     funit;
-    src1_sel_t  src1_sel;
-    src2_sel_t  src2_sel;
-    imm_sel_t   imm_sel;
-    rd_sel_t    rd_sel;
-    pc_sel_t    pc_sel;
-    logic       dec_err;
+    inst_t          inst;
+    opcode_t        opcode;
+    funct3_t        funct3;
+    funct7_t        funct7;
+    funit_t         funit;
+    src1_sel_t      src1_sel;
+    src2_sel_t      src2_sel;
+    imm_sel_t       imm_sel;
+    rd_sel_t        rd_sel;
+    pc_sel_t        pc_sel;
+    alu_op_sel_t    alu_op_sel;
+    logic           dec_err;
 
     assign inst = ir;
     decoder dec0 (
@@ -140,7 +141,6 @@ module secv #(
 
     // ALU operation selection
     alu_op_t alu_op;
-    alu_op_sel_t alu_op_sel;
     always_comb begin : alu_op_mux
         unique case (alu_op_sel)
             ALU_OP_SEL_DECODER: alu_op = alu_dec_op;
@@ -188,7 +188,10 @@ module secv #(
     );
 
     // Data memory inteface unit
-    mem mem0(
+    mem  #(
+        .ADR_WIDTH(DADR_WIDTH)
+    )
+    mem0 (
         // Control
         .fu_i (funit_in_bus[FUNIT_MEM]),
         .fu_o (funit_out_bus[FUNIT_MEM]),
@@ -339,7 +342,7 @@ module secv #(
                 imem_cyc_o = 1'b1;
                 imem_stb_o = 1'b1;
                 imem_sel_o =   '1;
-                imem_adr_o = pc[9 : 2];
+                imem_adr_o = pc[IADR_WIDTH-1 : 0];
 
                 if (imem_ack_i) begin
                     ir_next = imem_dat_i;

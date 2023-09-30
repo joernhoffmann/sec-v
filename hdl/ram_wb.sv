@@ -25,45 +25,45 @@
 
 module ram_wb
 #(
-    parameter int ADDR_WIDTH = 8,
-    parameter int DATA_WIDTH = 32,
+    parameter int ADR_WIDTH = 8,
+    parameter int DAT_WIDTH = 32,
     parameter bit RESET_MEM  = 0,
-    parameter int SEL_WIDTH  = DATA_WIDTH/8
+    parameter int SEL_WIDTH  = DAT_WIDTH/8
 ) (
     input  logic                    clk_i,  // Clock input
     input  logic                    rst_i,  // Reset input
     input  logic                    cyc_i,  // Cycle signal
     input  logic                    stb_i,  // Strobe signal
 
-    input  logic [ SEL_WIDTH-1 : 0] sel_i,  // Byte select signal
-    input  logic [ADDR_WIDTH-1 : 0] adr_i,  // Address input
+    input  logic [SEL_WIDTH-1 : 0]  sel_i,  // Byte select signal
+    input  logic [ADR_WIDTH-1 : 0]  adr_i,  // Address input
     input  logic                     we_i,  // Write enable signal
 
-    input  logic [DATA_WIDTH-1 : 0] dat_i,  // Data input
-    output logic [DATA_WIDTH-1 : 0] dat_o,  // Data output
+    input  logic [DAT_WIDTH-1 : 0]  dat_i,  // Data input
+    output logic [DAT_WIDTH-1 : 0]  dat_o,  // Data output
     output logic                    ack_o   // Acknowledge output
 );
-    logic [DATA_WIDTH-1 : 0] memory [2**ADDR_WIDTH];
+    logic [DAT_WIDTH-1 : 0] memory [2**ADR_WIDTH];
 
     `ifndef SYNTHESIS
         // Memory initialization
         initial begin
-            for (int idx=0; idx < 2**ADDR_WIDTH; idx++)
+            for (int idx=0; idx < 2**ADR_WIDTH; idx++)
                 memory[idx] = '0;
         end
 
         // Assertions
         initial begin
-            assert (ADDR_WIDTH > 0) else
-            $fatal("ADDR_WIDTH must be greater than 0.");
+            assert (ADR_WIDTH > 0) else
+            $fatal("ADR_WIDTH must be greater than 0.");
 
-            assert (DATA_WIDTH > 0 && $countones(DATA_WIDTH) == 1) else
-            $fatal("DATA_WIDTH must be a power of 2 and greater than 0.");
+            assert (DAT_WIDTH > 0 && $countones(DAT_WIDTH) == 1) else
+            $fatal("DAT_WIDTH must be a power of 2 and greater than 0.");
 
             assert (RESET_MEM === 0 || RESET_MEM === 1) else
             $fatal("RESET_MEM must be 0 or 1.");
 
-            assert (SEL_WIDTH === DATA_WIDTH / 8) else
+            assert (SEL_WIDTH === DAT_WIDTH / 8) else
             $fatal("SEL_WIDTH must match number of bytes in data word.");
         end
     `endif
@@ -82,7 +82,7 @@ module ram_wb
 `ifdef VERILATOR
                 memory <= '{default:'0};
 `else
-                for (int idx=0; idx < 2**ADDR_WIDTH; idx++)
+                for (int idx=0; idx < 2**ADR_WIDTH; idx++)
                     memory[idx] <= '0;
 `endif
             end

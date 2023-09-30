@@ -1,5 +1,4 @@
 `include "svut_h.sv"
-
 `include "rom_wb.sv"
 `include "ram_wb.sv"
 `include "alu_core.sv"
@@ -17,8 +16,8 @@ module secv_testbench();
 
     parameter int ILEN = secv_pkg::ILEN;
     parameter int XLEN = secv_pkg::XLEN;
-    parameter int IADR_WIDTH = 8;
-    parameter int DADR_WIDTH = 8;
+    parameter int IADR_WIDTH = 10;          // 1K (Byte addressable)
+    parameter int DADR_WIDTH = 10;          // 1k (Byte addressable)
     parameter int ISEL_WIDTH = ILEN/8;
     parameter int DSEL_WIDTH = XLEN/8;
 
@@ -72,32 +71,36 @@ module secv_testbench();
         .dmem_ack_i (dmem_ack_i)
     );
 
-    rom_wb rom (
-        .clk_i      (clk_i),
-        .rst_i      (rst_i),
-        .cyc_i      (imem_cyc_o),
-        .stb_i      (imem_stb_o),
-        .sel_i      (imem_sel_o),
-        .adr_i      (imem_adr_o),
-        .dat_o      (imem_dat_i),
-        .ack_o      (imem_ack_i)
+    rom_wb #(
+        .FILE   ("hello.hex"),
+        .ADR_WIDTH (10-2),              // 256 * 4 Byte = 1k
+        .DAT_WIDTH (secv_pkg::ILEN)     // 4 Byte
+    )  rom (
+        .clk_i  (clk_i),
+        .rst_i  (rst_i),
+        .cyc_i  (imem_cyc_o),
+        .stb_i  (imem_stb_o),
+        .sel_i  (imem_sel_o),
+        .adr_i  (imem_adr_o[9:2]),
+        .dat_o  (imem_dat_i),
+        .ack_o  (imem_ack_i)
     );
 
     ram_wb # (
-        .RESET_MEM(1),
-        .DATA_WIDTH(secv_pkg::XLEN)
-    )
-    ram (
-        .clk_i      (clk_i),
-        .rst_i      (rst_i),
-        .cyc_i      (dmem_cyc_o),
-        .stb_i      (dmem_stb_o),
-        .sel_i      (dmem_sel_o),
-        .adr_i      (dmem_adr_o),
-        .we_i       (dmem_we_o),
-        .dat_i      (dmem_dat_o),
-        .dat_o      (dmem_dat_i),
-        .ack_o      (dmem_ack_i)
+        .RESET_MEM  (1),
+        .ADR_WIDTH  (10-3),             // 128 * 8 Byte = 1k
+        .DAT_WIDTH  (secv_pkg::XLEN)    // 8 Byte
+    ) ram (
+        .clk_i  (clk_i),
+        .rst_i  (rst_i),
+        .cyc_i  (dmem_cyc_o),
+        .stb_i  (dmem_stb_o),
+        .sel_i  (dmem_sel_o),
+        .adr_i  (dmem_adr_o[9:3]),
+        .we_i   (dmem_we_o),
+        .dat_i  (dmem_dat_o),
+        .dat_o  (dmem_dat_i),
+        .ack_o  (dmem_ack_i)
     );
 
 
