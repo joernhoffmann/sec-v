@@ -17,10 +17,10 @@
 `define SECV_PKG
 
 package secv_pkg;
-    parameter int ILEN = 32;                            // Instruction width
-    parameter int XLEN = 64;                            // Data width
-    parameter int REG_COUNT = 32;                       // Number of general purpose integer registers
-    parameter int REG_ADDR_WIDTH = $clog2(REG_COUNT);   // Width to address registers
+    parameter int ILEN = 32;                        // Instruction width
+    parameter int XLEN = 64;                        // Data width
+    parameter int REG_COUNT = 32;                   // Number of general purpose integer registers
+    parameter int REG_ADR   = $clog2(REG_COUNT);    // Width to address registers
 
     // States
     typedef enum logic [3:0] {
@@ -55,7 +55,7 @@ package secv_pkg;
     // Instruction fields
     typedef logic [6:0] funct7_t;
     typedef logic [2:0] funct3_t;
-    typedef logic [4:0] regadr_t;
+    typedef logic [REG_ADR-1:0] regadr_t;
     typedef logic signed [XLEN-1:0] imm_t;
 
     // Instruction formats
