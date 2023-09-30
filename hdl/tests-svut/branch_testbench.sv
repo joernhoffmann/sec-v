@@ -10,7 +10,6 @@
 
 `include "svut_h.sv"
 `include "../branch.sv"
-`timescale 1 ns / 100 ps
 
 module branch_testbench();
     `SVUT_SETUP
