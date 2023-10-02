@@ -64,7 +64,7 @@ if [ -d $ELF2HEX_PATH ]; then
 	git pull
 else
 	mkdir -p $ELF2HEX_PATH
-	git clone https://github.com/dpretet/svut.git $ELF2HEX_PATH
+	git clone https://github.com/sifive/elf2hex.git $ELF2HEX_PATH
 fi
 
 

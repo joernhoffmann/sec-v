@@ -8,7 +8,7 @@ fi
 # SVUT
 SVUT=$HOME/lib/svut
 if [ -d $SVUT ]; then
-	export $SVUT
+	export SVUT
 	export PATH=$SVUT:$PATH
 fi
 
@@ -19,9 +19,10 @@ if [ -d $VERIBLE_PATH ]; then
 fi
 
 # Verilator
-VERILATOR_PATH=$HOME/lib/verilator/bin
-if [ -d $VERILATOR_PATH ]; then
-	export PATH=$VERILATOR_PATH:$PATH
+VERILATOR_ROOT=$HOME/lib/verilator
+if [ -d $VERILATOR_ROOT ]; then
+	export VERILATOR_ROOT
+	export PATH=$VERILATOR_ROOT/bin:$PATH
 fi
 
 # elf2hex
