@@ -57,49 +57,50 @@ The project plans to introduce various security functions:
 
 #### 3.1.1 Deterministic
 
-- Threaded memory tagging (*research*):
+1. Threaded memory tagging (*research*):
    - Supporting threading with word granularity
-- Code-injected device attestation (*research*):
+2. Code-injected device attestation (*research*):
    - Implementing challenge-response methods with PUF-based techniques
-- Anti-trojan detection (*research*):
+3. Anti-trojan detection (*research*):
    - Utilizing Physically Unclonable Functions (PUF)
-- Physical memory protection (PMP)
-- Separation of code and data stack (SCADS)
-- Support for control flow integrity (CFI)
-- Implementation of cryptographic and hash functions
+4. Physical memory protection (PMP)
+5. Separation of code and data stack (SCADS)
+6. Support for control flow integrity (CFI)
+7. Implementation of cryptographic and hash functions
 
 #### 3.1.2 Probabilistic
 
-- Instruction / code permutation
-- Structural permutation
-- Cache address permutation
+1. Instruction / code permutation
+2. Structural permutation
+3. Cache address permutation
 
 ### 3.2 Architecture
 
 Future architectural improvements include:
 
-- Control and status register support (CSR):
+1. Control and status register support (CSR):
    - Efficiently managing interrupts, exceptions, and more
-- Configurable interleaved multi-threading (CIMT):
+2. Configurable interleaved multi-threading (CIMT):
    - Extending interleaved multi-threading with configurable thread counts (1 to n) and a 4-stage pipeline
-- Cache controller
-- Power management controller
+3. Cache controller
+4. Power management controller
 
 ### 3.3 ISA Extensions
 
 These ISA extensions will enhance versatility:
 
-- C - Compressed instructions (for efficiency and energy-saving)
-- B - Bit manipulations (for enhanced efficiency)
-- M - Integer multiplication (for improved performance)
-- D - Division (for better performance)
+1. CSR   : Control and status register
+2. B     : Bit manipulations (for enhanced efficiency)
+3. C     : Compressed instructions (memory efficiency)
+4. M     : Integer multiplication (for improved performance)
+5. D     : Division (for better performance)
 
 ### 3.4 SoC Units
 
 Expanding SoC units to meet diverse requirements:
 
-- UART (Universal Asynchronous Receiver-Transmitter)
-- GPIO Port (General-Purpose Input/Output Port)
+1. UART (Universal Asynchronous Receiver-Transmitter)
+2. GPIO Port (General-Purpose Input/Output Port)
 
 The SEC-V project continues to evolve, aiming to deliver a secure and efficient RISC-V processor suitable for modern embedded systems.
 
