@@ -245,7 +245,25 @@ module alu_core_testbench();
     // ----------------------------------------------------------------------------------------------------------------
     // SRL - Shift Right Logic
     // ----------------------------------------------------------------------------------------------------------------
-    `UNIT_TEST("SRL shift-out all bits but one")
+    `UNIT_TEST("SRL shift-out no bit")
+        a_i 	= ~0;
+        b_i 	= 0;
+        op_i 	= ALU_OP_SRL;
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, ~0);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("SRL shift-out one bit")
+        a_i 	= ~0;
+        b_i 	= 1;
+        op_i 	= ALU_OP_SRL;
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, ~0 >> 1);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("SRL shift-out 63-bits")
         a_i 	= ~0;
         b_i 	= XLEN-1;
         op_i 	= ALU_OP_SRL;
@@ -254,33 +272,24 @@ module alu_core_testbench();
         `FAIL_IF(err_o);
     `UNIT_TEST_END
 
-    `UNIT_TEST("SRL shift-out all bits")
+    `UNIT_TEST("SRL shift-out 64-bits is pot possible (shamt [5:0])")
         a_i 	= ~0;
         b_i 	= XLEN;
         op_i 	= ALU_OP_SRL;
         #1
-        `FAIL_IF_NOT_EQUAL(res_o, 0);
-        `FAIL_IF(err_o);
-    `UNIT_TEST_END
-
-    `UNIT_TEST("SRL shift-out all bits with large shift amount")
-        a_i 	= ~0;
-        b_i 	= ~0-1;
-        op_i 	= ALU_OP_SRL;
-        #1
-        `FAIL_IF_NOT_EQUAL(res_o, 0);
+        `FAIL_IF_NOT_EQUAL(res_o, ~0);
         `FAIL_IF(err_o);
     `UNIT_TEST_END
 
     // ----------------------------------------------------------------------------------------------------------------
     // SRA - Shift Right Arithmetic
     // ----------------------------------------------------------------------------------------------------------------
-    `UNIT_TEST("SRA shift-in so that all bits set")
-        a_i 	= 1 << XLEN-1;	    // Set MSB to 1
-        b_i 	= XLEN-1;
+    `UNIT_TEST("SRA shift-in no bit")
+        a_i 	= 1 << XLEN-1;
+        b_i 	= 0;
         op_i 	= ALU_OP_SRA;
         #1
-        `FAIL_IF_NOT_EQUAL(res_o, ~0);
+        `FAIL_IF_NOT_EQUAL(res_o, { 1'b1, {XLEN-1{1'b0}}});
         `FAIL_IF(err_o);
     `UNIT_TEST_END
 
@@ -293,21 +302,21 @@ module alu_core_testbench();
         `FAIL_IF(err_o);
     `UNIT_TEST_END
 
-    `UNIT_TEST("SRA shift-out all bits")
-        a_i 	= 1 << XLEN-1;
-        b_i 	= XLEN;
+    `UNIT_TEST("SRA shift-in 63-Bit so that all bits set")
+        a_i 	= 1 << XLEN-1;	    // Set MSB to 1
+        b_i 	= XLEN-1;
         op_i 	= ALU_OP_SRA;
         #1
         `FAIL_IF_NOT_EQUAL(res_o, ~0);
         `FAIL_IF(err_o);
     `UNIT_TEST_END
 
-    `UNIT_TEST("SRA shift-out all bits with large shift amount")
+    `UNIT_TEST("SRA shift-in 64 bits not possible")
         a_i 	= 1 << XLEN-1;
-        b_i 	= ~0-1;
+        b_i 	= XLEN;
         op_i 	= ALU_OP_SRA;
         #1
-        `FAIL_IF_NOT_EQUAL(res_o, ~0);
+        `FAIL_IF_NOT_EQUAL(res_o, 1 << XLEN-1);
         `FAIL_IF(err_o);
     `UNIT_TEST_END
 

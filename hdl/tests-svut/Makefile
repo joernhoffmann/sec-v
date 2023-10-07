@@ -1,31 +1,31 @@
-SVUT ?= $(HOME)/lib/svut/svutRun
+SVUTRUN ?= $(HOME)/lib/svut/svutRun
 OPS = -no-splash
 
 all: alu_core alu_decoder alu branch decoder gpr mem_decoder secv
 
 alu_core:
-	$(SVUT) $(OPS) -test alu_core_testbench.sv
+	$(SVUTRUN) $(OPS) -test alu_core_testbench.sv
 
 alu_decoder:
-	$(SVUT) $(OPS) -test alu_decoder_testbench.sv
+	$(SVUTRUN) $(OPS) -test alu_decoder_testbench.sv
 
 alu:
-	$(SVUT) $(OPS) -test alu_testbench.sv
+	$(SVUTRUN) $(OPS) -test alu_testbench.sv
 
 branch:
-	$(SVUT) $(OPS) -test branch_testbench.sv
+	$(SVUTRUN) $(OPS) -test branch_testbench.sv
 
 decoder:
-	$(SVUT) $(OPS) -test decoder_testbench.sv
+	$(SVUTRUN) $(OPS) -test decoder_testbench.sv
 
 gpr:
-	$(SVUT) $(OPS) -test gpr_testbench.sv
+	$(SVUTRUN) $(OPS) -test gpr_testbench.sv
 
 mem_decoder:
-	$(SVUT) $(OPS) -test mem_decoder_testbench.sv
+	$(SVUTRUN) $(OPS) -test mem_decoder_testbench.sv
 
 secv:
-	$(SVUT) $(OPS) -test secv_testbench.sv
+	$(SVUTRUN) $(OPS) -test secv_testbench.sv
 
 secv_verilator: sim_main.cpp
 	verilator -Wall --trace --Mdir build +1800-2012ext+sv +1800-2005ext+v -Wno-STMTDLY -Wno-UNUSED \

@@ -29,67 +29,48 @@ module alu_core #(
     output  logic [XLEN-1:0]    res_o,  // Result
     output  logic               err_o
 );
-
-    // Main logic
+    // 32-Bit operands
     logic [31:0] a32, b32;
     assign a32 = a_i[31:0];
     assign b32 = b_i[31:0];
 
-    always_comb begin
+    // Shift amount
+    logic [5:0] shamt;
+    logic [4:0] shamt32;
+    assign shamt   = b_i[5:0];
+    assign shamt32 = b_i[4:0];
+
+    always_comb begin : alu_comb
         res_o =   '0;
         err_o = 1'b0;
 
         unique case(op_i)
             // Logic
-            ALU_OP_AND:
-                res_o = a_i & b_i;
-
-            ALU_OP_OR:
-                res_o = a_i | b_i;
-
-            ALU_OP_XOR:
-                res_o = a_i ^ b_i;
+            ALU_OP_AND:     res_o = a_i & b_i;
+            ALU_OP_OR:      res_o = a_i | b_i;
+            ALU_OP_XOR:     res_o = a_i ^ b_i;
 
             // Arithmetic
-            ALU_OP_ADD:
-                res_o = a_i + b_i;
-
-            ALU_OP_SUB:
-                res_o = a_i - b_i;
+            ALU_OP_ADD:     res_o = a_i + b_i;
+            ALU_OP_SUB:     res_o = a_i - b_i;
 
             // Arithmetic (32-bit)
-            ALU_OP_ADDW:
-                res_o = sext32(a32 + b32);
-
-            ALU_OP_SUBW:
-                res_o = sext32(a32 - b32);
+            ALU_OP_ADDW:    res_o = sext32(a32 + b32);
+            ALU_OP_SUBW:    res_o = sext32(a32 - b32);
 
             // Shift
-            ALU_OP_SLL:
-                res_o = a_i << b_i;
-
-            ALU_OP_SRL:
-                res_o = a_i >> b_i;
-
-            ALU_OP_SRA:
-                res_o = $signed(a_i) >>> b_i;
+            ALU_OP_SLL:     res_o = a_i << shamt;
+            ALU_OP_SRL:     res_o = a_i >> shamt;
+            ALU_OP_SRA:     res_o = $signed(a_i) >>> shamt;
 
             // Shift (32-bit)
-            ALU_OP_SLLW:
-                res_o = sext32(a32 << b32);
-
-            ALU_OP_SRLW:
-                res_o = sext32(a32 >> b32);
-
-            ALU_OP_SRAW:
-                res_o = sext32($signed(a32) >>> b32);
+            ALU_OP_SLLW:    res_o = sext32(a32 << shamt32);
+            ALU_OP_SRLW:    res_o = sext32(a32 >> shamt32);
+            ALU_OP_SRAW:    res_o = sext32($signed(a32) >>> shamt32);
 
             // Compares
-            ALU_OP_SLT:
-                res_o = {~a_i[XLEN-1], a_i[XLEN-2:0]} < {~b_i[XLEN-1], b_i[XLEN-2:0]} ? 'h1 : 'h0;
-
-            ALU_OP_SLTU:
-                res_o = $unsigned(a_i) < $unsigned(b_i) ? 'h1 : 'h0;
+            ALU_OP_SLT:     res_o = {~a_i[XLEN-1], a_i[XLEN-2:0]} < {~b_i[XLEN-1], b_i[XLEN-2:0]} ? 'h1 : 'h0;
+            ALU_OP_SLTU:    res_o = $unsigned(a_i) < $unsigned(b_i) ? 'h1 : 'h0;
 
             // ALU operation could not be decoded
             default: begin
