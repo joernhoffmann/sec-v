@@ -14,6 +14,8 @@ module alu_core_testbench();
     `SVUT_SETUP
 
     parameter XLEN = 64;
+    parameter WLEN = XLEN/2;
+
     alu_op_t	     op_i;
     logic [XLEN-1:0] a_i;
     logic [XLEN-1:0] b_i;
@@ -243,6 +245,63 @@ module alu_core_testbench();
     `UNIT_TEST_END
 
     // ----------------------------------------------------------------------------------------------------------------
+    // SLL - Shift Left Logic
+    // ----------------------------------------------------------------------------------------------------------------
+    `UNIT_TEST("SLL shift-in no bits")
+        a_i 	= ~0;
+        b_i 	= 0;
+        op_i 	= ALU_OP_SLL;
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, ~0);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("SLL shift-in 1-bit zero")
+        a_i 	= ~0;
+        b_i 	= 1;
+        op_i 	= ALU_OP_SLL;
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, ~0 << 1);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("SLL shift-in 63-bit zeros")
+        a_i 	= ~0;
+        b_i 	= XLEN-1;
+        op_i 	= ALU_OP_SLL;
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, {1'b1, {XLEN-1{1'b0}}});
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("SLL shift-in 64-bits zeros is pot possible (shamt [5:0])")
+        a_i 	= ~0;
+        b_i 	= XLEN;
+        op_i 	= ALU_OP_SLL;
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, ~0);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("SLL shift-left pattern 16")
+        a_i 	= 'hcafe;
+        b_i 	= 16;
+        op_i 	= ALU_OP_SLL;
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 'hcafe0000);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("SLL shift-left pattern 32 digits")
+        a_i 	= 'hcafebabe;
+        b_i 	= 32;
+        op_i 	= ALU_OP_SLL;
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 64'hcafebabe_00000000);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    // ----------------------------------------------------------------------------------------------------------------
     // SRL - Shift Right Logic
     // ----------------------------------------------------------------------------------------------------------------
     `UNIT_TEST("SRL shift-out no bit")
@@ -318,6 +377,48 @@ module alu_core_testbench();
         #1
         `FAIL_IF_NOT_EQUAL(res_o, 1 << XLEN-1);
         `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // SLLW - Shift Left Logic Word
+    // ----------------------------------------------------------------------------------------------------------------
+    `UNIT_TEST("SLLW shift-in no bit")
+        a_i 	= 1;
+        b_i 	= 0;
+        op_i 	= ALU_OP_SLLW;
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 1);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("SLLW shift-in no bit and correctly sign extend")
+        a_i 	= 1 << WLEN-1;
+        b_i 	= 0;
+        op_i 	= ALU_OP_SLLW;
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 64'hffff_ffff_8000_0000);
+        `FAIL_IF(err_o);
+        $display("res_o : %x", res_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("SLLW shift-in 31-bit zeros")
+        a_i 	= ~0;
+        b_i 	= WLEN-1;
+        op_i 	= ALU_OP_SLLW;
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, 64'hffff_ffff_8000_0000);
+        `FAIL_IF(err_o);
+        $display("res_o : %x", res_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("SLLW shift-in 32-bit zeros not possible")
+        a_i 	= ~0;
+        b_i 	= WLEN;
+        op_i 	= ALU_OP_SLLW;
+        #1
+        `FAIL_IF_NOT_EQUAL(res_o, ~0);
+        `FAIL_IF(err_o);
+        $display("res_o : %x", res_o);
     `UNIT_TEST_END
 
     // -----------------------------------------------------------------------------------------------------------------
