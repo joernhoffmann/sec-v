@@ -37,9 +37,12 @@ import secv_pkg::*;
 module secv #(
     parameter int IADR_WIDTH = 8,        // Instruction memory address width
     parameter int DADR_WIDTH = 8,        // Data memory address width
+    parameter int TADR_WIDTH = 16,       // Tag memory address width
 
     parameter int ISEL_WIDTH = ILEN/8,  // Instruction memory byte selection width
-    parameter int DSEL_WIDTH = XLEN/8   // Data memory byte selection width
+    parameter int DSEL_WIDTH = XLEN/8,  // Data memory byte selection width
+
+    parameter int TLEN       = 16       // Tag size
 ) (
     input   logic   clk_i,
     input   logic   rst_i,
@@ -60,7 +63,17 @@ module secv #(
     output  logic                       dmem_we_o,
     output  logic [XLEN-1 : 0]          dmem_dat_o,
     input   logic [XLEN-1 : 0]          dmem_dat_i,
-    input   logic                       dmem_ack_i
+    input   logic                       dmem_ack_i,
+
+    // Tag memory
+    output logic                        tmem_cyc_o,
+    output logic                        tmem_stb_o,
+    output logic                        tmem_sel_o,
+    output logic                        tmem_adr_o,
+    output logic                        tmem_we_o,
+    output logic [TLEN-1 : 0]           tmem_dat_o,
+    input  logic [TLEN-1 : 0]           tmem_dat_i,
+    input  logic                        tmem_ack_i
 );
     // --- General purpose register file ---------------------------------------------------------------------------- //
     logic [XLEN-1:0] rs1_dat, rs2_dat, rd_dat;
@@ -177,6 +190,7 @@ module secv #(
         .err_o      (brn_err)
     );
 
+
     // --- Function units ------------------------------------------------------------------------------------------- //
     // Arithmetic-logic unit
     alu alu0 (
@@ -201,6 +215,23 @@ module secv #(
         .dmem_dat_o (dmem_dat_o),
         .dmem_dat_i (dmem_dat_i),
         .dmem_ack_i (dmem_ack_i)
+    );
+
+    memtag #(
+        .ADR_WIDTH(DADR_WIDTH),
+    ) tag0 (
+        .fu_i (funit_in_bus[FUNIT_TAG]),
+        .fu_o (funit_out_bus[FUNIT_TAG]),
+
+        // Wishbone tag memory interface
+        .tmem_cyc_o (tmem_cyc_o),
+        .tmem_stb_o (tmem_stb_o),
+        .tmem_sel_o (tmem_sel_o),
+        .tmem_adr_o (tmem_adr_o),
+        .tmem_we_o  (tmem_we_o),
+        .tmem_dat_o (tmem_dat_o),
+        .tmem_dat_i (tmem_dat_i),
+        .tmem_ack_i (tmem_ack_i)
     );
 
     // Function unit bus
