@@ -7,7 +7,6 @@
  * Purpose  : Memory Tagging unit for the SEC-V processor.
  *
  * TODO:
- * - output as funit_out_t
  * - use opcode instead of set_i
  * - better use of mem_adr vs fu_i.src1
  *
@@ -30,10 +29,10 @@ module memtag #(
     parameter int TSEL_WIDTH = 1
 ) (
     input funit_in_t fu_i,
+    output funit_out_t fu_o,
 
     input logic set_i,
 
-    output logic err_o,
     output logic [ADR_WIDTH-1 : 0] err_adr_o,
 
     /* tag memory */
@@ -56,7 +55,6 @@ module memtag #(
   assign set = set_i;
 
   logic err;
-  assign err_o = err;
 
   logic [ADR_WIDTH-1 : 0] err_adr;
   assign err_adr_o = err_adr;
@@ -92,5 +90,14 @@ module memtag #(
       end
     end
   end
+
+  always_comb begin
+    fu_o = funit_out_default();
+
+    if (fu_i.ena) begin
+      fu_o.rdy = err;
+      fu_o.err = err;
+   end
+ end
 
 endmodule
