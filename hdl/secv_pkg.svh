@@ -37,7 +37,7 @@ package secv_pkg;
     // Opcodes
     typedef enum logic [6:0] {
         OPCODE_LOAD         = 7'b00_000_11,     // Load from memory
-        OPCODE_CUSTOM_0     = 7'b00_010_11,     // Custom opcoide (memtag)
+        OPCODE_CUSTOM_0     = 7'b00_010_11,     // Custom opcode (memtag)
 
         OPCODE_MISC_MEM     = 7'b00_011_11,     // Misc. memory access (e.g. fence instructions)
         OPCODE_OP_IMM       = 7'b00_100_11,     // Operation immediate
