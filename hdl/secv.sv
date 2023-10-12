@@ -69,7 +69,7 @@ module secv #(
     output logic                        tmem_cyc_o,
     output logic                        tmem_stb_o,
     output logic                        tmem_sel_o,
-    output logic                        tmem_adr_o,
+    output logic [TADR_WIDTH-1 : 0]     tmem_adr_o,
     output logic                        tmem_we_o,
     output logic [TLEN-1 : 0]           tmem_dat_o,
     input  logic [TLEN-1 : 0]           tmem_dat_i,
@@ -217,11 +217,13 @@ module secv #(
         .dmem_ack_i (dmem_ack_i)
     );
 
+    logic [DADR_WIDTH-1 : 0] err_adr;
     memtag #(
         .ADR_WIDTH(DADR_WIDTH),
     ) tag0 (
-        .fu_i (funit_in_bus[FUNIT_TAG]),
-        .fu_o (funit_out_bus[FUNIT_TAG]),
+        .fu_i      (funit_in_bus[FUNIT_TAG]),
+        .fu_o      (funit_out_bus[FUNIT_TAG]),
+        .err_adr_o (err_adr),
 
         // Wishbone tag memory interface
         .tmem_cyc_o (tmem_cyc_o),
