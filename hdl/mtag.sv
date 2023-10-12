@@ -7,7 +7,7 @@
  * Purpose  : Memory Tagging unit for the SEC-V processor.
  *
  * TODO:
- * - split out memtag_decoder
+ * - split out mtag_decoder
  * - find out, if I actually should split this into one
  *   function unit and one internal unit
  *
@@ -18,7 +18,7 @@
 `include "secv_pkg.svh"
 import secv_pkg::*;
 
-module memtag #(
+module mtag #(
     /* size of tags in bit */
     parameter int TLEN = 16,
     /* size of granules in byte */

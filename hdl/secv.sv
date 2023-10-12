@@ -218,11 +218,11 @@ module secv #(
     );
 
     logic [DADR_WIDTH-1 : 0] err_adr;
-    memtag #(
+    mtag #(
         .ADR_WIDTH(DADR_WIDTH),
     ) tag0 (
-        .fu_i      (funit_in_bus[FUNIT_TAG]),
-        .fu_o      (funit_out_bus[FUNIT_TAG]),
+        .fu_i      (funit_in_bus[FUNIT_MTAG]),
+        .fu_o      (funit_out_bus[FUNIT_MTAG]),
         .err_adr_o (err_adr),
 
         // Wishbone tag memory interface

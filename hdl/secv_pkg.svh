@@ -253,7 +253,7 @@ package secv_pkg;
         FUNIT_NONE,     // No function unit
         FUNIT_ALU,      // Arithmetic logic unit (ADD, SUB etc.)
         FUNIT_MEM,      // Memory unit           (Loads, Stores, FENCE etc.)
-        FUNIT_TAG,      // Tagging unit
+        FUNIT_MTAG,      // Tagging unit
         FUNIT_COUNT
     } funit_t;
 
