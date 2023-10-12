@@ -313,6 +313,14 @@ package secv_pkg;
         MEM_OP_SD       // 11
     } mem_op_t;
 
+    // MTAG
+    typedef enum bit [3:0] {
+        MTAG_OP_NONE = 0,
+
+        // Loads
+        MTAG_OP_TADR,     // 1
+    } mtag_op_t;
+
     // Funit operation (input)
     typedef union packed {
         alu_op_t alu;
