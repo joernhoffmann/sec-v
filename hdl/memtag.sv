@@ -7,8 +7,9 @@
  * Purpose  : Memory Tagging unit for the SEC-V processor.
  *
  * TODO:
- * - use opcode instead of set_i
- * - better use of mem_adr vs fu_i.src1
+ * - split out memtag_decoder
+ * - find out, if I actually should split this into one
+ *   function unit and one internal unit
  *
  * History
  *  v1.0    - Initial version
@@ -31,8 +32,6 @@ module memtag #(
     input funit_in_t fu_i,
     output funit_out_t fu_o,
 
-    input logic set_i,
-
     output logic [ADR_WIDTH-1 : 0] err_adr_o,
 
     /* tag memory */
@@ -50,9 +49,6 @@ module memtag #(
 
   logic [TLEN-1 : 0] tag;
   assign tag = fu_i.src1[XLEN-1 : XLEN-TLEN];
-
-  logic set;
-  assign set = set_i;
 
   logic err;
 
@@ -73,7 +69,7 @@ module memtag #(
     if (fu_i.ena) begin
       tmem_cyc_o = 1'b1;
       tmem_stb_o = 1'b1;
-      tmem_adr_o = mem_adr / GRANULARITY;
+      tmem_adr_o = TADR_WIDTH'(mem_adr / GRANULARITY);
 
       if (fu_i.op == OPCODE_CUSTOM_0) begin
         /* set tag in tag memory */
