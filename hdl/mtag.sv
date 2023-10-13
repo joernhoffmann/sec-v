@@ -7,7 +7,6 @@
  * Purpose    : Memory Tagging unit for the SEC-V processor.
  *
  * TODO:
- * - split out mtag_decoder
  * - find out, if I actually should split this into one
  *     function unit and one internal unit
  *
@@ -19,30 +18,30 @@
 import secv_pkg::*;
 
 module mtag #(
-        /* size of tags in bit */
-        parameter int TLEN = 16,
-        /* size of granules in byte */
-        parameter int GRANULARITY = 8,
-        /* address size in bit */
-        parameter int ADR_WIDTH = 8,
-        /* tag memory address width in bit */
-        parameter int TADR_WIDTH = 16,
-        parameter int TSEL_WIDTH = 1
+    /* size of tags in bit */
+    parameter int TLEN = 16,
+    /* size of granules in byte */
+    parameter int GRANULARITY = 8,
+    /* address size in bit */
+    parameter int ADR_WIDTH = 8,
+    /* tag memory address width in bit */
+    parameter int TADR_WIDTH = 16,
+    parameter int TSEL_WIDTH = 1
 ) (
-        input funit_in_t fu_i,
-        output funit_out_t fu_o,
+    input funit_in_t fu_i,
+    output funit_out_t fu_o,
 
-        output logic [ADR_WIDTH-1 : 0] err_adr_o,
+    output logic [ADR_WIDTH-1 : 0] err_adr_o,
 
-        /* tag memory */
-        output logic                    tmem_cyc_o,
-        output logic                    tmem_stb_o,
-        output logic [TSEL_WIDTH-1 : 0] tmem_sel_o,
-        output logic [TADR_WIDTH-1 : 0] tmem_adr_o,
-        output logic                    tmem_we_o,
-        output logic [TLEN-1 : 0]       tmem_dat_o,
-        input  logic [TLEN-1 : 0]       tmem_dat_i,
-        input  logic                    tmem_ack_i
+    /* tag memory */
+    output logic                    tmem_cyc_o,
+    output logic                    tmem_stb_o,
+    output logic [TSEL_WIDTH-1 : 0] tmem_sel_o,
+    output logic [TADR_WIDTH-1 : 0] tmem_adr_o,
+    output logic                    tmem_we_o,
+    output logic [TLEN-1 : 0]       tmem_dat_o,
+    input  logic [TLEN-1 : 0]       tmem_dat_i,
+    input  logic                    tmem_ack_i
 );
     logic [ADR_WIDTH-1 : 0] mem_adr;
     assign mem_adr = ADR_WIDTH'(fu_i.src1);
@@ -71,22 +70,26 @@ module mtag #(
             tmem_stb_o = 1'b1;
             tmem_adr_o = TADR_WIDTH'(mem_adr / GRANULARITY);
 
-            if (fu_i.op == OPCODE_CUSTOM_0) begin
-                /* set tag in tag memory */
-                tmem_dat_o = tag;
-                tmem_sel_o = 'b1;
-                tmem_we_o  = 'b1;
-            end else begin
-                /* compare tag with tag memory */
-                tmem_sel_o = 1'b1;
-                if (tmem_dat_i != tag) begin
-                    err = 1'b1;
-                    err_adr = mem_adr;
+            case (fu_i.op)
+                MTAG_OP_TADR: begin
+                    /* set tag in tag memory */
+                    tmem_dat_o = tag;
+                    tmem_sel_o = 'b1;
+                    tmem_we_o  = 'b1;
                 end
-            end
+                default: begin
+                    /* compare tag with tag memory */
+                    tmem_sel_o = 1'b1;
+                    if (tmem_dat_i != tag) begin
+                        err = 1'b1;
+                        err_adr = mem_adr;
+                    end
+                end
+            endcase
         end
     end
 
+    // output
     always_comb begin
         fu_o = funit_out_default();
 

@@ -13,7 +13,7 @@
 `include "secv_pkg.svh"
 import secv_pkg::*;
 
-module mtag (
+module mtag_decoder (
     input  inst_t    inst_i,
     output mtag_op_t op_o,
     output logic     err_o

@@ -168,6 +168,15 @@ module secv #(
         .err_o      (mem_dec_err)
     );
 
+    // Memory Tagging decoder
+    mtag_op_t mtag_op;
+    logic mtag_dec_err;
+    mtag_decoder mtag_dec0 (
+        .inst_i (inst),
+        .op_o   (mtag_op),
+        .err_o  (mtag_dec_err)
+    );
+
     // Funit operation selection
     funit_op_t funit_op;
     always_comb begin : funit_op_mux
@@ -175,6 +184,7 @@ module secv #(
             FUNIT_NONE  : funit_op = '0;
             FUNIT_ALU   : funit_op = alu_op;
             FUNIT_MEM   : funit_op = mem_op;
+            FUNIT_MTAG  : funit_op = mtag_op;
             default     : funit_op = '0;
         endcase
     end

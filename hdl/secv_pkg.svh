@@ -318,13 +318,14 @@ package secv_pkg;
         MTAG_OP_NONE = 0,
 
         // Loads
-        MTAG_OP_TADR,     // 1
+        MTAG_OP_TADR    // 1
     } mtag_op_t;
 
     // Funit operation (input)
     typedef union packed {
         alu_op_t alu;
         mem_op_t mem;
+        mtag_op_t mtag;
     } funit_op_t;
 
     // Function unit input interface
