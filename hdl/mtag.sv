@@ -4,7 +4,7 @@
  *
  * Project    : Memory Tagged SEC-V
  * Author     : Till Mahlburg
- * Purpose    : Memory Tagging unit for the SEC-V processor.
+ * Purpose    : Memory Tagging function unit for the SEC-V processor.
  *
  * TODO:
  * - find out, if I actually should split this into one
@@ -25,8 +25,7 @@ module mtag #(
     /* address size in bit */
     parameter int ADR_WIDTH = 8,
     /* tag memory address width in bit */
-    parameter int TADR_WIDTH = 16,
-    parameter int TSEL_WIDTH = 1
+    parameter int TADR_WIDTH = 16
 ) (
     input funit_in_t fu_i,
     output funit_out_t fu_o,
@@ -36,7 +35,7 @@ module mtag #(
     /* tag memory */
     output logic                    tmem_cyc_o,
     output logic                    tmem_stb_o,
-    output logic [TSEL_WIDTH-1 : 0] tmem_sel_o,
+    output logic                    tmem_sel_o,
     output logic [TADR_WIDTH-1 : 0] tmem_adr_o,
     output logic                    tmem_we_o,
     output logic [TLEN-1 : 0]       tmem_dat_o,
@@ -96,7 +95,7 @@ module mtag #(
         if (fu_i.ena) begin
             fu_o.rdy = err;
             fu_o.err = err;
-     end
- end
+        end
+    end
 
 endmodule
