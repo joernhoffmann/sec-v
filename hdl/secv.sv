@@ -208,6 +208,7 @@ module secv #(
         .fu_o (funit_out_bus[FUNIT_ALU])
     );
 
+    logic [DADR_WIDTH-1 : 0] t_err_adr;
     // Data memory inteface unit
     mem  #(
         .ADR_WIDTH(DADR_WIDTH)
@@ -215,6 +216,8 @@ module secv #(
         // Control
         .fu_i (funit_in_bus[FUNIT_MEM]),
         .fu_o (funit_out_bus[FUNIT_MEM]),
+
+        .t_err_adr_o(t_err_adr),
 
         // Wishbone data memory interface
         .dmem_cyc_o (dmem_cyc_o),
@@ -224,16 +227,22 @@ module secv #(
         .dmem_we_o  (dmem_we_o),
         .dmem_dat_o (dmem_dat_o),
         .dmem_dat_i (dmem_dat_i),
-        .dmem_ack_i (dmem_ack_i)
+        .dmem_ack_i (dmem_ack_i),
+
+        // Wishbone tag memory interface
+        .tmem_cyc_o (tmem_cyc_o),
+        .tmem_stb_o (tmem_stb_o),
+        .tmem_sel_o (tmem_sel_o),
+        .tmem_adr_o (tmem_adr_o),
+        .tmem_dat_i (tmem_dat_i),
+        .tmem_ack_i (tmem_ack_i)
     );
 
-    logic [DADR_WIDTH-1 : 0] err_adr;
     mtag #(
         .ADR_WIDTH(DADR_WIDTH),
-    ) tag0 (
+    ) mtag0 (
         .fu_i      (funit_in_bus[FUNIT_MTAG]),
         .fu_o      (funit_out_bus[FUNIT_MTAG]),
-        .err_adr_o (err_adr),
 
         // Wishbone tag memory interface
         .tmem_cyc_o (tmem_cyc_o),

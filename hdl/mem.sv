@@ -28,11 +28,16 @@ import secv_pkg::*;
 module mem #(
     parameter int XLEN = secv_pkg::XLEN,
     parameter int ADR_WIDTH = 8,
-    parameter int SEL_WIDTH = XLEN/8
+    parameter int SEL_WIDTH = XLEN/8,
+
+    parameter int TLEN = 16,
+    parameter int TADR_WIDTH = 16
 ) (
     // Function unit interface
     input  funit_in_t  fu_i,
     output funit_out_t fu_o,
+
+    output logic [ADR_WIDTH-1 : 0] t_err_adr_o,
 
     // Wishbone data memory interface
     output logic                    dmem_cyc_o,
@@ -42,13 +47,24 @@ module mem #(
     output logic                    dmem_we_o,
     output logic [XLEN-1      : 0]  dmem_dat_o,
     input  logic [XLEN-1      : 0]  dmem_dat_i,
-    input  logic                    dmem_ack_i
+    input  logic                    dmem_ack_i,
+
+    /* tag memory */
+    output logic                    tmem_cyc_o,
+    output logic                    tmem_stb_o,
+    output logic                    tmem_sel_o,
+    output logic [TADR_WIDTH-1 : 0] tmem_adr_o,
+    input  logic [TLEN-1       : 0] tmem_dat_i,
+    input  logic                    tmem_ack_i
 );
 
     // Signals
     logic [XLEN-1 : 0] dmem_dat;
     logic load, err;
     mem_op_t op;
+
+    logic t_err;
+    logic [ADR_WIDTH-1 : 0] t_err_adr;
 
     // Mem access
     assign op = mem_op_t'(fu_i.op.mem);
@@ -146,18 +162,35 @@ module mem #(
         end
     end
 
+    // Tag checking
+    mtag_chk mtag_chk0 (
+        .ena_i      (fu_i.ena),
+        .adr_i      (fu_i.src1),
+        .err_o      (t_err),
+        .err_adr_o  (t_err_adr),
+
+        .tmem_cyc_o (tmem_cyc_o),
+        .tmem_stb_o (tmem_stb_o),
+        .tmem_sel_o (tmem_sel_o),
+        .tmem_adr_o (tmem_adr_o),
+        .tmem_dat_i (tmem_dat_i),
+        .tmem_ack_i (tmem_ack_i)
+    );
+
     // Ouptut
     always_comb begin
         fu_o = funit_out_default();
+        t_err_adr_o = 'b0;
 
         if (fu_i.ena) begin
-                // Control output
-                fu_o.rdy = err || dmem_ack_i;
-                fu_o.err = err;
+            // Control output
+            fu_o.rdy = err || dmem_ack_i || t_err;
+            fu_o.err = err;
+            t_err_adr_o = t_err_adr;
 
-                // Result output
-                fu_o.res = dmem_dat;
-                fu_o.res_wb = load && !err;
+            // Result output
+            fu_o.res = dmem_dat;
+            fu_o.res_wb = load && !err;
         end
     end
 endmodule

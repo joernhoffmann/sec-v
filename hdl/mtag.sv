@@ -30,8 +30,6 @@ module mtag #(
     input funit_in_t fu_i,
     output funit_out_t fu_o,
 
-    output logic [ADR_WIDTH-1 : 0] err_adr_o,
-
     /* tag memory */
     output logic                    tmem_cyc_o,
     output logic                    tmem_stb_o,
@@ -50,11 +48,7 @@ module mtag #(
 
     logic err;
 
-    logic [ADR_WIDTH-1 : 0] err_adr;
-    assign err_adr_o = err_adr;
-
     always_comb begin
-        err_adr = 'b0;
         err = 'b0;
 
         tmem_cyc_o = 'b0;
@@ -77,12 +71,8 @@ module mtag #(
                     tmem_we_o  = 'b1;
                 end
                 default: begin
-                    /* compare tag with tag memory */
-                    tmem_sel_o = 1'b1;
-                    if (tmem_dat_i != tag) begin
-                        err = 1'b1;
-                        err_adr = mem_adr;
-                    end
+                    /* unknown opcode */
+                    err = 1'b1;
                 end
             endcase
         end
