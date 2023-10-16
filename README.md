@@ -57,16 +57,20 @@ The project plans to introduce various security functions:
 
 #### 3.1.1 Deterministic
 
-1. Threaded memory tagging (*research*):
+1. Memory tagging (*research*):
    - Supporting threading with word granularity
 2. Code-injected device attestation (*research*):
    - Implementing challenge-response methods with PUF-based techniques
 3. Anti-trojan detection (*research*):
    - Utilizing Physically Unclonable Functions (PUF)
 4. Physical memory protection (PMP)
-5. Separation of code and data stack (SCADS)
-6. Support for control flow integrity (CFI)
-7. Implementation of cryptographic and hash functions
+   - PMP-Device that isolates memory regions
+6. Separation of code and data stack (SCADS)
+7. Support for control flow integrity (CFI)
+   - Forward-edge and backward-edge (return) CFI
+9. Implementation of cryptographic and hash functions
+   - Offloading purpose
+   - Key-hiding
 
 #### 3.1.2 Probabilistic
 
