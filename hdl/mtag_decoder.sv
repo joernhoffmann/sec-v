@@ -22,6 +22,9 @@ module mtag_decoder (
     funct3_t funct3;
     assign funct3 = inst_i.r_type.funct3;
 
+    opcode_t opcode;
+    assign opcode = decode_opcode(inst_i);
+
     mtag_op_t op;
     logic err;
 
@@ -29,10 +32,15 @@ module mtag_decoder (
         op = MTAG_OP_NONE;
         err = 1'b0;
 
-        case(funct3)
-            FUNCT3_MTAG_TADR: op = MTAG_OP_TADR;
-            default:          err = 1'b1;
-        endcase
+        if (opcode == OPCODE_CUSTOM_0) begin
+            case(funct3)
+                FUNCT3_MTAG_TADR: op = MTAG_OP_TADR;
+                default:          err = 1'b1;
+            endcase
+        end
+        else begin
+            err = 1'b1;
+        end
     end
 
     assign op_o = op;
