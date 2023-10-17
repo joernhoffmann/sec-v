@@ -72,7 +72,7 @@ module mtag #(
                 end
                 default: begin
                     /* unknown opcode */
-                    err = 1'b1;
+                    err = 'b1;
                 end
             endcase
         end
@@ -83,7 +83,7 @@ module mtag #(
         fu_o = funit_out_default();
 
         if (fu_i.ena) begin
-            fu_o.rdy = err;
+            fu_o.rdy = 1'b1;
             fu_o.err = err;
         end
     end
