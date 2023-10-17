@@ -24,7 +24,9 @@ module mtag #(
     /* address size in bit */
     parameter int ADR_WIDTH = 8,
     /* tag memory address width in bit */
-    parameter int TADR_WIDTH = 16
+    parameter int TADR_WIDTH = 16,
+    /* tag memory byte selection width */
+    parameter int TSEL_WIDTH = TLEN / 8
 ) (
     input funit_in_t fu_i,
     output funit_out_t fu_o,
@@ -32,7 +34,7 @@ module mtag #(
     /* tag memory */
     output logic                    tmem_cyc_o,
     output logic                    tmem_stb_o,
-    output logic                    tmem_sel_o,
+    output logic [TSEL_WIDTH-1 : 0] tmem_sel_o,
     output logic [TADR_WIDTH-1 : 0] tmem_adr_o,
     output logic                    tmem_we_o,
     output logic [TLEN-1 : 0]       tmem_dat_o,
@@ -66,7 +68,7 @@ module mtag #(
                 MTAG_OP_TADR: begin
                     /* set tag in tag memory */
                     tmem_dat_o = tag;
-                    tmem_sel_o = 'b1;
+                    tmem_sel_o = '1;
                     tmem_we_o  = 'b1;
                 end
                 default: begin

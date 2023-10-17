@@ -35,14 +35,15 @@
 import secv_pkg::*;
 
 module secv #(
+    parameter int TLEN       = 16       // Tag size
+
     parameter int IADR_WIDTH = 8,        // Instruction memory address width
     parameter int DADR_WIDTH = 8,        // Data memory address width
     parameter int TADR_WIDTH = 16,       // Tag memory address width
 
     parameter int ISEL_WIDTH = ILEN/8,  // Instruction memory byte selection width
     parameter int DSEL_WIDTH = XLEN/8,  // Data memory byte selection width
-
-    parameter int TLEN       = 16       // Tag size
+    parameter int TSEL_WIDTH = TLEN/8,  // Tag memory byte selection width
 ) (
     input   logic   clk_i,
     input   logic   rst_i,
@@ -70,7 +71,7 @@ module secv #(
     output logic                        tmem_stb_o,
     output logic                        tmem_sel_o,
     output logic [TADR_WIDTH-1 : 0]     tmem_adr_o,
-    output logic                        tmem_we_o,
+    output logic [TSEL_WIDTH-1 : 0]     tmem_we_o,
     output logic [TLEN-1 : 0]           tmem_dat_o,
     input  logic [TLEN-1 : 0]           tmem_dat_i,
     input  logic                        tmem_ack_i

@@ -21,7 +21,9 @@ module mtag_chk #(
     /* address size in bit */
     parameter int ADR_WIDTH = 8,
     /* tag memory address width in bit */
-    parameter int TADR_WIDTH = 16
+    parameter int TADR_WIDTH = 16,
+    /* tag memory byte selection width */
+    parameter int TSEL_WIDTH = TLEN / 8
 ) (
     input  logic                   ena_i,
 
@@ -32,7 +34,7 @@ module mtag_chk #(
     /* tag memory */
     output logic                    tmem_cyc_o,
     output logic                    tmem_stb_o,
-    output logic                    tmem_sel_o,
+    output logic [TSEL_WIDTH-1 : 0] tmem_sel_o,
     output logic [TADR_WIDTH-1 : 0] tmem_adr_o,
     input  logic [TLEN-1 : 0]       tmem_dat_i,
     input  logic                    tmem_ack_i
@@ -64,7 +66,7 @@ module mtag_chk #(
             tmem_adr_o = TADR_WIDTH'(mem_adr / GRANULARITY);
 
             /* compare tag with tag memory */
-            tmem_sel_o = 1'b1;
+            tmem_sel_o = '1;
             if (tmem_dat_i != tag) begin
                 err = 1'b1;
                 err_adr = mem_adr;
