@@ -20,14 +20,20 @@ module mtag_testbench();
     parameter int MADR_WIDTH    = 8; // memory address width (address portion of a pointer)
     parameter int TADR_WIDTH    = TLEN; // address width within the tag memory
 
-    logic   clk_i;
-    logic   rst_i;
+    parameter int TSEL_WIDTH    = TLEN / 8; // tag memory byte selection width
+
+    logic   clk;
+    logic   rst;
 
     // tag memory
     logic                       tmem_cyc_o;
+    logic                       tmem_cyc_i;
     logic                       tmem_stb_o;
-    logic                       tmem_sel_o;
+    logic                       tmem_stb_i;
+    logic [TSEL_WIDTH-1 : 0]    tmem_sel_o;
+    logic [TSEL_WIDTH-1 : 0]    tmem_sel_i;
     logic [TADR_WIDTH-1 : 0]    tmem_adr_o;
+    logic [TADR_WIDTH-1 : 0]    tmem_adr_i;
     logic                       tmem_we_o;
     logic [TLEN-1 : 0]          tmem_dat_o;
     logic [TLEN-1 : 0]          tmem_dat_i;
@@ -38,7 +44,7 @@ module mtag_testbench();
 
     mtag #(
         .TLEN(TLEN),
-        .GRANULARTIY(GRANULARITY),
+        .GRANULARITY(GRANULARITY),
         .ADR_WIDTH(MADR_WIDTH),
         .TADR_WIDTH(TADR_WIDTH)
     ) dut (
@@ -52,21 +58,19 @@ module mtag_testbench();
         .tmem_adr_o (tmem_adr_o),
         .tmem_we_o  (tmem_we_o),
         .tmem_dat_o (tmem_dat_o),
-        .tmem_dat_i (tmem_dat_i),
         .tmem_ack_i (tmem_ack_i)
     );
 
     ram_wb #(
-        .RESET_MEM(1),
-        .ADR_WIDTH(MADR_WIDTH),
+        .ADR_WIDTH(TADR_WIDTH),
         .DAT_WIDTH(TLEN)
     ) tmem (
-        .clk_i  (clk_i),
-        .rst_i  (rst_i),
-        .cyc_i  (tmem_cyc_o),
-        .stb_i  (tmem_stb_o),
-        .sel_i  (tmem_sel_o),
-        .adr_i  (tmem_adr_o),
+        .clk_i  (clk),
+        .rst_i  (rst),
+        .cyc_i  (tmem_cyc_i),
+        .stb_i  (tmem_stb_i),
+        .sel_i  (tmem_sel_i),
+        .adr_i  (tmem_adr_i),
         .we_i   (tmem_we_o),
         .dat_i  (tmem_dat_o),
         .dat_o  (tmem_dat_i),
@@ -75,20 +79,20 @@ module mtag_testbench();
 
     // To create a clock:
     initial clk = 0;
-    always #2 clk = ~clk;
+    always #1 clk = ~clk;
 
     // To dump data for visualization:
-    // initial begin
-    //     $dumpfile("mtag_testbench.vcd");
-    //     $dumpvars(0, mtag_testbench);
-    // end
+    initial begin
+       $dumpfile("mtag_testbench.vcd");
+       $dumpvars(0, mtag_testbench);
+    end
 
     // Setup time format when printing with $realtime()
     initial $timeformat(-9, 1, "ns", 8);
 
     task setup(msg="");
     begin
-        //
+        rst = 0;
     end
     endtask
 
@@ -98,7 +102,53 @@ module mtag_testbench();
     end
     endtask
 
-    `TEST_SUIE("MTAG")
+    `TEST_SUITE("MTAG")
+
+    /*** MISC ***/
+    `UNIT_TEST("Disabled unit should not be ready")
+        fu_i.ena = 1'b0;
+        #1 `FAIL_IF_NOT_EQUAL(fu_o.rdy, 0);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("Enabled, but error and not writing to memory if MTAG_OP_NONE")
+        fu_i.ena = 1'b1;
+        fu_i.op = MTAG_OP_NONE;
+        fu_i.src1 = 1;
+        fu_i.src2 = 2;
+        #1
+        `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
+        `FAIL_IF_NOT_EQUAL(fu_o.err, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_we_o, 0);
+    `UNIT_TEST_END
+
+    /*** MEMORY ***/
+    `UNIT_TEST("Expose correct tag and tag memory address on MTAG_OP_TADR")
+        fu_i.ena = 1'b1;
+        fu_i.op = MTAG_OP_TADR;
+        fu_i.src1 = 'h214A__0000_0000_0032; // Tag: 0x214A_0032 = 8522 | Address: 0x32 = 50
+        fu_i.src2 = 0; // ignored
+        #1
+        `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
+        `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
+        `FAIL_IF_NOT_EQUAL(tmem_we_o, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_cyc_o, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_stb_o, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_sel_o, '1);
+        `FAIL_IF_NOT_EQUAL(tmem_dat_o, 8522);
+        // Tag address = address / GRANULARITY | 50 / 8 = 6
+        `FAIL_IF_NOT_EQUAL(tmem_adr_o, 6);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("Write successfully to memory on MTAG_OP_TADR")
+        tmem_adr_i = tmem_adr_o;
+        tmem_cyc_i = tmem_cyc_o;
+        tmem_stb_i = tmem_stb_o;
+        tmem_sel_i = tmem_sel_o;
+        #2
+        fu_i.ena = 1'b0;
+        #2
+        `FAIL_IF_NOT_EQUAL(tmem_dat_i, 8522);
+    `UNIT_TEST_END
 
     `TEST_SUITE_END
 endmodule
