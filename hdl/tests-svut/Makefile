@@ -24,6 +24,12 @@ gpr:
 mem_decoder:
 	$(SVUTRUN) $(OPS) -test mem_decoder_testbench.sv
 
+mtag_decoder:
+	$(SVUTRUN) $(OPS) -test mtag_decoder_testbench.sv
+
+mtag:
+	$(SVUTRUN) $(OPS) -test mtag_testbench.sv
+
 secv:
 	$(SVUTRUN) $(OPS) -test secv_testbench.sv
 
