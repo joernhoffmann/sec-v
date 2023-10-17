@@ -7,8 +7,7 @@
  * Purpose    : Memory Tagging function unit for the SEC-V processor.
  *
  * TODO:
- * - find out, if I actually should split this into one
- *     function unit and one internal unit
+ *      - use shift operation to calculate tmem_adr_o
  *
  * History
  *    v1.0        - Initial version
