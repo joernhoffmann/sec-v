@@ -38,7 +38,6 @@ module mtag #(
     output logic [TADR_WIDTH-1 : 0] tmem_adr_o,
     output logic                    tmem_we_o,
     output logic [TLEN-1 : 0]       tmem_dat_o,
-    input  logic [TLEN-1 : 0]       tmem_dat_i,
     input  logic                    tmem_ack_i
 );
     logic [ADR_WIDTH-1 : 0] mem_adr;

@@ -252,7 +252,6 @@ module secv #(
         .tmem_adr_o (tmem_adr_o),
         .tmem_we_o  (tmem_we_o),
         .tmem_dat_o (tmem_dat_o),
-        .tmem_dat_i (tmem_dat_i),
         .tmem_ack_i (tmem_ack_i)
     );
 
