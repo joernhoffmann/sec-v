@@ -82,10 +82,10 @@ module mtag_testbench();
     always #1 clk = ~clk;
 
     // To dump data for visualization:
-    initial begin
-       $dumpfile("mtag_testbench.vcd");
-       $dumpvars(0, mtag_testbench);
-    end
+    //initial begin
+    //    $dumpfile("mtag_testbench.vcd");
+    //    $dumpvars(0, mtag_testbench);
+    //end
 
     // Setup time format when printing with $realtime()
     initial $timeformat(-9, 1, "ns", 8);
