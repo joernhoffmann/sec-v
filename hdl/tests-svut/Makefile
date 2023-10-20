@@ -27,6 +27,9 @@ mem_decoder:
 mtag_decoder:
 	$(SVUTRUN) $(OPS) -test mtag_decoder_testbench.sv
 
+mtag_chk:
+	$(SVUTRUN) $(OPS) -test mtag_chk_testbench.sv
+
 mtag:
 	$(SVUTRUN) $(OPS) -test mtag_testbench.sv
 
