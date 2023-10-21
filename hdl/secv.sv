@@ -26,6 +26,11 @@
  *      [ ] Add formal verification
  *      [ ] Add verilator stuff
  *
+ * Memory Tagging TODO:
+ *   - tag memory currently has multiple drivers and doesn't work
+ *     -> it could maybe be switched between the mem and the mtag funits,
+ *        following or using the implementation of the funit_buses
+ *
  * History
  *  v1.0    - Initial version
  *  v1.1    - Add function unit bus
@@ -35,7 +40,7 @@
 import secv_pkg::*;
 
 module secv #(
-    parameter int TLEN       = 16       // Tag size
+    parameter int TLEN       = 16,       // Tag size
 
     parameter int IADR_WIDTH = 8,        // Instruction memory address width
     parameter int DADR_WIDTH = 8,        // Data memory address width
@@ -43,7 +48,7 @@ module secv #(
 
     parameter int ISEL_WIDTH = ILEN/8,  // Instruction memory byte selection width
     parameter int DSEL_WIDTH = XLEN/8,  // Data memory byte selection width
-    parameter int TSEL_WIDTH = TLEN/8,  // Tag memory byte selection width
+    parameter int TSEL_WIDTH = TLEN/8   // Tag memory byte selection width
 ) (
     input   logic   clk_i,
     input   logic   rst_i,
@@ -69,9 +74,9 @@ module secv #(
     // Tag memory
     output logic                        tmem_cyc_o,
     output logic                        tmem_stb_o,
-    output logic                        tmem_sel_o,
+    output logic [TSEL_WIDTH-1 : 0]     tmem_sel_o,
     output logic [TADR_WIDTH-1 : 0]     tmem_adr_o,
-    output logic [TSEL_WIDTH-1 : 0]     tmem_we_o,
+    output logic                        tmem_we_o,
     output logic [TLEN-1 : 0]           tmem_dat_o,
     input  logic [TLEN-1 : 0]           tmem_dat_i,
     input  logic                        tmem_ack_i
@@ -240,7 +245,7 @@ module secv #(
     );
 
     mtag #(
-        .ADR_WIDTH(DADR_WIDTH),
+        .ADR_WIDTH(DADR_WIDTH)
     ) mtag0 (
         .fu_i      (funit_in_bus[FUNIT_MTAG]),
         .fu_o      (funit_out_bus[FUNIT_MTAG]),

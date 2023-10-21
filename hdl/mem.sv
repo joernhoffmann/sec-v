@@ -31,7 +31,8 @@ module mem #(
     parameter int SEL_WIDTH = XLEN/8,
 
     parameter int TLEN = 16,
-    parameter int TADR_WIDTH = 16
+    parameter int TADR_WIDTH = 16,
+    parameter int TSEL_WIDTH = TLEN/8
 ) (
     // Function unit interface
     input  funit_in_t  fu_i,
@@ -52,7 +53,7 @@ module mem #(
     /* tag memory */
     output logic                    tmem_cyc_o,
     output logic                    tmem_stb_o,
-    output logic                    tmem_sel_o,
+    output logic [TSEL_WIDTH-1 : 0] tmem_sel_o,
     output logic [TADR_WIDTH-1 : 0] tmem_adr_o,
     input  logic [TLEN-1       : 0] tmem_dat_i,
     input  logic                    tmem_ack_i
@@ -185,7 +186,7 @@ module mem #(
         if (fu_i.ena) begin
             // Control output
             fu_o.rdy = err || dmem_ack_i || t_err;
-            fu_o.err = err;
+            fu_o.err = err || t_err;
             t_err_adr_o = t_err_adr;
 
             // Result output

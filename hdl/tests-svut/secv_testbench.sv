@@ -8,6 +8,9 @@
 `include "decoder.sv"
 `include "mem.sv"
 `include "mem_decoder.sv"
+`include "mtag.sv"
+`include "mtag_chk.sv"
+`include "mtag_decoder.sv"
 `include "secv.sv"
 `include "gpr.sv"
 
@@ -16,10 +19,13 @@ module secv_testbench();
 
     parameter int ILEN = secv_pkg::ILEN;
     parameter int XLEN = secv_pkg::XLEN;
+    parameter int TLEN = 16;
     parameter int IADR_WIDTH = 10;          // 1K (Byte addressable)
     parameter int DADR_WIDTH = 10;          // 1k (Byte addressable)
+    parameter int TADR_WIDTH = 16;
     parameter int ISEL_WIDTH = ILEN/8;
     parameter int DSEL_WIDTH = XLEN/8;
+    parameter int TSEL_WIDTH = TLEN/8;
 
     logic   clk_i;
     logic   rst_i;
@@ -42,11 +48,23 @@ module secv_testbench();
     logic [XLEN-1 : 0]          dmem_dat_i;
     logic                       dmem_ack_i;
 
+    // Tag memory
+    logic                       tmem_cyc_o;
+    logic                       tmem_stb_o;
+    logic [TSEL_WIDTH-1 : 0]    tmem_sel_o;
+    logic [TADR_WIDTH-1 : 0]    tmem_adr_o;
+    logic                       tmem_we_o;
+    logic [TLEN-1 : 0]          tmem_dat_o;
+    logic [TLEN-1 : 0]          tmem_dat_i;
+    logic                       tmem_ack_i;
+
     secv #(
         .IADR_WIDTH (IADR_WIDTH),
         .DADR_WIDTH (DADR_WIDTH),
+        .TADR_WIDTH (TADR_WIDTH),
         .ISEL_WIDTH (ISEL_WIDTH),
-        .DSEL_WIDTH (DSEL_WIDTH)
+        .DSEL_WIDTH (DSEL_WIDTH),
+        .TSEL_WIDTH (TSEL_WIDTH)
     ) dut
     (
         .clk_i      (clk_i),
@@ -65,7 +83,16 @@ module secv_testbench();
         .dmem_we_o  (dmem_we_o),
         .dmem_dat_o (dmem_dat_o),
         .dmem_dat_i (dmem_dat_i),
-        .dmem_ack_i (dmem_ack_i)
+        .dmem_ack_i (dmem_ack_i),
+
+        .tmem_cyc_o (tmem_cyc_o),
+        .tmem_stb_o (tmem_stb_o),
+        .tmem_sel_o (tmem_sel_o),
+        .tmem_adr_o (tmem_adr_o),
+        .tmem_we_o  (tmem_we_o),
+        .tmem_dat_o (tmem_dat_o),
+        .tmem_dat_i (tmem_dat_i),
+        .tmem_ack_i (tmem_ack_i)
     );
 
     rom_wb #(
@@ -100,6 +127,22 @@ module secv_testbench();
         .ack_o  (dmem_ack_i)
     );
 
+    ram_wb # (
+        .RESET_MEM  (1),
+        .ADR_WIDTH  (TADR_WIDTH),   // 128 * 8 Byte = 1k
+        .DAT_WIDTH  (TLEN)          // 8 Byte
+    ) tmem (
+        .clk_i  (clk_i),
+        .rst_i  (rst_i),
+        .cyc_i  (tmem_cyc_o),
+        .stb_i  (tmem_stb_o),
+        .sel_i  (tmem_sel_o),
+        .adr_i  (tmem_adr_o),
+        .we_i   (tmem_we_o),
+        .dat_i  (tmem_dat_o),
+        .dat_o  (tmem_dat_i),
+        .ack_o  (tmem_ack_i)
+    );
 
     // To create a clock:
     initial clk_i = 0;

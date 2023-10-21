@@ -47,6 +47,7 @@ module mtag_chk #(
     assign tag = adr_i[XLEN-1 : XLEN-TLEN];
 
     logic err;
+    assign err_o = err;
 
     logic [ADR_WIDTH-1 : 0] err_adr;
     assign err_adr_o = err_adr;
