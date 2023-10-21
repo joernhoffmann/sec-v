@@ -11,6 +11,9 @@ module mem_unit_test;
   parameter int ADR_WIDTH = 8;
   parameter int SEL_WIDTH = XLEN/8;
 
+  parameter int TLEN = 16;
+  parameter int TADR_WIDTH = 16;
+  parameter int TSEL_WIDTH = TLEN/8;
 
   //===================================
   // This is the UUT that we're
@@ -18,6 +21,9 @@ module mem_unit_test;
   //===================================
   funit_in_t fu_i;
   funit_out_t fu_o;
+
+  logic [ADR_WIDTH-1 : 0]  t_err_adr;
+
   logic                    dmem_cyc_o;
   logic                    dmem_stb_o;
   logic [SEL_WIDTH-1 : 0]  dmem_sel_o;
@@ -27,6 +33,13 @@ module mem_unit_test;
   logic [XLEN-1      : 0]  dmem_dat_i;
   logic                    dmem_ack_i;
 
+  logic                    tmem_cyc_o;
+  logic                    tmem_stb_o;
+  logic [TSEL_WIDTH-1 : 0] tmem_sel_o;
+  logic [TADR_WIDTH-1 : 0] tmem_adr_o;
+  logic [TLEN-1       : 0] tmem_dat_i;
+  logic                    tmem_ack_i;
+
   mem #(
     .XLEN(XLEN),
     .ADR_WIDTH(ADR_WIDTH)
@@ -35,7 +48,10 @@ module mem_unit_test;
     .fu_i (fu_i),
     .fu_o (fu_o),
 
-    // Wishbone interface
+    // Tagging error
+    .t_err_adr_o (t_err_adr),
+
+    // Wishbone interface for data memory
     .dmem_cyc_o (dmem_cyc_o),
     .dmem_stb_o (dmem_stb_o),
     .dmem_sel_o (dmem_sel_o),
@@ -43,7 +59,15 @@ module mem_unit_test;
     .dmem_we_o  (dmem_we_o),
     .dmem_dat_o (dmem_dat_o),
     .dmem_dat_i (dmem_dat_i),
-    .dmem_ack_i (dmem_ack_i)
+    .dmem_ack_i (dmem_ack_i),
+
+    // Wishbone interface for tag memory
+    .tmem_cyc_o (tmem_cyc_o),
+    .tmem_stb_o (tmem_stb_o),
+    .tmem_sel_o (tmem_sel_o),
+    .tmem_adr_o (tmem_adr_o),
+    .tmem_dat_i (tmem_dat_i),
+    .tmem_ack_i (tmem_ack_i)
   );
 
 
@@ -102,19 +126,19 @@ module mem_unit_test;
 
     `SVTEST(MEM_ready_if_enabled_with_invalid_opcode)
         fu_i.ena = 1;
-      	#1 
+      	#1
         `FAIL_UNLESS(fu_o.rdy);
     `SVTEST_END
 
     `SVTEST(MEM_signals_error_if_enabled_with_invalid_opcode)
         fu_i.ena = 1;
-        #1 
+        #1
         `FAIL_UNLESS(fu_o.err);
     `SVTEST_END
 
     `SVTEST(MEM_does_not_write_back_if_enabled_with_invalid_opcode)
         fu_i.ena = 1;
-        #1 
+        #1
         `FAIL_UNLESS(!fu_o.res_wb);
     `SVTEST_END
 
@@ -138,7 +162,7 @@ module mem_unit_test;
       fu_i.ena = 1;
   	  fu_i.op = MEM_OP_LW;
       dmem_ack_i = 1'b1;
-      #1 
+      #1
       `FAIL_UNLESS(fu_o.rdy);
     `SVTEST_END
 
