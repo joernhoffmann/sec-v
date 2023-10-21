@@ -26,11 +26,6 @@
  *      [ ] Add formal verification
  *      [ ] Add verilator stuff
  *
- * Memory Tagging TODO:
- *   - tag memory currently has multiple drivers and doesn't work
- *     -> it could maybe be switched between the mem and the mtag funits,
- *        following or using the implementation of the funit_buses
- *
  * History
  *  v1.0    - Initial version
  *  v1.1    - Add function unit bus
@@ -236,12 +231,12 @@ module secv #(
         .dmem_ack_i (dmem_ack_i),
 
         // Wishbone tag memory interface
-        .tmem_cyc_o (tmem_cyc_o),
-        .tmem_stb_o (tmem_stb_o),
-        .tmem_sel_o (tmem_sel_o),
-        .tmem_adr_o (tmem_adr_o),
+        .tmem_cyc_o (tmem_cyc_o_bus[FUNIT_MEM]),
+        .tmem_stb_o (tmem_stb_o_bus[FUNIT_MEM]),
+        .tmem_sel_o (tmem_sel_o_bus[FUNIT_MEM]),
+        .tmem_adr_o (tmem_adr_o_bus[FUNIT_MEM]),
         .tmem_dat_i (tmem_dat_i),
-        .tmem_ack_i (tmem_ack_i)
+        .tmem_ack_i (tmem_ack_i_bus[FUNIT_MEM])
     );
 
     mtag #(
@@ -251,13 +246,13 @@ module secv #(
         .fu_o      (funit_out_bus[FUNIT_MTAG]),
 
         // Wishbone tag memory interface
-        .tmem_cyc_o (tmem_cyc_o),
-        .tmem_stb_o (tmem_stb_o),
-        .tmem_sel_o (tmem_sel_o),
-        .tmem_adr_o (tmem_adr_o),
+        .tmem_cyc_o (tmem_cyc_o_bus[FUNIT_MTAG]),
+        .tmem_stb_o (tmem_stb_o_bus[FUNIT_MTAG]),
+        .tmem_sel_o (tmem_sel_o_bus[FUNIT_MTAG]),
+        .tmem_adr_o (tmem_adr_o_bus[FUNIT_MTAG]),
         .tmem_we_o  (tmem_we_o),
         .tmem_dat_o (tmem_dat_o),
-        .tmem_ack_i (tmem_ack_i)
+        .tmem_ack_i (tmem_ack_i_bus[FUNIT_MTAG])
     );
 
     // Function unit bus
@@ -266,11 +261,23 @@ module secv #(
     funit_in_t  funit_in;
     funit_out_t funit_out;
 
+    // Tag memory bus
+    logic                   tmem_cyc_o_bus[FUNIT_COUNT];
+    logic                   tmem_stb_o_bus[FUNIT_COUNT];
+    logic [TSEL_WIDTH-1: 0] tmem_sel_o_bus[FUNIT_COUNT];
+    logic [TADR_WIDTH-1: 0] tmem_adr_o_bus[FUNIT_COUNT];
+    logic                   tmem_ack_i_bus[FUNIT_COUNT];
+
     // I/O of selected function unit
     always_comb begin
         funit_in_bus[funit] = funit_in;
+        tmem_ack_i_bus[funit] = tmem_ack_i;
     end
     assign funit_out = funit_out_bus[funit];
+    assign tmem_cyc_o = tmem_cyc_o_bus[funit];
+    assign tmem_stb_o = tmem_stb_o_bus[funit];
+    assign tmem_sel_o = tmem_sel_o_bus[funit];
+    assign tmem_adr_o = tmem_adr_o_bus[funit];
 
     // --- MUXer ---------------------------------------------------------------------------------------------------- //
     // Source 1 selection
