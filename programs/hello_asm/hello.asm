@@ -4,6 +4,7 @@
 main:
     addi    x1, x0, 0xca        # x1 = 0xcafe
     slli    x1, x1, 8
+    lui     x3, 0xff            # x3 = 0xff000
     addi    x1, x1, 0xfe
     addi    x2, x0, 0xbe        # x2 = 0xbe
 

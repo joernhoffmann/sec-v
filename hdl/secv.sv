@@ -423,7 +423,7 @@ module secv #(
                 funit_in.ena = 1'b1;
 
                 // Check if unit is ready
-                if (funit_out.rdy)
+                if (funit_out.rdy || funit == FUNIT_NONE)
                     state_next = STATE_WB;
             end
 
