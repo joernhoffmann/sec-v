@@ -153,10 +153,10 @@ module decoder (
             OPCODE_CUSTOM_0: begin
                 funit       = FUNIT_MTAG;
 
-                src1_sel    = SRC1_SEL_RS1;         // Address with encoded tag
-                src2_sel    = SRC2_SEL_RS2;           // No second operand
+                src1_sel    = SRC1_SEL_RS1;         // Address, possibly with encoded tag
+                src2_sel    = SRC2_SEL_RS2;         // Possibly tag
 
-                rd_sel      = RD_SEL_NONE;
+                rd_sel      = RD_SEL_NONE;          // No destination
             end
 
             OPCODE_OP, OPCODE_OP_32: begin
