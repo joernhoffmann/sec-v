@@ -53,8 +53,8 @@ module mtag_chk #(
     assign err_adr_o = err_adr;
 
     always_comb begin
-        err_adr = 'b0;
-        err = 'b0;
+        err = 1'b0;
+        err_adr = 0;
 
         tmem_cyc_o = 'b0;
         tmem_stb_o = 'b0;
@@ -66,15 +66,11 @@ module mtag_chk #(
             tmem_stb_o = 1'b1;
             tmem_adr_o = TADR_WIDTH'(mem_adr / GRANULARITY);
             tmem_sel_o = '1;
-        end
-    end
-
-    always_ff @(posedge tmem_ack_i) begin
             /* compare tag with tag memory */
-        if (ena_i && tmem_dat_i != tag) begin
-            err = 1'b1;
-            err_adr = mem_adr;
+            if (tmem_ack_i && tmem_dat_i != tag) begin
+                err = 1'b1;
+                err_adr = mem_adr;
+            end
         end
     end
-
 endmodule
