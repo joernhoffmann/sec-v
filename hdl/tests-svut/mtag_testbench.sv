@@ -122,9 +122,9 @@ module mtag_testbench();
     `UNIT_TEST_END
 
     /*** MEMORY ***/
-    `UNIT_TEST("Expose correct tag and tag memory address on MTAG_OP_TADR")
+    `UNIT_TEST("Expose correct tag and tag memory address on MTAG_OP_TADRE")
         fu_i.ena = 1'b1;
-        fu_i.op = MTAG_OP_TADR;
+        fu_i.op = MTAG_OP_TADRE;
         fu_i.src1 = 'h214A__0000_0000_0032; // Tag: 0x214A_0032 = 8522 | Address: 0x32 = 50
         fu_i.src2 = 0; // ignored
         #1
@@ -139,7 +139,7 @@ module mtag_testbench();
         `FAIL_IF_NOT_EQUAL(tmem_adr_o, 6);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Write successfully to memory on MTAG_OP_TADR")
+    `UNIT_TEST("Write successfully to memory on MTAG_OP_TADRE")
         tmem_adr_i = tmem_adr_o;
         tmem_cyc_i = tmem_cyc_o;
         tmem_stb_i = tmem_stb_o;

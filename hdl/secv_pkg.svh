@@ -137,7 +137,7 @@ package secv_pkg;
     typedef enum logic [2:0] {
         FUNCT3_MTAG_TADR    = 3'b000,     // Tag encoded in top bits of rs1
                                           // Address encoded in lower bits of rs1
-        FUNCT3_MTAG_TADRE   = 3'b001,     // Address in rs1
+        FUNCT3_MTAG_TADRE   = 3'b001      // Address in rs1
                                           // Tag in rs2
     } funct3_mtag_t;
 

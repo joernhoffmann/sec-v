@@ -71,9 +71,10 @@ module mtag #(
 
             case (fu_i.op)
                 MTAG_OP_TADR: begin
-                    tmem_dat_o = r_tag
+                    tmem_dat_o = r_tag;
                     tmem_sel_o = '1;
                     tmem_we_o  = 'b1;
+                end
                 MTAG_OP_TADRE: begin
                     /* set tag in tag memory */
                     tmem_dat_o = enc_tag;

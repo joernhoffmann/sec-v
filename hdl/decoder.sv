@@ -133,8 +133,8 @@ module decoder (
             OPCODE_LOAD: begin
                 funit       = FUNIT_MEM;
 
-                src1_sel    = SRC1_SEL_RS1_IMM;     // Address
-                src2_sel    = SRC2_SEL_0;           // No second operand
+                src1_sel    = SRC1_SEL_RS1_IMM;     // Address (could include encoded tag)
+                src2_sel    = SRC2_SEL_0;           // Could hold tag
                 imm_sel     = IMM_SEL_I;
 
                 rd_sel      = RD_SEL_FUNIT;
@@ -154,7 +154,7 @@ module decoder (
                 funit       = FUNIT_MTAG;
 
                 src1_sel    = SRC1_SEL_RS1;         // Address with encoded tag
-                src2_sel    = SRC2_SEL_0;           // No second operand
+                src2_sel    = SRC2_SEL_RS2;           // No second operand
 
                 rd_sel      = RD_SEL_NONE;
             end
