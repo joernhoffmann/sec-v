@@ -65,13 +65,15 @@ module mtag_chk #(
             tmem_cyc_o = 1'b1;
             tmem_stb_o = 1'b1;
             tmem_adr_o = TADR_WIDTH'(mem_adr / GRANULARITY);
-
-            /* compare tag with tag memory */
             tmem_sel_o = '1;
-            if (tmem_dat_i != tag) begin
-                err = 1'b1;
-                err_adr = mem_adr;
-            end
+        end
+    end
+
+    always_ff @(posedge tmem_ack_i) begin
+            /* compare tag with tag memory */
+        if (ena_i && tmem_dat_i != tag) begin
+            err = 1'b1;
+            err_adr = mem_adr;
         end
     end
 
