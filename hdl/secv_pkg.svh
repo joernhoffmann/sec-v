@@ -135,10 +135,10 @@ package secv_pkg;
     // --- funct3 --------------------------------------------------------------------------------------------------- //
     // funct3 - MTAG
     typedef enum logic [2:0] {
-        FUNCT3_MTAG_TADR    = 3'b000,     // Tag encoded in top bits of rs1
-                                          // Address encoded in lower bits of rs1
-        FUNCT3_MTAG_TADRE   = 3'b001      // Address in rs1
-                                          // Tag in rs2
+        FUNCT3_MTAG_TADR    = 3'b000,     // Address in src1
+                                          // Tag in src2
+        FUNCT3_MTAG_TADRE   = 3'b001      // Tag encoded in top bits of scr1
+                                          // Address encoded in lower bits of scr1
     } funct3_mtag_t;
 
     // funct3 - ALU
@@ -256,7 +256,7 @@ package secv_pkg;
         FUNIT_NONE,     // No function unit
         FUNIT_ALU,      // Arithmetic logic unit (ADD, SUB etc.)
         FUNIT_MEM,      // Memory unit           (Loads, Stores, FENCE etc.)
-        FUNIT_MTAG,      // Tagging unit
+        FUNIT_MTAG,     // Tagging unit
         FUNIT_COUNT
     } funit_t;
 
