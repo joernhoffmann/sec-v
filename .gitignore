@@ -17,3 +17,7 @@ svut.out
 *.hex
 *.ihex
 *.o
+
+# SVut test output
+*.vcd
+hdl/tests-svut/build/*
