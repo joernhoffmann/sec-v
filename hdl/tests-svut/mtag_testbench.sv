@@ -110,7 +110,7 @@ module mtag_testbench();
         #1 `FAIL_IF_NOT_EQUAL(fu_o.rdy, 0);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Enabled, but error and not writing to memory if MTAG_OP_NONE")
+    `UNIT_TEST("Enabled, but error and not writing to tag memory if MTAG_OP_NONE")
         fu_i.ena = 1'b1;
         fu_i.op = MTAG_OP_NONE;
         fu_i.src1 = 1;
@@ -122,6 +122,7 @@ module mtag_testbench();
     `UNIT_TEST_END
 
     /*** MEMORY ***/
+    /** TADRE **/
     `UNIT_TEST("Expose correct tag and tag memory address on MTAG_OP_TADRE")
         fu_i.ena = 1'b1;
         fu_i.op = MTAG_OP_TADRE;
@@ -139,7 +140,7 @@ module mtag_testbench();
         `FAIL_IF_NOT_EQUAL(tmem_adr_o, 6);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Write successfully to memory on MTAG_OP_TADRE")
+    `UNIT_TEST("Write successfully to tag memory on MTAG_OP_TADRE")
         tmem_adr_i = tmem_adr_o;
         tmem_cyc_i = tmem_cyc_o;
         tmem_stb_i = tmem_stb_o;
@@ -148,6 +149,35 @@ module mtag_testbench();
         fu_i.ena = 1'b0;
         #2
         `FAIL_IF_NOT_EQUAL(tmem_dat_i, 8522);
+    `UNIT_TEST_END
+
+    /** TADR **/
+    `UNIT_TEST("Expose correct tag and tag memory address on MTAG_OP_TADR")
+        fu_i.ena = 1'b1;
+        fu_i.op = MTAG_OP_TADR;
+        fu_i.src1 = 'hE5; // Address: 0xE5 = 229
+        fu_i.src2 = 'hA4B1; // Tag: 0xA4B1 = 42161
+        #1
+        `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
+        `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
+        `FAIL_IF_NOT_EQUAL(tmem_we_o, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_cyc_o, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_stb_o, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_sel_o, '1);
+        `FAIL_IF_NOT_EQUAL(tmem_dat_o,42161);
+        // Tag address = address / GRANULARITY | 229 / 8 = 28
+        `FAIL_IF_NOT_EQUAL(tmem_adr_o, 28);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("Write successfully to tag memory on MTAG_OP_TADR")
+        tmem_adr_i = tmem_adr_o;
+        tmem_cyc_i = tmem_cyc_o;
+        tmem_stb_i = tmem_stb_o;
+        tmem_sel_i = tmem_sel_o;
+        #2
+        fu_i.ena = 1'b0;
+        #2
+        `FAIL_IF_NOT_EQUAL(tmem_dat_i, 42161);
     `UNIT_TEST_END
 
     `TEST_SUITE_END
