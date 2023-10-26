@@ -96,7 +96,7 @@ module secv_testbench();
     );
 
     rom_wb #(
-        .FILE   ("hello.hex"),
+        .FILE   ("mtag.hex"),
         .ADR_WIDTH (10-2),              // 256 * 4 Byte = 1k
         .DAT_WIDTH (secv_pkg::ILEN)     // 4 Byte
     )  rom (
