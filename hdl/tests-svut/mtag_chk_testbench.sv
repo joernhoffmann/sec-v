@@ -122,6 +122,14 @@ module mtag_chk_testbench();
          `FAIL_IF_NOT_EQUAL(tmem_adr_o, 0);
     `UNIT_TEST_END
 
+    `UNIT_TEST("No early error")
+        ena = 1'b1;
+        // Tag: 0x01AB = 427 | Address: 0x011F = 287
+        adr = 'h01AB_0000_0000_011F;
+        #1
+        `FAIL_IF_NOT_EQUAL(err, 0);
+    `UNIT_TEST_END
+
     `UNIT_TEST("Error on tag mismatch")
         ena = 1'b1;
         // Tag: 0x01AB = 427 | Address: 0x011F = 287
@@ -166,6 +174,7 @@ module mtag_chk_testbench();
         tmem_stb_i = tmem_stb_o;
         tmem_sel_i = tmem_sel_o;
         tmem_adr_i = tmem_adr_o;
+
         #4
         `FAIL_IF_NOT_EQUAL(err, 0);
         `FAIL_IF_NOT_EQUAL(err_adr, 0);
