@@ -12,7 +12,7 @@ main:
     # instruction formats: https://sourceware.org/binutils/docs/as/RISC_002dV_002dFormats.html
     # tadr x0, x1, x0
     #       	opcode6     func3   func7   rd  rs1 rs2
-    .insn 	r 	CUSTOM_0,   0,      0,      x0, x1, x0
+    .insn 	r 	CUSTOM_0,   0,      1,      x0, x1, x0
     # T[23] = 0xff01
 
     # successful memory store operation with tag
