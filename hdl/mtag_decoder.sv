@@ -34,8 +34,9 @@ module mtag_decoder (
 
         if (opcode == OPCODE_CUSTOM_0) begin
             case(funct3)
-                FUNCT3_MTAG_TADR: op = MTAG_OP_TADR;
-                default:          err = 1'b1;
+                FUNCT3_MTAG_TADR:   op = MTAG_OP_TADR;
+                FUNCT3_MTAG_TADRE:  op = MTAG_OP_TADRE;
+                default:            err = 1'b1;
             endcase
         end
         else begin

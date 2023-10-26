@@ -8,7 +8,7 @@
  *
  * TODO:
  *      - use shift operation to calculate tmem_adr_o
- *      - better ops, immediate and register based tag assignment
+ *      - better ops, immediate based tag assignment
  *
  * History
  *    v1.0        - Initial version
@@ -44,8 +44,13 @@ module mtag #(
     logic [ADR_WIDTH-1 : 0] mem_adr;
     assign mem_adr = ADR_WIDTH'(fu_i.src1);
 
-    logic [TLEN-1 : 0] tag;
-    assign tag = fu_i.src1[XLEN-1 : XLEN-TLEN];
+    // decode encoded tag
+    logic [TLEN-1 : 0] enc_tag;
+    assign enc_tag = fu_i.src1[XLEN-1 : XLEN-TLEN];
+
+    // decode tag from rs2
+    logic [TLEN-1 : 0] r_tag;
+    assign r_tag = TLEN'(fu_i.src2);
 
     logic err;
 
@@ -66,8 +71,12 @@ module mtag #(
 
             case (fu_i.op)
                 MTAG_OP_TADR: begin
+                    tmem_dat_o = r_tag
+                    tmem_sel_o = '1;
+                    tmem_we_o  = 'b1;
+                MTAG_OP_TADRE: begin
                     /* set tag in tag memory */
-                    tmem_dat_o = tag;
+                    tmem_dat_o = enc_tag;
                     tmem_sel_o = '1;
                     tmem_we_o  = 'b1;
                 end
