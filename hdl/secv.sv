@@ -209,7 +209,6 @@ module secv #(
         .fu_o (funit_out_bus[FUNIT_ALU])
     );
 
-    logic [DADR_WIDTH-1 : 0] tag_err_adr;
     // Data memory inteface unit
     mem  #(
         .ADR_WIDTH(DADR_WIDTH)
@@ -217,8 +216,6 @@ module secv #(
         // Control
         .fu_i (funit_in_bus[FUNIT_MEM]),
         .fu_o (funit_out_bus[FUNIT_MEM]),
-
-        .tag_err_adr_o(tag_err_adr),
 
         // Wishbone data memory interface
         .dmem_cyc_o (dmem_cyc_o),

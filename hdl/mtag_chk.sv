@@ -29,7 +29,6 @@ module mtag_chk #(
 
     input  logic [XLEN-1 : 0]      adr_i,
     output logic                   err_o,
-    output logic [ADR_WIDTH-1 : 0] err_adr_o,
 
     /* tag memory */
     output logic                    tmem_cyc_o,
@@ -49,12 +48,8 @@ module mtag_chk #(
     logic err;
     assign err_o = err;
 
-    logic [ADR_WIDTH-1 : 0] err_adr;
-    assign err_adr_o = err_adr;
-
     always_comb begin
         err = 1'b0;
-        err_adr = 0;
 
         tmem_cyc_o = 'b0;
         tmem_stb_o = 'b0;
@@ -69,7 +64,6 @@ module mtag_chk #(
             /* compare tag with tag memory */
             if (tmem_ack_i && tmem_dat_i != tag) begin
                 err = 1'b1;
-                err_adr = mem_adr;
             end
         end
     end

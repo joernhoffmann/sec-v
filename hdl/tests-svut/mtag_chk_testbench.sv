@@ -30,7 +30,6 @@ module mtag_chk_testbench();
     logic ena;
     logic [XLEN-1 : 0] adr;
     logic err;
-    logic [XLEN-1 : 0] err_adr;
 
     logic                       tmem_cyc_o;
     logic                       tmem_cyc_i;
@@ -55,7 +54,6 @@ module mtag_chk_testbench();
         .ena_i      (ena),
         .adr_i      (adr),
         .err_o      (err),
-        .err_adr_o  (err_adr),
 
         .tmem_cyc_o (tmem_cyc_o),
         .tmem_stb_o (tmem_stb_o),
@@ -141,7 +139,6 @@ module mtag_chk_testbench();
         tmem_adr_i = tmem_adr_o;
         #4
         `FAIL_IF_NOT_EQUAL(err, 1);
-        `FAIL_IF_NOT_EQUAL(err_adr, 'h011F);
         `FAIL_IF_NOT_EQUAL(tmem_cyc_o, '1);
         `FAIL_IF_NOT_EQUAL(tmem_stb_o, '1);
         `FAIL_IF_NOT_EQUAL(tmem_sel_o, '1);
@@ -177,7 +174,6 @@ module mtag_chk_testbench();
 
         #4
         `FAIL_IF_NOT_EQUAL(err, 0);
-        `FAIL_IF_NOT_EQUAL(err_adr, 0);
         `FAIL_IF_NOT_EQUAL(tmem_cyc_o, '1);
         `FAIL_IF_NOT_EQUAL(tmem_stb_o, '1);
         `FAIL_IF_NOT_EQUAL(tmem_sel_o, '1);
