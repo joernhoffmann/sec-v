@@ -38,7 +38,7 @@ module mem #(
     input  funit_in_t  fu_i,
     output funit_out_t fu_o,
 
-    output logic [ADR_WIDTH-1 : 0] t_err_adr_o,
+    output logic [ADR_WIDTH-1 : 0] tag_err_adr_o,
 
     // Wishbone data memory interface
     output logic                    dmem_cyc_o,
@@ -64,8 +64,8 @@ module mem #(
     logic load, err;
     mem_op_t op;
 
-    logic t_err;
-    logic [ADR_WIDTH-1 : 0] t_err_adr;
+    logic tag_err;
+    logic [ADR_WIDTH-1 : 0] tag_err_adr;
 
     // Mem access
     assign op = mem_op_t'(fu_i.op.mem);
@@ -167,8 +167,8 @@ module mem #(
     mtag_chk mtag_chk0 (
         .ena_i      (fu_i.ena),
         .adr_i      (fu_i.src1),
-        .err_o      (t_err),
-        .err_adr_o  (t_err_adr),
+        .err_o      (tag_err),
+        .err_adr_o  (tag_err_adr),
 
         .tmem_cyc_o (tmem_cyc_o),
         .tmem_stb_o (tmem_stb_o),
@@ -181,13 +181,13 @@ module mem #(
     // Ouptut
     always_comb begin
         fu_o = funit_out_default();
-        t_err_adr_o = 'b0;
+        tag_err_adr_o = 'b0;
 
         if (fu_i.ena) begin
             // Control output
-            fu_o.rdy = err || dmem_ack_i || t_err;
-            fu_o.err = err || t_err;
-            t_err_adr_o = t_err_adr;
+            fu_o.rdy = err || dmem_ack_i || tag_err;
+            fu_o.err = err || tag_err;
+            tag_err_adr_o = tag_err_adr;
 
             // Result output
             fu_o.res = dmem_dat;
