@@ -102,8 +102,7 @@ module csr_regs #(
     typedef struct packed {
         logic [1:0]  mxl;           // ISA Width aka. machine x-length (1 = RV32, 2 = RV64, 3 = RV128)
         logic [35:0] reserved;      // Reserved Bits
-        logic [25:0] extensions;    // ISA Extensions (bit position corresponds to letter,
-                                    // e.g., bit 0 for "A", bit 12 for "M")
+        logic [25:0] extensions;    // ISA Extensions (bit position corresponds to letter, e.g., bit 0 for "A")
     } misa_t;
 
     // Machine Interrupt Enable
