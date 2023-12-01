@@ -32,7 +32,7 @@ module csr_regs #(
 
     localparam int HARTS_WIDTH = $clog2(HARTS);
 
-    // Defines
+    // --- CSR Adresses --------------------------------------------------------------------------------------------- //
     typedef enum logic [11:0] {
         // User Mode
         CSR_ADDR_USTATUS     = 12'h000, // User Status Register
@@ -83,6 +83,7 @@ module csr_regs #(
         CSR_ADDR_MHARTID     = 12'hF14  // Hardware Thread ID
     } csr_addr_t;
 
+    // --- CSR bitfields -------------------------------------------------------------------------------------------- //
     // Machine status information
     typedef struct packed {
         logic        sd;                // Status Dirty Bit
@@ -129,16 +130,11 @@ module csr_regs #(
         logic cy;                   // Enable Cycle Counter
     } mcounteren_t;
 
-    // --- Register defaults ---------------------------------------------------------------------------------------- //
+    // --- CSR defaults --------------------------------------------------------------------------------------------- //
     localparam logic [63:0] MVENDORID   = 64'h4254_4147;    // Bitaggregat - BTAG
     localparam logic [63:0] MARCHID     = 64'hbabe_0001;
     localparam logic [63:0] MIMPID      = 64'hcaff_0001;
-
-    // Supported extension
-    //  20 : user mode
-    //  8  : integer
-    localparam logic [25:0] EXTENSIONS_SECV = 26'h100100;
-
+    localparam logic [25:0] EXTENSIONS  = 26'h100100;       // User mode (20), Integer (8)
 
     // --- Register signals  ---------------------------------------------------------------------------------------- //
     // Machine Mode
