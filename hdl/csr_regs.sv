@@ -86,12 +86,7 @@ module csr_regs #(
     // Machine status information
     typedef struct packed {
         logic        sd;                // Status Dirty Bit
-        logic [62:23] reserved0;        // Reserved Bits
-        logic        tsr;               // Trap SRET Bit
-        logic        tw;                // Timeout Wait Bit
-        logic        tvm;               // Trap Virtual Memory Bit
-        logic        mxr;               // Make Executable Readable Bit
-        logic        sum;               // Supervisor User Memory Access Bit
+        logic [62:18] reserved0;        // Reserved Bits
         logic        mprv;              // Modify Privilege Bit
         logic [1:0]  xs;                // User Extension Status
         logic [1:0]  fs;                // Floating-point Status
