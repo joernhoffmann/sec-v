@@ -22,20 +22,25 @@ module csr_regs #(
     input   logic                       clk_i,
     input   logic                       rst_i,
 
-    input   logic [11:0]                addr_i,     // CSR address
-    input   logic [63:0]                data_i,     // CSR write data
-    input   logic                       we_i,       // CSR write enable
-    output  logic [63:0]                data_o,     // CSR read data
+    // Generic
+    input   logic [HARTS_WIDTH-1 : 0]   hartid_i,       // Hardware thread id
 
-    // Exception handling
-    input   logic [HARTS_WIDTH-1 : 0]   hartid_i,   // Hardware thread id
-    input   logic [XLEN-1 : 0]          pc_i,       // Current PC
-    input   logic                       exc_i,      // Exception occured
-    input   exc_t                       exc_type_i  // Exception type
+    // CSR access
+    input   logic [11:0]                csr_adr_i,      // CSR address
+    input   logic [63:0]                csr_dat_i,      // CSR write data
+    input   logic                       csr_we_i,       // CSR write enable
+    output  logic [63:0]                csr_dat_o,      // CSR read data
 
+    // Trap (interrupt, exception or fault)
+    input   logic [XLEN-1 : 0]          trap_pc_i,      // Current PC when trap occurs
+    input   logic [XLEN-1 : 0]          trap_adr_i,     // Trap address (faulting memory address etc.)
+    input   logic                       int_i,          // Interrupt occured
+    input   int_t                       int_cause,      // Interrupt type
+    input   logic                       exc_i,          // Exception occured
+    input   exc_t                       exc_cause_i     // Exception type
 );
 
-    localparam int HARTS_WIDTH = $clog2(HARTS) + 1;
+    localparam int HARTS_WIDTH = HARTS > 1 ? $clog2(HARTS) : 1;
     localparam logic [25:0] SECV_EXT = EXT_U |EXT_I;
 
     // --- Signal instances  ---------------------------------------------------------------------------------------- //
@@ -132,21 +137,21 @@ module csr_regs #(
 
 
     always_comb begin : csr_read
-        data_o = 64'h0;
+        csr_dat_o = 64'h0;
 
-        case (addr_i)
+        case (csr_adr_i)
             // Machine Timer
-            CSR_ADDR_MCYCLE     : data_o = mcycle;
-            CSR_ADDR_MINSTRET   : data_o = minstret;
+            CSR_ADDR_MCYCLE     : csr_dat_o = mcycle;
+            CSR_ADDR_MINSTRET   : csr_dat_o = minstret;
 
             // Machine Information Registers
-            CSR_ADDR_MVENDORID  : data_o = MVENDORID;
-            CSR_ADDR_MARCHID    : data_o = MARCHID;
-            CSR_ADDR_MIMPID     : data_o = MIMPID;
-            CSR_ADDR_MHARTID    : data_o = {{(XLEN-HARTS_WIDTH){1'b0}}, hartid_i};
+            CSR_ADDR_MVENDORID  : csr_dat_o = MVENDORID;
+            CSR_ADDR_MARCHID    : csr_dat_o = MARCHID;
+            CSR_ADDR_MIMPID     : csr_dat_o = MIMPID;
+            CSR_ADDR_MHARTID    : csr_dat_o = {{(XLEN-HARTS_WIDTH){1'b0}}, hartid_i};
 
             default:
-                data_o = 64'h0;
+                csr_dat_o = 64'h0;
         endcase
     end
 
