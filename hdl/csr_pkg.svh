@@ -113,52 +113,57 @@ package csr_pkg;
     localparam logic [63:0] MIMPID      = 64'hcaff_0001;
 
     typedef enum logic [25:0] {         // RISC-V extensions
-      EXT_A = 26'h00000001,             // Atomic
-      EXT_B = 26'h00000002,             // Bit manipulation
-      EXT_C = 26'h00000004,             // Compressed
-      EXT_D = 26'h00000008,             // Double-precision floating-point
-      EXT_E = 26'h00000010,             // Embedded
-      EXT_F = 26'h00000020,             // Single-precision floating-point
-      EXT_G = 26'h00000040,             // General-purpose registers
-      EXT_H = 26'h00000080,             // Hypervisor
-      EXT_I = 26'h00000100,             // Base integer
-      EXT_J = 26'h00000200,             // Dynamically Translated Languages (Java)
-      EXT_K = 26'h00000400,             // Custom
-      EXT_L = 26'h00000800,             // 64-bit integer
-      EXT_M = 26'h00001000,             // Integer multiplication and division
-      EXT_N = 26'h00002000,             // User-level interrupts
-      EXT_O = 26'h00004000,             // Custom
-      EXT_P = 26'h00008000,             // Packed SIMD
-      EXT_Q = 26'h00010000,             // Quad-precision floating-point
-      EXT_R = 26'h00020000,             // Custom
-      EXT_S = 26'h00040000,             // Supervisor mode
-      EXT_T = 26'h00080000,             // Transactional memory
-      EXT_U = 26'h00100000,             // User-level extensions
-      EXT_V = 26'h00200000,             // Custom
-      EXT_W = 26'h00400000,             // Custom
-      EXT_X = 26'h00800000,             // Non-standard extension
-      EXT_Y = 26'h01000000,             // Custom
-      EXT_Z = 26'h02000000              // Custom
+        EXT_A = 26'h00000001,           // Atomic
+        EXT_B = 26'h00000002,           // Bit manipulation
+        EXT_C = 26'h00000004,           // Compressed
+        EXT_D = 26'h00000008,           // Double-precision floating-point
+        EXT_E = 26'h00000010,           // Embedded
+        EXT_F = 26'h00000020,           // Single-precision floating-point
+        EXT_G = 26'h00000040,           // General-purpose registers
+        EXT_H = 26'h00000080,           // Hypervisor
+        EXT_I = 26'h00000100,           // Base integer
+        EXT_J = 26'h00000200,           // Dynamically Translated Languages (Java)
+        EXT_K = 26'h00000400,           // Custom
+        EXT_L = 26'h00000800,           // 64-bit integer
+        EXT_M = 26'h00001000,           // Integer multiplication and division
+        EXT_N = 26'h00002000,           // User-level interrupts
+        EXT_O = 26'h00004000,           // Custom
+        EXT_P = 26'h00008000,           // Packed SIMD
+        EXT_Q = 26'h00010000,           // Quad-precision floating-point
+        EXT_R = 26'h00020000,           // Custom
+        EXT_S = 26'h00040000,           // Supervisor mode
+        EXT_T = 26'h00080000,           // Transactional memory
+        EXT_U = 26'h00100000,           // User-level extensions
+        EXT_V = 26'h00200000,           // Custom
+        EXT_W = 26'h00400000,           // Custom
+        EXT_X = 26'h00800000,           // Non-standard extension
+        EXT_Y = 26'h01000000,           // Custom
+        EXT_Z = 26'h02000000            // Custom
     } ext_t;
 
-    typedef enum logic [5:0] {
-        EXC_NONE  = 6'b000000,          // No exception occured
-        EXC_IMA   = 6'b000001,          // Instruction address misaligned
-        EXC_IAF   = 6'b000010,          // Instruction access fault
-        EXC_II    = 6'b000011,          // Illegal instruction
-        EXC_BP    = 6'b000100,          // Breakpoint
-        EXC_LMA   = 6'b000101,          // Load address misaligned
-        EXC_LAF   = 6'b000110,          // Load access fault
-        EXC_SMA   = 6'b000111,          // Store address misaligned
-        EXC_SAF   = 6'b001000,          // Store access fault
-        EXC_ECU   = 6'b011100,          // Environment call from U-mode
-        EXC_ECS   = 6'b011101,          // Environment call from S-mode
-        EXC_ECM   = 6'b011110,          // Environment call from M-mode
-        EXC_IPF   = 6'b111100,          // Instruction page fault
-        EXC_LPF   = 6'b111101,          // Load page fault
-        EXC_RSVD1 = 6'b111110,          // Reserved
-        EXC_RSVD2 = 6'b111111           // Reserved
-    } exc_t;
+typedef enum logic [5:0] {              // RISC-V Exceptions
+    EXC_INST_MISALIGNED         = 0,    // Instruction address misaligned
+    EXC_INST_ACCESS_FAULT       = 1,    // Instruction access fault
+    EXC_INST_ILLEGAL            = 2,    // Illegal instruction
+    EXC_LD_ADDRESS_MISALIGNED   = 4,    // Load address misaligned
+    EXC_LD_ACCESS_FAULT         = 5,    // Load access fault
+    EXC_ST_ADDRESS_MISALIGNED   = 6,    // Store / AMO address misaligned
+    EXC_ST_ACCESS_FAULT         = 7,    // Store / AMO access fault
+    EXC_ENV_CALL_U              = 8,    // Environment call from U-mode
+    EXC_ENV_CALL_M              = 11,   // Environment call from M-mode
+    // 16 .. 23 Reserved
+    // 24 .. 31 Custom use
+    EXC_MEM_TAG_INVLD           = 24    // Memory Tag Invalid
+} exc_t;
+
+typedef enum logic [5:0] {
+    INT_MSI                     = 3,    // Machine software interrupt
+    INT_MTI                     = 7,    // Machine timer interrupt
+    INT_MEI                     = 11    // Machine external interrupt
+    // 12 .. 15 Reserved
+    //    >= 16 Platform use
+
+} int_t;
 
 endpackage
 `endif
