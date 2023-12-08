@@ -22,6 +22,10 @@ package secv_pkg;
     parameter int REG_COUNT = 32;                   // Number of general purpose integer registers
     parameter int REG_ADR   = $clog2(REG_COUNT);    // Width to address registers
 
+
+    // -------------------------------------------------------------------------------------------------------------- //
+    // Modes / States etc.
+    // -------------------------------------------------------------------------------------------------------------- //
     // States
     typedef enum logic [3:0] {
         STATE_IDLE,
@@ -30,6 +34,12 @@ package secv_pkg;
         STATE_EXECUTE,
         STATE_WB
     } state_t;
+
+    // Privilege modes
+    typedef enum logic {
+        PRIV_MODE_USER,         // User mode (least privilge)
+        PRIV_MODE_MACHINE       // Machine mode (highes privilege)
+    } priv_mode_t;
 
     // -------------------------------------------------------------------------------------------------------------- //
     // Instruction

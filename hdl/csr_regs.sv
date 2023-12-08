@@ -23,7 +23,9 @@ module csr_regs #(
     input   logic                       rst_i,
 
     // Generic
-    input   logic [HARTS_WIDTH-1 : 0]   hartid_i,       // Hardware thread id
+    input   logic [HARTS_WIDTH-1 : 0]   hartid_i,      // Hardware thread id
+    input   priv_mode_t                 mpriv_i,       // Privilege mode of the hart
+    output  priv_mode_t                 mpriv_prev_o,  // Revious privilege mode of the hart
 
     // CSR access
     input   logic [11:0]                csr_adr_i,      // CSR address
@@ -34,14 +36,24 @@ module csr_regs #(
     // Trap (interrupt, exception or fault)
     input   logic [XLEN-1 : 0]          trap_pc_i,      // Current PC when trap occurs
     input   logic [XLEN-1 : 0]          trap_adr_i,     // Trap address (faulting memory address etc.)
-    input   logic                       intr_i,          // Interrupt occured
-    input   intr_cause_t                intr_cause_i,    // Interrupt type
-    input   logic                       excpt_i,          // Exception occured
-    input   excpt_cause_t               excpt_cause_i     // Exception type
+    input   logic                       mret_i,         // Return from trap
+    output  logic [XLEN-1 : 0]          mret_pc_o,      // Returning IP
+
+    input   logic                       intr_i,         // Interrupt occured
+    input   intr_cause_t                intr_cause_i,   // Interrupt type
+    input   logic                       except_i,       // Exception occured
+    input   except_cause_t              except_cause_i  // Exception type
 );
 
     localparam int HARTS_WIDTH = HARTS > 1 ? $clog2(HARTS) : 1;
     localparam logic [25:0] SECV_EXT = RVEXT_U | RVEXT_I;
+
+    /* TODO:
+        -   Privilege mode
+        -   mret instruction / trap_clear
+        -   Setting of old interrupt counter
+     */
+
 
     // --- Signal instances  ---------------------------------------------------------------------------------------- //
     // Machine Mode
@@ -53,7 +65,7 @@ module csr_regs #(
 
     logic [63:0] mscratch;     // Machine Scratch
     logic [63:0] mepc;         // Machine Exception Program Counter
-    logic [63:0] mcause;       // Machine Cause
+    mcause_t     mcause;       // Machine Cause
     logic [63:0] mtval;        // Machine Trap Value
     logic [63:0] mip;          // Machine Interrupt Pending
 
@@ -74,7 +86,6 @@ module csr_regs #(
     logic [63:0] mvendorid;    // Vendor ID
     logic [63:0] marchid;      // Architecture ID
     logic [63:0] mimpid;       // Implementation ID
-    logic [63:0] mhartid;      // Hardware Thread ID
 
     // User Mode
     logic [63:0] ustatus;      // User Status Register
@@ -115,7 +126,6 @@ module csr_regs #(
 
             mcycle      <= 64'h0;
             minstret    <= 64'h0;
-            mhartid     <= 64'h0;
 
             // User mode
             ustatus     <= 64'h0;
@@ -127,14 +137,47 @@ module csr_regs #(
             ucause      <= 64'h0;
             utval       <= 64'h0;
             uip         <= 64'h0;
-        end
+        end // rst_i
 
     else
         mcycle   <= mcycle + 1;
         minstret <= mcycle;
 
-    end
+        // Interrupt handling
+        if (intr_i) begin
+            mcause <= 'b0;
+            mcause.intr  <= 1'b1;
+            mcause.cause <= intr_cause_i;
+            mepc         <= trap_pc_i;
+            mtval <= 'b0;
+        end
 
+        // Fault and exception handling
+        else if (except_i) begin
+            mcause       <= 'b0;
+            mcause.intr  <= 1'b0;
+            mcause.cause <= except_cause_i;
+            mepc         <= trap_pc_i;
+            mstatus.mpp  <= (mpriv_i == PRIV_MODE_MACHINE) ? 2'b11 : 2'b00;
+
+            // Set machine trap value (trap address)
+            if (except_cause_i == EXCEPT_CAUSE_LOAD_ADDRESS_MISALIGNED  ||
+                except_cause_i == EXCEPT_CAUSE_LOAD_ACCESS_FAULT        ||
+                except_cause_i == EXCEPT_CAUSE_STORE_ADDRESS_MISALIGNED ||
+                except_cause_i == EXCEPT_CAUSE_STORE_ACCESS_FAULT       ||
+                except_cause_i == EXCEPT_CAUSE_MTAG_INVLD)
+            begin
+                mtval <= trap_adr_i;
+            end
+        end
+
+        if (!intr_i && !except_i && mret_i) begin
+            mret_pc_o <= mepc;
+            mcause <= 'b0;
+            mepc   <= 'b0;
+            mtval  <= 'b0;
+        end
+    end
 
     always_comb begin : csr_read
         csr_dat_o = 64'h0;
