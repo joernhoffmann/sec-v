@@ -34,14 +34,14 @@ module csr_regs #(
     // Trap (interrupt, exception or fault)
     input   logic [XLEN-1 : 0]          trap_pc_i,      // Current PC when trap occurs
     input   logic [XLEN-1 : 0]          trap_adr_i,     // Trap address (faulting memory address etc.)
-    input   logic                       int_i,          // Interrupt occured
-    input   int_t                       int_cause,      // Interrupt type
-    input   logic                       exc_i,          // Exception occured
-    input   exc_t                       exc_cause_i     // Exception type
+    input   logic                       intr_i,          // Interrupt occured
+    input   intr_cause_t                intr_cause_i,    // Interrupt type
+    input   logic                       excpt_i,          // Exception occured
+    input   excpt_cause_t               excpt_cause_i     // Exception type
 );
 
     localparam int HARTS_WIDTH = HARTS > 1 ? $clog2(HARTS) : 1;
-    localparam logic [25:0] SECV_EXT = EXT_U |EXT_I;
+    localparam logic [25:0] SECV_EXT = RVEXT_U | RVEXT_I;
 
     // --- Signal instances  ---------------------------------------------------------------------------------------- //
     // Machine Mode
