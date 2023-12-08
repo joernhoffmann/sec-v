@@ -15,7 +15,7 @@
 import secv_pkg::*;
 
 module csr_regs #(
-    parameter int HARTS = 2
+    parameter int HARTS = 1
 
 ) (
     input   logic                       clk_i,
@@ -30,7 +30,7 @@ module csr_regs #(
     output  logic [63:0]                data_o      // CSR output
 );
 
-    localparam int HARTS_WIDTH = $clog2(HARTS);
+    localparam int HARTS_WIDTH = $clog2(HARTS) + 1;
 
     // --- CSR Adresses --------------------------------------------------------------------------------------------- //
     typedef enum logic [11:0] {
@@ -84,8 +84,7 @@ module csr_regs #(
     } csr_addr_t;
 
     // --- CSR bitfields -------------------------------------------------------------------------------------------- //
-    // Machine status information
-    typedef struct packed {
+    typedef struct packed {             // Machine Status Information Register
         logic        sd;                // Status Dirty Bit
         logic [62:18] reserved0;        // Reserved Bits
         logic        mprv;              // Modify Privilege Bit
@@ -99,15 +98,14 @@ module csr_regs #(
         logic [2:0]  reserved3;         // Reserved Bits
     } mstatus_t;
 
-    // Machine ISA information
-    typedef struct packed {
-        logic [1:0]  mxl;           // ISA Width aka. machine x-length (1 = RV32, 2 = RV64, 3 = RV128)
-        logic [35:0] reserved;      // Reserved Bits
-        logic [25:0] extensions;    // ISA Extensions (bit position corresponds to letter, e.g., bit 0 for "A")
+
+    typedef struct packed {             // Machine ISA Information Register
+        logic [1:0]  mxl;               // ISA Width aka. machine x-length (1 = RV32, 2 = RV64, 3 = RV128)
+        logic [35:0] reserved;          // Reserved Bits
+        logic [25:0] extensions;        // ISA Extensions (bit position corresponds to letter, e.g., bit 0 for "A")
     } misa_t;
 
-    // Machine Interrupt Enable
-    typedef struct packed {
+    typedef struct packed {             // Machine Interrupt Enable Register
         logic [63:12]   reserved;       // Reserved Bits
         logic           meie;           // Machine External Interrupt Enable
         logic [2:0]     reserved1;      // Reserved Bits
@@ -117,26 +115,25 @@ module csr_regs #(
         logic [2:0]     reserved3;      // Reserved Bits
     } mie_t;
 
-    // Machine Trap Vector
-    typedef struct packed {
-        logic [61:2] base;          // Base address of the trap vector
-        logic [1:0]  mode;          // Trap-Vector Base-Address Mode
+    typedef struct packed {             // Machine Trap Vector Register
+        logic [61:2] base;              // Base address of the trap vector
+        logic [1:0]  mode;              // Trap-Vector Base-Address Mode
     } mtvec_t;
 
     typedef struct packed {
-        logic [31:3] reserved;      // Reserved Bits
-        logic ir;                   // Enable Instructions-Retired Counter
-        logic tm;                   // Enable Timer Register
-        logic cy;                   // Enable Cycle Counter
+        logic [31:3] reserved;          // Reserved Bits
+        logic ir;                       // Enable Instructions-Retired Counter
+        logic tm;                       // Enable Timer Register
+        logic cy;                       // Enable Cycle Counter
     } mcounteren_t;
 
-    // --- CSR defaults --------------------------------------------------------------------------------------------- //
+    // --- Default values ------------------------------------------------------------------------------------------- //
     localparam logic [63:0] MVENDORID   = 64'h4254_4147;    // Bitaggregat - BTAG
     localparam logic [63:0] MARCHID     = 64'hbabe_0001;
     localparam logic [63:0] MIMPID      = 64'hcaff_0001;
     localparam logic [25:0] EXTENSIONS  = 26'h100100;       // User mode (20), Integer (8)
 
-    // --- Register signals  ---------------------------------------------------------------------------------------- //
+    // --- Signal instances  ---------------------------------------------------------------------------------------- //
     // Machine Mode
     mstatus_t mstatus;         // Machine Status
     logic [63:0] misa;         // ISA and Extensions
