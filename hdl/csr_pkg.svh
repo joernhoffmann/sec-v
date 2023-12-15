@@ -38,7 +38,7 @@ package csr_pkg;
         CSR_ADDR_MSCRATCH    = 12'h340,     // Machine Scratch
         CSR_ADDR_MEPC        = 12'h341,     // Machine Exception Program Counter
         CSR_ADDR_MCAUSE      = 12'h342,     // Machine Cause
-        CSR_ADDR_MTVAL       = 12'h343,     // Machine Trap Value
+        CSR_ADDR_MTVAL       = 12'h343,     // Machine Trap Value (WARL)
         CSR_ADDR_MIP         = 12'h344,     // Machine Interrupt Pending
 
         // Machine Memory Protection
@@ -64,14 +64,10 @@ package csr_pkg;
         CSR_ADDR_MHARTID     = 12'hF14      // Hardware Thread ID
     } csr_addr_t;
 
-    // --- CSR bitfields -------------------------------------------------------------------------------------------- //
+    // --- CSR bit fields ------------------------------------------------------------------------------------------- //
     // Machine status information register (mstatus)
     typedef struct packed {
-        logic           sd;                 // Status Dirty Bit
-        logic [62:18]   reserved0;          // Reserved Bits
-        logic           mprv;               // Modify Privilege Bit
-        logic [1:0]     xs;                 // User Extension Status
-        logic [1:0]     fs;                 // Floating-point Status
+        logic [63:13]   reserved0;          // Reserved Bits
         logic [1:0]     mpp;                // Machine Previous Privilege
         logic [2:0]     reserved1;          // Reserved Bits
         logic           mpie;               // Machine Previous Interrupt Enable
@@ -87,16 +83,25 @@ package csr_pkg;
         logic [25:0]    extensions;         // ISA Extensions (bit position corresponds to letter, e.g., bit 0 for "A")
     } misa_t;
 
-    // Machine interrupt enable register (mie)
+    // Machine interrupt registers
+    // Machine interrupt enable (mie)
+    // Machine interrupt pending (mip)
     typedef struct packed {
         logic [63:12]   reserved;           // Reserved Bits
-        logic           meie;               // Machine External Interrupt Enable
+        logic           mei;                // Machine External Interrupt (Enable / Pending)
         logic [2:0]     reserved1;          // Reserved Bits
-        logic           mtie;               // Machine Timer Interrupt Enable
+        logic           mti;                // Machine Timer Interrupt (Enable / Pending)
         logic [2:0]     reserved2;          // Reserved Bits
-        logic           msie;               // Machine Software Interrupt Enable
+        logic           msi;                // Machine Software Interrupt (Enable / Pending)
         logic [2:0]     reserved3;          // Reserved Bits
-    } mie_t;
+    } mintr_t;
+
+    // Interrupt signals (enable, pending)
+    typedef struct packed {
+        logic           mei;               // Machine External Interrupt
+        logic           mti;               // Machine Timer Interrupt Enable
+        logic           msi;               // Machine Softwarte Interrupt Enable
+    } intr_t;
 
     // Machine trap vector register (mtvec)
     typedef struct packed {
@@ -124,37 +129,52 @@ package csr_pkg;
     localparam logic [63:0] MARCHID     = 64'hbabe_0001;
     localparam logic [63:0] MIMPID      = 64'hcaff_0001;
 
+    typedef enum logic [1:0] {
+        MSTATUS_MPP_USER        = 2'b00,
+        MSTATUS_MPP_SUPERVISOR  = 2'b01,
+        MSTATUS_MPP_RESERVED    = 2'b10,
+        MSTATUS_MPP_MACHINE     = 2'b11
+    } mstatus_mpp_t;
+
+    typedef enum logic [1:0]
+    {
+        MISA_MXL_RES    = 2'b00,
+        MISA_MXL_RV32   = 2'b01,
+        MISA_MXL_RV64   = 2'b10,
+        MISA_MXL_RV128  = 2'b11
+    } misa_mxl_t;
+
     // RISC-V ISA extensions
     typedef enum logic [25:0] {
-        RVEXT_A = 26'h00000001,         // Atomic
-        RVEXT_B = 26'h00000002,         // Bit manipulation
-        RVEXT_C = 26'h00000004,         // Compressed
-        RVEXT_D = 26'h00000008,         // Double-precision floating-point
-        RVEXT_E = 26'h00000010,         // Embedded
-        RVEXT_F = 26'h00000020,         // Single-precision floating-point
-        RVEXT_G = 26'h00000040,         // General-purpose registers
-        RVEXT_H = 26'h00000080,         // Hypervisor
-        RVEXT_I = 26'h00000100,         // Base integer
-        RVEXT_J = 26'h00000200,         // Dynamically Translated Languages (Java)
-        RVEXT_K = 26'h00000400,         // Custom
-        RVEXT_L = 26'h00000800,         // 64-bit integer
-        RVEXT_M = 26'h00001000,         // Integer multiplication and division
-        RVEXT_N = 26'h00002000,         // User-level interrupts
-        RVEXT_O = 26'h00004000,         // Custom
-        RVEXT_P = 26'h00008000,         // Packed SIMD
-        RVEXT_Q = 26'h00010000,         // Quad-precision floating-point
-        RVEXT_R = 26'h00020000,         // Custom
-        RVEXT_S = 26'h00040000,         // Supervisor mode
-        RVEXT_T = 26'h00080000,         // Transactional memory
-        RVEXT_U = 26'h00100000,         // User-level extensions
-        RVEXT_V = 26'h00200000,         // Custom
-        RVEXT_W = 26'h00400000,         // Custom
-        RVEXT_X = 26'h00800000,         // Non-standard extension
-        RVEXT_Y = 26'h01000000,         // Custom
-        RVEXT_Z = 26'h02000000          // Custom
-    } rvext_t;
+        MISA_EXT_A = 26'h00000001,      // Atomic
+        MISA_EXT_B = 26'h00000002,      // Bit manipulation
+        MISA_EXT_C = 26'h00000004,      // Compressed
+        MISA_EXT_D = 26'h00000008,      // Double-precision floating-point
+        MISA_EXT_E = 26'h00000010,      // Embedded
+        MISA_EXT_F = 26'h00000020,      // Single-precision floating-point
+        MISA_EXT_G = 26'h00000040,      // General-purpose registers
+        MISA_EXT_H = 26'h00000080,      // Hypervisor
+        MISA_EXT_I = 26'h00000100,      // Base integer
+        MISA_EXT_J = 26'h00000200,      // Dynamically Translated Languages (Java)
+        MISA_EXT_K = 26'h00000400,      // Custom
+        MISA_EXT_L = 26'h00000800,      // 64-bit integer
+        MISA_EXT_M = 26'h00001000,      // Integer multiplication and division
+        MISA_EXT_N = 26'h00002000,      // User-level interrupts
+        MISA_EXT_O = 26'h00004000,      // Custom
+        MISA_EXT_P = 26'h00008000,      // Packed SIMD
+        MISA_EXT_Q = 26'h00010000,      // Quad-precision floating-point
+        MISA_EXT_R = 26'h00020000,      // Custom
+        MISA_EXT_S = 26'h00040000,      // Supervisor mode
+        MISA_EXT_T = 26'h00080000,      // Transactional memory
+        MISA_EXT_U = 26'h00100000,      // User-level extensions
+        MISA_EXT_V = 26'h00200000,      // Custom
+        MISA_EXT_W = 26'h00400000,      // Custom
+        MISA_EXT_X = 26'h00800000,      // Non-standard extension
+        MISA_EXT_Y = 26'h01000000,      // Custom
+        MISA_EXT_Z = 26'h02000000       // Custom
+    } misa_ext_t;
 
-    // Exception cause
+    // Exception cause (0.cause)
     typedef enum logic [5:0] {
         EXCEPT_CAUSE_INST_MISALIGNED            = 0,    // Instruction address misaligned
         EXCEPT_CAUSE_INST_ACCESS_FAULT          = 1,    // Instruction access fault
@@ -170,7 +190,7 @@ package csr_pkg;
         EXCEPT_CAUSE_MTAG_INVLD                 = 24    // Memory Tag Invalid (needed? cf. LD_ or ST_ACCESS_FAULT)
     } except_cause_t;
 
-    // Interrupt cause
+    // Interrupt cause (1.cause)
     typedef enum logic [5:0] {
         INTR_CAUSE_MSI                  = 3,    // Machine software interrupt
         INTR_CAUSE_MTI                  = 7,    // Machine timer interrupt
