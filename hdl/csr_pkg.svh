@@ -64,8 +64,7 @@ package csr_pkg;
         CSR_ADDR_MHARTID     = 12'hF14      // Hardware Thread ID
     } csr_addr_t;
 
-    // --- CSR bit fields ------------------------------------------------------------------------------------------- //
-    // Machine status information register (mstatus)
+    // --- Register Fields ------------------------------------------------------------------------------------------ //
     typedef struct packed {
         logic [63:13]   reserved0;          // Reserved Bits
         logic [1:0]     mpp;                // Machine Previous Privilege
@@ -76,16 +75,13 @@ package csr_pkg;
         logic [2:0]     reserved3;          // Reserved Bits
     } mstatus_t;
 
-    // Machine ISA information register (misa)
     typedef struct packed {
         logic [1:0]     mxl;                // ISA Width aka. machine x-length (1 = RV32, 2 = RV64, 3 = RV128)
         logic [35:0]    reserved;           // Reserved Bits
         logic [25:0]    extensions;         // ISA Extensions (bit position corresponds to letter, e.g., bit 0 for "A")
     } misa_t;
 
-    // Machine interrupt registers
-    // Machine interrupt enable (mie)
-    // Machine interrupt pending (mip)
+    // Machine interrupt enable (mie) and interrupt pending (mip)
     typedef struct packed {
         logic [63:12]   reserved;           // Reserved Bits
         logic           mei;                // Machine External Interrupt (Enable / Pending)
@@ -103,13 +99,11 @@ package csr_pkg;
         logic           msi;               // Machine Softwarte Interrupt Enable
     } intr_t;
 
-    // Machine trap vector register (mtvec)
     typedef struct packed {
         logic [63:2]    base;               // Base address of the trap vector
         logic [1:0]     mode;               // Trap-Vector Base-Address Mode
     } mtvec_t;
 
-    // Machine counter enable register (mcounteren)
     typedef struct packed {
         logic [31:3]    reserved;
         logic           ir;                 // Enable Instructions-Retired Counter
@@ -117,7 +111,6 @@ package csr_pkg;
         logic           cy;                 // Enable Cycle Counter
     } mcounteren_t;
 
-    // Machine cause register
     typedef struct packed {
         logic           intr;               // Interrupt occured
         logic [62: 6]   unused;

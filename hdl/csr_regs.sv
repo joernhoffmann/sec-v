@@ -28,9 +28,9 @@ module csr_regs #(
 
     // CSR access
     input   logic [11:0]                csr_adr_i,      // CSR address
-    input   logic [XLEN-1:0]            csr_dat_i,      // CSR write data
     input   logic                       csr_we_i,       // CSR write enable
-    output  logic [XLEN-1:0]            csr_dat_o,      // CSR read data
+    input   logic [XLEN-1:0]            csr_dat_i,      // CSR write data
+    output  logic [XLEN-1:0]            csr_dat_o,      // CSR read data (old value)
 
     // Trap: interrupt (async), exception (execution), fault (mem-access)
     input   logic [XLEN-1:0]            trap_pc_i,      // Current PC when trap occurs
@@ -81,27 +81,95 @@ module csr_regs #(
     // Machine status register on mret instruction
     function automatic mstatus_t mstatus_mret(mstatus_t mstatus_i);
         mstatus_t mstatus = mstatus_i;
-        mstatus.mpp  <= MSTATUS_PRIV_MACHINE;
-        mstatus.mpie <= 1'b0;
-        mstatus.mie  <= mstatus_i.mpie;
+        mstatus.mpp  = MSTATUS_PRIV_MACHINE;
+        mstatus.mpie = 1'b0;
+        mstatus.mie  = mstatus_i.mpie;
         return mstatus;
     endfunction;
 
-
     // --- Registers ------------------------------------------------------------------------------------------------ //
-    // Machine Mode
-    mstatus_t mstatus;              // Machine Status
-    logic [XLEN-1:0] misa;          // ISA and Extensions
+    // Machine Status and Control
+    mstatus_t        mstatus;       // Machine Status
     logic [XLEN-1:0] mie;           // Machine Interrupt Enable
     logic [XLEN-1:0] mtvec;         // Machine Trap-Vector Base-Address
     logic [XLEN-1:0] mcounteren;    // Machine Counter Enable
 
-    logic [XLEN-1:0] mscratch;      // Machine Scratch
-    logic [XLEN-1:0] mepc;          // Machine Exception Program Counter
-    mcause_t         mcause;        // Machine Cause
-    logic [XLEN-1:0] mtval;         // Machine Trap Value
-    logic [XLEN-1:0] mip;           // Machine Interrupt Pending
+    always_ff @( posedge clk_i ) begin: status_control_impl
+        if (rst_i) begin
+            mstatus     <= 'h0;
+            mie         <= 'h0;
+            mtvec       <= 'h0;
+            mcounteren  <= 'h0;
+        end
 
+        else begin
+            if (intr_i) begin
+                mstatus <= mstatus_trap(mstatus, priv_i);
+            end
+
+            else if (except_i) begin
+                mstatus <= mstatus_trap(mstatus, priv_i);
+            end
+
+            else if (mret_i) begin
+                mstatus <= mstatus_mret(mstatus);
+            end
+        end
+    end
+
+    // Machine Trap Handling
+    logic [XLEN-1:0] mscratch, mscratch_next;   // Machine Scratch
+    logic [XLEN-1:0] mepc;                      // Machine Exception Program Counter
+    mcause_t         mcause;                    // Machine Cause
+    logic [XLEN-1:0] mtval;                     // Machine Trap Value
+    logic [XLEN-1:0] mip;                       // Machine Interrupt Pending
+
+    always_ff @( posedge clk_i ) begin: trap_impl
+        if (rst_i) begin
+            mscratch    <= 'h0;
+            mepc        <= 'h0;
+            mcause      <= 'h0;
+            mtval       <= 'h0;
+            mip         <= 'h0;
+        end
+
+        else begin
+            mscratch <= mscratch_next;
+
+            if (intr_i) begin
+                mepc         <= trap_pc_i;
+                mcause       <= 'h0;
+                mcause.intr  <= 1'b1;
+                mcause.cause <= intr_cause_i;
+                mtval        <= 'h0;
+            end
+
+            else if (except_i) begin
+                mepc         <= trap_pc_i;
+                mcause       <= 'h0;
+                mcause.intr  <= 1'b0;
+                mcause.cause <= except_cause_i;
+
+                if (except_cause_i == EXCEPT_CAUSE_LOAD_ADDRESS_MISALIGNED  ||
+                    except_cause_i == EXCEPT_CAUSE_LOAD_ACCESS_FAULT        ||
+                    except_cause_i == EXCEPT_CAUSE_STORE_ADDRESS_MISALIGNED ||
+                    except_cause_i == EXCEPT_CAUSE_STORE_ACCESS_FAULT       ||
+                    except_cause_i == EXCEPT_CAUSE_MTAG_INVLD)
+                begin
+                    mtval <= trap_adr_i;
+                end
+            end
+
+            else if (mret_i) begin
+                mepc    <= 'h0;
+                mcause  <= 'h0;
+                mtval   <= 'h0;
+                mstatus <= mstatus_mret(mstatus);
+            end
+        end
+    end
+
+    // Machine Memory Protection
     logic [XLEN-1:0] pmpcfg0;       // Configuration for PMP entries 0-3
     logic [XLEN-1:0] pmpcfg1;       // Configuration for PMP entries 4-7
     logic [XLEN-1:0] pmpaddr0;      // PMP Address Register 0
@@ -113,39 +181,8 @@ module csr_regs #(
     logic [XLEN-1:0] pmpaddr6;
     logic [XLEN-1:0] pmpaddr7;
 
-    logic [XLEN-1:0] mcycle;        // Machine Cycle Counter
-    logic [XLEN-1:0] minstret;      // Machine Instructions-Retired Counter
-
-    logic [XLEN-1:0] mvendorid;     // Vendor ID
-    logic [XLEN-1:0] marchid;       // Architecture ID
-    logic [XLEN-1:0] mimpid;        // Implementation ID
-
-    // User Mode
-    logic [XLEN-1:0] ustatus;       // User Status Register
-    logic [XLEN-1:0] uie;           // User Interrupt Enable Register
-    logic [XLEN-1:0] utvec;         // User Trap-Vector Base-Address Register
-
-    logic [XLEN-1:0] uscratch;      // User Scratch Register
-    logic [XLEN-1:0] uepc;          // User Exception Program Counter
-    logic [XLEN-1:0] ucause;        // User Cause Register
-    logic [XLEN-1:0] utval;         // User Trap Value
-    logic [XLEN-1:0] uip;           // User Interrupt Pending
-
-    always_ff @( posedge clk_i ) begin: csr_reset
+    always_ff @( posedge clk_i ) begin: pmp_impl
         if (rst_i) begin
-            // Machine mode
-            mstatus     <= 'h0;
-            misa        <= 'h0;
-            mie         <= 'h0;
-            mtvec       <= 'h0;
-            mcounteren  <= 'h0;
-
-            mscratch    <= 'h0;
-            mepc        <= 'h0;
-            mcause      <= 'h0;
-            mtval       <= 'h0;
-            mip         <= 'h0;
-
             pmpcfg0     <= 'h0;
             pmpcfg1     <= 'h0;
             pmpaddr0    <= 'h0;
@@ -156,78 +193,51 @@ module csr_regs #(
             pmpaddr5    <= 'h0;
             pmpaddr6    <= 'h0;
             pmpaddr7    <= 'h0;
+        end
 
+        // TODO...
+    end
+
+    // Machhine Timer Registers
+    logic [XLEN-1:0] mcycle;        // Machine Cycle Counter
+    logic [XLEN-1:0] minstret;      // Machine Instructions-Retired Counter
+
+    always_ff @( posedge clk_i ) begin: counter_impl
+        if (rst_i) begin
             mcycle      <= 'h0;
             minstret    <= 'h0;
-
-            // User mode
-            ustatus     <= 'h0;
-            uie         <= 'h0;
-            utvec       <= 'h0;
-
-            uscratch    <= 'h0;
-            uepc        <= 'h0;
-            ucause      <= 'h0;
-            utval       <= 'h0;
-            uip         <= 'h0;
-        end // rst_i
-
-    else
-        mcycle   <= mcycle + 1;
-        minstret <= mcycle;
-
-        // Interrupt handling
-        if (intr_i) begin
-            mcause       <= 'h0;
-            mcause.intr  <= 1'b1;
-            mcause.cause <= intr_cause_i;
-            mepc         <= trap_pc_i;
-            mtval        <= 'h0;
-            mstatus <= mstatus_trap(mstatus, priv_i);
         end
 
-        // Fault and exception handling
-        else if (except_i) begin
-            mcause       <= 'h0;
-            mcause.intr  <= 1'b0;
-            mcause.cause <= except_cause_i;
-            mepc         <= trap_pc_i;
-
-            // Set machine trap value (trap address)
-            if (except_cause_i == EXCEPT_CAUSE_LOAD_ADDRESS_MISALIGNED  ||
-                except_cause_i == EXCEPT_CAUSE_LOAD_ACCESS_FAULT        ||
-                except_cause_i == EXCEPT_CAUSE_STORE_ADDRESS_MISALIGNED ||
-                except_cause_i == EXCEPT_CAUSE_STORE_ACCESS_FAULT       ||
-                except_cause_i == EXCEPT_CAUSE_MTAG_INVLD)
-            begin
-                mtval <= trap_adr_i;
-            end
-
-            mstatus <= mstatus_trap(mstatus, priv_i);
-        end
-
-        else if (mret_i) begin
-            mcause  <= 'h0;
-            mepc    <= 'h0;
-            mtval   <= 'h0;
-            mstatus <= mstatus_mret(mstatus);
+        else begin
+            mcycle   <= mcycle + 1;
+            minstret <= mcycle;
         end
     end
 
+    // --- CSR Wrtie ------------------------------------------------------------------------------------------------ //
+
+
+    // --- CSR Read ------------------------------------------------------------------------------------------------- //
     always_comb begin : csr_read
         csr_dat_o = 'h0;
-
         case (csr_adr_i)
+            // Machine Status and Control
+            CSR_ADDR_MSTATUS    : csr_dat_o = mstatus;
+            CSR_ADDR_MISA       : csr_dat_o = misa_default();
+            CSR_ADDR_MIE        : csr_dat_o = mie;
+            CSR_ADDR_MTVEC      : csr_dat_o = mtvec;
+            CSR_ADDR_MCOUNTEREN : csr_dat_o = mcounteren;
+
+            // Machine Trap Handling
+            CSR_ADDR_MSCRATCH   : csr_dat_o = mscratch;
+            CSR_ADDR_MEPC       : csr_dat_o = mepc;
+            CSR_ADDR_MCAUSE     : csr_dat_o = mcause;
+            CSR_ADDR_MTVAL      : csr_dat_o = mtval;
+            CSR_ADDR_MIP        : csr_dat_o = mip;
+
             // Machine Timer
             CSR_ADDR_MCYCLE     : csr_dat_o = mcycle;
             CSR_ADDR_MINSTRET   : csr_dat_o = minstret;
-
-            // Macine Status and Control
-            CSR_ADDR_MISA       : csr_dat_o = misa_default();
-
-            // Machine Trap Handling
-            CSR_ADDR_MCAUSE     : csr_dat_o = mcause;
-            CSR_ADDR_MTVAL      : csr_dat_o = mtval;
 
             // Machine Information Registers
             CSR_ADDR_MVENDORID  : csr_dat_o = MVENDORID;
