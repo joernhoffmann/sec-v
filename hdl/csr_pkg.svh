@@ -130,14 +130,14 @@ package csr_pkg;
     localparam logic [63:0] MIMPID      = 64'hcaff_0001;
 
     typedef enum logic [1:0] {
-        MSTATUS_MPP_USER        = 2'b00,
-        MSTATUS_MPP_SUPERVISOR  = 2'b01,
-        MSTATUS_MPP_RESERVED    = 2'b10,
-        MSTATUS_MPP_MACHINE     = 2'b11
-    } mstatus_mpp_t;
+        MSTATUS_PRIV_USER        = 2'b00,
+        MSTATUS_PRIV_SUPERVISOR  = 2'b01,
+        MSTATUS_PRIV_RESERVED    = 2'b10,
+        MSTATUS_PRIV_MACHINE     = 2'b11
+    } mstatus_priv_t;
 
-    typedef enum logic [1:0]
-    {
+    // Machine X-Length field
+    typedef enum logic [1:0] {
         MISA_MXL_RES    = 2'b00,
         MISA_MXL_RV32   = 2'b01,
         MISA_MXL_RV64   = 2'b10,

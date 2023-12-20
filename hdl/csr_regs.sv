@@ -61,26 +61,27 @@ module csr_regs #(
         return misa;
     endfunction
 
-    // Hartid to register value
+    // Converts hid to register value
     function automatic logic [XLEN-1:0] hartid_reg(logic [HARTS_WIDTH-1:0] hartid);
         return {{(XLEN - HARTS_WIDTH){1'b0}}, hartid_i};
     endfunction;
 
-    // mstatus register when trap occurs
+    // Machine status register when trap occurs
     function automatic mstatus_t mstatus_trap (mstatus_t mstatus_i, priv_mode_t priv_mode);
         mstatus_t mstatus = mstatus_i;
 
-        mstatus.mpp  = (priv_mode == PRIV_MODE_MACHINE) ? MSTATUS_MPP_MACHINE : MSTATUS_MPP_USER;
+        // Currently only machine mode supported, otherwise:
+        // mstatus.mpp = (priv_mode == PRIV_MODE_MACHINE) ? MSTATUS_MPP_MACHINE : MSTATUS_MPP_USER;
+        mstatus.mpp  = MSTATUS_PRIV_MACHINE;
         mstatus.mpie = mstatus_i.mie;
         mstatus.mie  = 1'b0;
         return mstatus;
     endfunction;
 
-    // mstatus register on mret instruction
+    // Machine status register on mret instruction
     function automatic mstatus_t mstatus_mret(mstatus_t mstatus_i);
         mstatus_t mstatus = mstatus_i;
-
-        mstatus.mpp  <= MSTATUS_MPP_USER;
+        mstatus.mpp  <= MSTATUS_PRIV_MACHINE;
         mstatus.mpie <= 1'b0;
         mstatus.mie  <= mstatus_i.mpie;
         return mstatus;
