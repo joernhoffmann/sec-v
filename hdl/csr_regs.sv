@@ -27,28 +27,29 @@ module csr_regs #(
     input   logic                       rst_i,
 
     // Generic
-    input   logic [HARTS_WIDTH-1 : 0]   hartid_i,       // Hardware thread id
-    input   priv_mode_t                 priv_i,         // Privilege mode of the hart
-    output  priv_mode_t                 priv_prev_o,    // Revious privilege mode of the hart
+    input   logic [HARTS_WIDTH-1 : 0]   hartid_i,               // Hardware thread id
+    input   priv_mode_t                 priv_i,                 // Privilege mode of the hart
+    output  priv_mode_t                 priv_prev_o,            // Revious privilege mode of the hart
 
     // CSR access
-    input   logic [11:0]                csr_adr_i,      // CSR address
-    input   logic                       csr_we_i,       // CSR write enable
-    input   logic [XLEN-1:0]            csr_dat_i,      // CSR write data
-    output  logic [XLEN-1:0]            csr_dat_o,      // CSR read data (old value)
+    input   logic [11:0]                csr_adr_i,              // CSR address
+    input   logic                       csr_we_i,               // CSR write enable
+    input   logic [XLEN-1:0]            csr_dat_i,              // CSR write data
+    output  logic [XLEN-1:0]            csr_dat_o,              // CSR read data (old value)
 
-    // Trap: interrupt (async), exception (execution), fault (mem-access)
-    input   logic [XLEN-1:0]            trap_pc_i,      // Current PC when trap occurs
-    input   logic [XLEN-1:0]            trap_adr_i,     // Trap address (faulting memory address etc.)
-    input   logic                       mret_i,         // Return from trap
+    // Traps: interrupts, exceptions, faults
+    input   logic [XLEN-1:0]            trap_pc_i,              // Current PC when trap occurs
+    input   logic [XLEN-1:0]            trap_adr_i,             // Trap address (faulting memory address etc.)
+    output  logic [XLEN-1:0]            trap_vect_o,            // Trap vector address (= next pc or base address)
+    output  logic                       trap_vect_is_base_o,    // Trap vector is base address
+    input   logic                       mret_i,                 // Return from trap
 
-    input   logic                       intr_i,         // Interrupt occured
-    input   intr_cause_t                intr_cause_i,   // Interrupt type
-    input   logic                       except_i,       // Exception occured
-    input   except_cause_t              except_cause_i  // Exception type
+    input   logic                       intr_i,                 // Interrupt occured
+    input   intr_cause_t                intr_cause_i,           // Interrupt type
+    input   logic                       except_i,               // Exception occured
+    input   except_cause_t              except_cause_i          // Exception type
 );
     localparam int HARTS_WIDTH = HARTS > 1 ? $clog2(HARTS) : 1;
-
     // --- Functions ------------------------------------------------------------------------------------------------ //
     /*
      * Machine ISA register
@@ -93,6 +94,11 @@ module csr_regs #(
         return mstatus;
     endfunction;
 
+
+    // --- Shared signals  ------------------------------------------------------------------------------------------ //
+    logic mmode;
+    assign mmode = !rst_i && priv_i == PRIV_MODE_MACHINE;
+
     // --- Register Implementation ---------------------------------------------------------------------------------- //
     /*
      * Machine Status and Control
@@ -121,6 +127,10 @@ module csr_regs #(
 
             else if (mret_i) begin
                 mstatus <= mstatus_mret(mstatus);
+            end
+
+            else if (mmode && csr_we_i && csr_adr_i == CSR_ADDR_MSTATUS) begin
+                // TODO ...
             end
         end
     end
@@ -228,12 +238,10 @@ module csr_regs #(
         end
     end
 
-    // --- CSR Wrtie ------------------------------------------------------------------------------------------------ //
-
-
     // --- CSR Read ------------------------------------------------------------------------------------------------- //
     always_comb begin : csr_read
         csr_dat_o = 'h0;
+
         case (csr_adr_i)
             // Machine Status and Control
             CSR_ADDR_MSTATUS    : csr_dat_o = mstatus;
