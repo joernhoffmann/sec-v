@@ -88,8 +88,8 @@ package csr_pkg;
     } misa_t;
 
     /*
-     * Machine Interrupt Enable  (mie)
-     * Machien Interrupt Pending (mip)
+     * Interrupt Enable  (mie, sie, ...)
+     * Interrupt Pending (mip, sip, ...)
      */
     typedef struct packed {
         logic [63:12]   reserved;
@@ -102,13 +102,13 @@ package csr_pkg;
     } mintr_t;
 
     /*
-     * Machine Interrupt Bundle
+     * Interrupt Vector
      */
     typedef struct packed {
         logic           mei;               // Machine External Interrupt
         logic           mti;               // Machine Timer Interrupt Enable
         logic           msi;               // Machine Softwarte Interrupt Enable
-    } intr_t;
+    } intr_vec_t;
 
     /*
      * Machine Trap Vector

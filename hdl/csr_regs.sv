@@ -46,6 +46,10 @@ module csr_regs #(
 
     input   logic                       intr_i,                 // Interrupt occured
     input   intr_cause_t                intr_cause_i,           // Interrupt type
+    input   intr_vec_t                  intr_pend_i,            // Interrupts pending
+    output  intr_vec_t                  intr_en_o,              // Interrupts enabled (external, timer etc.)
+    output  logic                       intr_glob_en_o,         // Global interrupts enabled (currently m-mode only)
+
     input   logic                       except_i,               // Exception occured
     input   except_cause_t              except_cause_i          // Exception type
 );
@@ -94,17 +98,17 @@ module csr_regs #(
         return mstatus;
     endfunction;
 
+    // --- Internal signals  ------------------------------------------------------------------------------------------ //
+    logic m_mode;
+    assign m_mode = !rst_i && priv_i == PRIV_MODE_MACHINE;
 
-    // --- Shared signals  ------------------------------------------------------------------------------------------ //
-    logic mmode;
-    assign mmode = !rst_i && priv_i == PRIV_MODE_MACHINE;
 
     // --- Register Implementation ---------------------------------------------------------------------------------- //
     /*
      * Machine Status and Control
      */
     mstatus_t        mstatus;       // Machine Status
-    logic [XLEN-1:0] mie;           // Machine Interrupt Enable
+    mintr_t          mie;           // Machine Interrupt Enable
     logic [XLEN-1:0] mtvec;         // Machine Trap-Vector Base-Address
     logic [XLEN-1:0] mcounteren;    // Machine Counter Enable
 
@@ -129,7 +133,7 @@ module csr_regs #(
                 mstatus <= mstatus_mret(mstatus);
             end
 
-            else if (mmode && csr_we_i && csr_adr_i == CSR_ADDR_MSTATUS) begin
+            else if (m_mode && csr_we_i && csr_adr_i == CSR_ADDR_MSTATUS) begin
                 // TODO ...
             end
         end
@@ -142,8 +146,18 @@ module csr_regs #(
     logic [XLEN-1:0] mepc;                      // Machine Exception Program Counter
     mcause_t         mcause;                    // Machine Cause
     logic [XLEN-1:0] mtval;                     // Machine Trap Value
-    logic [XLEN-1:0] mip;                       // Machine Interrupt Pending
+    mintr_t          mip;                       // Machine Interrupt Pending
 
+    // Outputs
+    assign intr_glob_en_o = mstatus.mie;
+    always_comb begin : intr_en_impl
+        intr_en_o = 'b0;
+        intr_en_o.mei = mie.mei;
+        intr_en_o.mti = mie.mti;
+        intr_en_o.msi = mie.msi;
+    end
+
+    // Registers
     always_ff @( posedge clk_i ) begin: trap_impl
         if (rst_i) begin
             mscratch    <= 'h0;
