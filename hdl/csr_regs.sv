@@ -7,6 +7,11 @@
  * Ext.     : Zicsr
  * Purpose  : Control and status register (access, encoding etc.) implementation
  *
+ * TODO
+ *  [ ] User mode
+ *  [ ] Memory Protection
+ *  [ ] Counter
+ *
  * History
  *  v1.0    - Initial version
  */
@@ -42,17 +47,12 @@ module csr_regs #(
     input   logic                       except_i,       // Exception occured
     input   except_cause_t              except_cause_i  // Exception type
 );
-
     localparam int HARTS_WIDTH = HARTS > 1 ? $clog2(HARTS) : 1;
 
-    /* TODO:
-        - Privilege mode (user mode / machine mode)
-        - mret instruction / trap_clear
-        - Setting of old interrupt counter
+    // --- Functions ------------------------------------------------------------------------------------------------ //
+    /*
+     * Machine ISA register
      */
-
-    // --- Default register values ---------------------------------------------------------------------------------- //
-    // Machine ISA register
     localparam logic [25:0] SECV_EXT = MISA_EXT_U | MISA_EXT_I;
     function automatic logic [XLEN-1:0] misa_default();
         misa_t misa     = 'b0;
@@ -61,12 +61,16 @@ module csr_regs #(
         return misa;
     endfunction
 
-    // Converts hid to register value
+    /*
+     * Converts hid to register value
+     */
     function automatic logic [XLEN-1:0] hartid_reg(logic [HARTS_WIDTH-1:0] hartid);
         return {{(XLEN - HARTS_WIDTH){1'b0}}, hartid_i};
     endfunction;
 
-    // Machine status register when trap occurs
+    /*
+     * Machine status register when trap occurs
+     */
     function automatic mstatus_t mstatus_trap (mstatus_t mstatus_i, priv_mode_t priv_mode);
         mstatus_t mstatus = mstatus_i;
 
@@ -78,7 +82,9 @@ module csr_regs #(
         return mstatus;
     endfunction;
 
-    // Machine status register on mret instruction
+    /*
+     * Machine status register on mret instruction
+     */
     function automatic mstatus_t mstatus_mret(mstatus_t mstatus_i);
         mstatus_t mstatus = mstatus_i;
         mstatus.mpp  = MSTATUS_PRIV_MACHINE;
@@ -87,8 +93,10 @@ module csr_regs #(
         return mstatus;
     endfunction;
 
-    // --- Registers ------------------------------------------------------------------------------------------------ //
-    // Machine Status and Control
+    // --- Register Implementation ---------------------------------------------------------------------------------- //
+    /*
+     * Machine Status and Control
+     */
     mstatus_t        mstatus;       // Machine Status
     logic [XLEN-1:0] mie;           // Machine Interrupt Enable
     logic [XLEN-1:0] mtvec;         // Machine Trap-Vector Base-Address
@@ -117,7 +125,9 @@ module csr_regs #(
         end
     end
 
-    // Machine Trap Handling
+    /*
+     * Machine Trap Handling
+     */
     logic [XLEN-1:0] mscratch, mscratch_next;   // Machine Scratch
     logic [XLEN-1:0] mepc;                      // Machine Exception Program Counter
     mcause_t         mcause;                    // Machine Cause
@@ -169,7 +179,9 @@ module csr_regs #(
         end
     end
 
-    // Machine Memory Protection
+    /*
+     * Machine Memory Protection
+     */
     logic [XLEN-1:0] pmpcfg0;       // Configuration for PMP entries 0-3
     logic [XLEN-1:0] pmpcfg1;       // Configuration for PMP entries 4-7
     logic [XLEN-1:0] pmpaddr0;      // PMP Address Register 0
@@ -183,22 +195,24 @@ module csr_regs #(
 
     always_ff @( posedge clk_i ) begin: pmp_impl
         if (rst_i) begin
-            pmpcfg0     <= 'h0;
-            pmpcfg1     <= 'h0;
-            pmpaddr0    <= 'h0;
-            pmpaddr1    <= 'h0;
-            pmpaddr2    <= 'h0;
-            pmpaddr3    <= 'h0;
-            pmpaddr4    <= 'h0;
-            pmpaddr5    <= 'h0;
-            pmpaddr6    <= 'h0;
-            pmpaddr7    <= 'h0;
+            pmpcfg0  <= 'h0;
+            pmpcfg1  <= 'h0;
+            pmpaddr0 <= 'h0;
+            pmpaddr1 <= 'h0;
+            pmpaddr2 <= 'h0;
+            pmpaddr3 <= 'h0;
+            pmpaddr4 <= 'h0;
+            pmpaddr5 <= 'h0;
+            pmpaddr6 <= 'h0;
+            pmpaddr7 <= 'h0;
         end
 
         // TODO...
     end
 
-    // Machhine Timer Registers
+    /*
+     * Machhine Timer Registers
+     */
     logic [XLEN-1:0] mcycle;        // Machine Cycle Counter
     logic [XLEN-1:0] minstret;      // Machine Instructions-Retired Counter
 

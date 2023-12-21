@@ -13,7 +13,7 @@
 `define CSR_PKG
 
 package csr_pkg;
-   // --- CSR Adresses --------------------------------------------------------------------------------------------- //
+   // --- Addresses ------------------------------------------------------------------------------------------------- //
     typedef enum logic [11:0] {
         // User Mode
         CSR_ADDR_USTATUS     = 12'h000,     // User Status Register
@@ -64,46 +64,63 @@ package csr_pkg;
         CSR_ADDR_MHARTID     = 12'hF14      // Hardware Thread ID
     } csr_addr_t;
 
-    // --- Register Fields ------------------------------------------------------------------------------------------ //
+    // --- Registers ------------------------------------------------------------------------------------------------ //
+    /*
+     * Machine Status
+     */
     typedef struct packed {
-        logic [63:13]   reserved0;          // Reserved Bits
+        logic [63:13]   reserved0;
         logic [1:0]     mpp;                // Machine Previous Privilege
-        logic [2:0]     reserved1;          // Reserved Bits
+        logic [2:0]     reserved1;
         logic           mpie;               // Machine Previous Interrupt Enable
-        logic [2:0]     reserved2;          // Reserved Bits
+        logic [2:0]     reserved2;
         logic           mie;                // Machine Interrupt Enable
-        logic [2:0]     reserved3;          // Reserved Bits
+        logic [2:0]     reserved3;
     } mstatus_t;
 
+    /*
+     * Machine ISA register
+     */
     typedef struct packed {
-        logic [1:0]     mxl;                // ISA Width aka. machine x-length (1 = RV32, 2 = RV64, 3 = RV128)
-        logic [35:0]    reserved;           // Reserved Bits
-        logic [25:0]    extensions;         // ISA Extensions (bit position corresponds to letter, e.g., bit 0 for "A")
+        logic [1:0]     mxl;                // Machine x-length (1 = RV32, 2 = RV64, 3 = RV128)
+        logic [35:0]    reserved;
+        logic [25:0]    extensions;         // Extensions (bit position corresponds to letter, e.g., bit 0 for "A")
     } misa_t;
 
-    // Machine interrupt enable (mie) and interrupt pending (mip)
+    /*
+     * Machine Interrupt Enable  (mie)
+     * Machien Interrupt Pending (mip)
+     */
     typedef struct packed {
-        logic [63:12]   reserved;           // Reserved Bits
+        logic [63:12]   reserved;
         logic           mei;                // Machine External Interrupt (Enable / Pending)
-        logic [2:0]     reserved1;          // Reserved Bits
+        logic [2:0]     reserved1;
         logic           mti;                // Machine Timer Interrupt (Enable / Pending)
-        logic [2:0]     reserved2;          // Reserved Bits
+        logic [2:0]     reserved2;
         logic           msi;                // Machine Software Interrupt (Enable / Pending)
-        logic [2:0]     reserved3;          // Reserved Bits
+        logic [2:0]     reserved3;
     } mintr_t;
 
-    // Interrupt signals (enable, pending)
+    /*
+     * Machine Interrupt Bundle
+     */
     typedef struct packed {
         logic           mei;               // Machine External Interrupt
         logic           mti;               // Machine Timer Interrupt Enable
         logic           msi;               // Machine Softwarte Interrupt Enable
     } intr_t;
 
+    /*
+     * Machine Trap Vector
+     */
     typedef struct packed {
         logic [63:2]    base;               // Base address of the trap vector
         logic [1:0]     mode;               // Trap-Vector Base-Address Mode
     } mtvec_t;
 
+    /*
+     * Machine Counter Enable
+     */
     typedef struct packed {
         logic [31:3]    reserved;
         logic           ir;                 // Enable Instructions-Retired Counter
@@ -111,6 +128,9 @@ package csr_pkg;
         logic           cy;                 // Enable Cycle Counter
     } mcounteren_t;
 
+    /*
+     * Machine Trap Cause
+     */
     typedef struct packed {
         logic           intr;               // Interrupt occured
         logic [62: 6]   unused;
@@ -122,6 +142,9 @@ package csr_pkg;
     localparam logic [63:0] MARCHID     = 64'hbabe_0001;
     localparam logic [63:0] MIMPID      = 64'hcaff_0001;
 
+    /*
+     * Machine Status Privileges
+     */
     typedef enum logic [1:0] {
         MSTATUS_PRIV_USER        = 2'b00,
         MSTATUS_PRIV_SUPERVISOR  = 2'b01,
@@ -129,7 +152,9 @@ package csr_pkg;
         MSTATUS_PRIV_MACHINE     = 2'b11
     } mstatus_priv_t;
 
-    // Machine X-Length field
+    /*
+     * Machine X-Length field
+     */
     typedef enum logic [1:0] {
         MISA_MXL_RES    = 2'b00,
         MISA_MXL_RV32   = 2'b01,
@@ -137,7 +162,9 @@ package csr_pkg;
         MISA_MXL_RV128  = 2'b11
     } misa_mxl_t;
 
-    // RISC-V ISA extensions
+    /*
+     * ISA extensions
+     */
     typedef enum logic [25:0] {
         MISA_EXT_A = 26'h00000001,      // Atomic
         MISA_EXT_B = 26'h00000002,      // Bit manipulation
@@ -167,7 +194,9 @@ package csr_pkg;
         MISA_EXT_Z = 26'h02000000       // Custom
     } misa_ext_t;
 
-    // Exception cause (0.cause)
+    /*
+     * Exception cause (0-prefix in mcause)
+     */
     typedef enum logic [5:0] {
         EXCEPT_CAUSE_INST_MISALIGNED            = 0,    // Instruction address misaligned
         EXCEPT_CAUSE_INST_ACCESS_FAULT          = 1,    // Instruction access fault
@@ -183,7 +212,9 @@ package csr_pkg;
         EXCEPT_CAUSE_MTAG_INVLD                 = 24    // Memory Tag Invalid (needed? cf. LD_ or ST_ACCESS_FAULT)
     } except_cause_t;
 
-    // Interrupt cause (1.cause)
+    /*
+     * Interrupt cause (1-prefix in mcause)
+     */
     typedef enum logic [5:0] {
         INTR_CAUSE_MSI                  = 3,    // Machine software interrupt
         INTR_CAUSE_MTI                  = 7,    // Machine timer interrupt
