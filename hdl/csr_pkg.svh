@@ -88,8 +88,8 @@ package csr_pkg;
     } misa_t;
 
     /*
-     * Interrupt Enable  (mie, sie, ...)
-     * Interrupt Pending (mip, sip, ...)
+     * Interrupt enable register (mie, sie, ...)
+     * Interrupt pending register (mip, sip, ...)
      */
     typedef struct packed {
         logic [63:12]   reserved;
@@ -99,7 +99,7 @@ package csr_pkg;
         logic [2:0]     reserved2;
         logic           msi;                // Machine Software Interrupt (Enable / Pending)
         logic [2:0]     reserved3;
-    } mintr_t;
+    } mint_reg_t;
 
     /*
      * Interrupt Vector
@@ -108,10 +108,10 @@ package csr_pkg;
         logic           mei;               // Machine External Interrupt
         logic           mti;               // Machine Timer Interrupt Enable
         logic           msi;               // Machine Softwarte Interrupt Enable
-    } intr_vec_t;
+    } int_t;
 
     /*
-     * Machine Trap Vector
+     * Machine Trap Vector Register
      */
     typedef struct packed {
         logic [63:2]    base;               // Base address of the trap vector
@@ -119,7 +119,7 @@ package csr_pkg;
     } mtvec_t;
 
     /*
-     * Machine Counter Enable
+     * Machine Counter Enable Register
      */
     typedef struct packed {
         logic [31:3]    reserved;
@@ -213,7 +213,7 @@ package csr_pkg;
     } except_cause_t;
 
     /*
-     * Interrupt cause (1-prefix in mcause)
+     * Machine Interrupt cause (1-prefix in mcause)
      */
     typedef enum logic [5:0] {
         INTR_CAUSE_MSI                  = 3,    // Machine software interrupt
@@ -221,7 +221,7 @@ package csr_pkg;
         INTR_CAUSE_MEI                  = 11    // Machine external interrupt
         // 12 .. 15 Reserved
         //    >= 16 Platform use
-    } intr_cause_t;
+    } int_cause_t;
 
 endpackage
 `endif
