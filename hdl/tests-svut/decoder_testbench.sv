@@ -254,6 +254,18 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(err,      1'b0);
     `UNIT_TEST_END
 
+   `UNIT_TEST("SYSTEM")
+        inst_i = {25'bx, OPCODE_SYSTEM};
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_CSR);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_RS1);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
+    `UNIT_TEST_END
+
    `UNIT_TEST("Check selection of FUNIT_NONE with wrong opcode")
         inst_i = {25'bx, 7'b00000_00};
         #1
@@ -266,11 +278,6 @@ module decoder_testbench();
         `FAIL_IF_NOT_EQUAL(err,      1'b1);
 
         inst_i = {25'bx, 7'b00000_10};
-        #1
-        `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
-        `FAIL_IF_NOT_EQUAL(err,      1'b1);
-
-        inst_i = {25'bx, 7'b11100_11};
         #1
         `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_NONE);
         `FAIL_IF_NOT_EQUAL(err,      1'b1);
