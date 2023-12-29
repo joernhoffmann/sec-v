@@ -61,7 +61,8 @@ package secv_pkg;
 
         OPCODE_BRANCH       = 7'b11_000_11,     // Branch (unconditional)
         OPCODE_JALR         = 7'b11_001_11,     // Jump and link (to) register (call)
-        OPCODE_JAL          = 7'b11_011_11      // Jump and link (call)
+        OPCODE_JAL          = 7'b11_011_11,     // Jump and link (call)
+        OPCODE_SYSTEM       = 7'b11_100_11      // Ecall, Ebreak, CSRxx
     } opcode_t;
 
     // Instruction fields
@@ -134,12 +135,12 @@ package secv_pkg;
 
     // Instruction type
     typedef union packed {
-        inst_r_t  r_type;   // Register
-        inst_i_t  i_type;   // Immediate (12' bits)
-        inst_s_t  s_type;   // Store
-        inst_b_t  b_type;   // Branch
-        inst_u_t  u_type;   // Upper immediate (20'bits)
-        inst_j_t  j_type;   // Jump
+        inst_r_t        r_type;         // Register
+        inst_i_t        i_type;         // Immediate (12' bits)
+        inst_s_t        s_type;         // Store
+        inst_b_t        b_type;         // Branch
+        inst_u_t        u_type;         // Upper immediate (20'bits)
+        inst_j_t        j_type;         // Jump
     } inst_t;
 
     // --- funct3 --------------------------------------------------------------------------------------------------- //
@@ -191,6 +192,17 @@ package secv_pkg;
         FUNCT3_STORE_SD     = 3'b011    // Store double word
     } funct3_store_t;
 
+    // funct3 - CSR
+    typedef enum logic [2:0] {
+        FUNCT3_ECALL_EBREAK = 3'b000,   // Ebreak / Ecall
+        FUNCT3_CSR_RW       = 3'b001,   // CSR Read and Write
+        FUNCT3_CSR_RS       = 3'b010,   // CSR Read and Set
+        FUNCT3_CSR_RC       = 3'b011,   // CSR Read and Clear
+        FUNCT3_CSR_RWI      = 3'b101,   // CSR Read and Write Immediate
+        FUNCT3_CSR_RSI      = 3'b110,   // CSR Read and Set Immediate
+        FUNCT3_CSR_RCI      = 3'b111    // CSR Read and Clear Immediate
+    } funct3_csr_t;
+
     // funct7
     localparam funct7_t FUNCT7_00h = 7'h00;
     localparam funct7_t FUNCT7_20h = 7'h20;
@@ -200,58 +212,78 @@ package secv_pkg;
     // Functions
     // -------------------------------------------------------------------------------------------------------------- //
     // --- Decode functions ----------------------------------------------------------------------------------------- //
-    // Decodes the opcode of the instruction
+    /*
+     * Decodes the opcode of the instruction
+     */
     function automatic opcode_t decode_opcode (inst_t inst_i);
         return opcode_t'(inst_i[6:0]);
     endfunction
 
-    // Decode I-immediate (lower 12'bits)
+    /*
+     * Decode I-immediate (lower 12'bits)
+     */
     function automatic imm_t decode_imm_i (inst_t inst);
         //      {         sext[11]},      [10: 0]}
         return  {{XLEN-11{inst[31]}}, inst[30:20]};
     endfunction
 
-    // Decode S-immediate (store)
+    /*
+     * Decode S-immediate (store)
+     */
     function automatic imm_t decode_imm_s (inst_t inst);
         //     {         sext[11],       [10: 5],       [4:0]}
         return {{XLEN-11{inst[31]}}, inst[30:25],  inst[11:7]};
     endfunction
 
-    // Decode B-immediate (branch)
+    /*
+     * Decode B-immediate (branch)
+     */
     function automatic imm_t decode_imm_b (inst_t inst);
         //     {         sext[12],      [11],      [10: 5],       [4:1],   [0]}
         return {{XLEN-12{inst[31]}}, inst[7],  inst[30:25],  inst[11:8], 1'b0 };
     endfunction
 
-    // Decode U-immediate (upper 20'bits)
+    /*
+     * Decode U-immediate (upper 20'bits)
+     */
     function automatic imm_t decode_imm_u (inst_t inst);
         //     {         sext[31],       [30:12],   [11:0]}
         return {{XLEN-31{inst[31]}}, inst[30:12],   12'b0};
     endfunction
 
-    // Decode J-immediate (jump)
+    /*
+     * Decode J-immediate (jump)
+     */
     function automatic imm_t decode_imm_j (inst_t inst);
         //     {         sext[20],      [19:12],     [11],      [10:1],    [0]}
         return {{XLEN-20{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0 };
     endfunction
 
     // --- Signum extension function -------------------------------------------------------------------------------- //
-    // Sign extends the 8-bit byte operand to XLEN bits
+    /*
+     * Sign extends the 8-bit byte operand to XLEN bits
+     */
     function automatic [XLEN-1:0] sext8(logic [7:0] operand);
         return {{XLEN-8{operand[7]}}, operand[7:0]};
     endfunction
 
-    // Sign extends 12-bit operand (immediate usually) to XLEN bits
+    /*
+     * Sign extends 12-bit operand (immediate usually) to XLEN bits
+     */
     function automatic [XLEN-1:0] sext12(logic [11:0] operand);
         return {{XLEN-12{operand[11]}}, operand[11:0]};
     endfunction
 
-    // Sign extends the 16-bit half operand to XLEN bits
+    /*
+     * Sign extends the 16-bit half operand to XLEN bits
+     */
     function automatic [XLEN-1:0] sext16(logic [15:0] operand);
         return {{XLEN-16{operand[15]}}, operand[15:0]};
     endfunction
 
-    // Sign extends the 32-bit word operand to XLEN bits
+    /*
+     * Sign extends the 32-bit word operand to XLEN bits
+     */
     function automatic [XLEN-1:0] sext32(logic [31:0] operand);
         return {{XLEN-32{operand[31]}}, operand[31:0]};
     endfunction
@@ -261,8 +293,9 @@ package secv_pkg;
     // -------------------------------------------------------------------------------------------------------------- //
     typedef enum int {
         FUNIT_NONE,     // No function unit
-        FUNIT_ALU,      // Arithmetic logic unit (ADD, SUB etc.)
+        FUNIT_ALU,      // Arithmetic-logic unit (ADD, SUB etc.)
         FUNIT_MEM,      // Memory unit           (Loads, Stores, FENCE etc.)
+        FUNIT_CSR,      // Control and status register unit
         FUNIT_COUNT
     } funit_t;
 

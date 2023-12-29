@@ -203,6 +203,12 @@ module secv #(
         .dmem_ack_i (dmem_ack_i)
     );
 
+    // Control and status register unit
+    csr csr0 (
+        .fu_i (funit_in_bus[FUNIT_CSR]),
+        .fu_o (funit_out_bus[FUNIT_CSR])
+    );
+
     // Function unit bus
     funit_in_t  funit_in_bus[FUNIT_COUNT];
     funit_out_t funit_out_bus[FUNIT_COUNT];

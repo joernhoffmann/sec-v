@@ -44,11 +44,11 @@ module csr_regs #(
     output  logic                       trap_vect_is_base_o,    // Trap vector is base address
     input   logic                       mret_i,                 // Return from trap
 
-    input   logic                       int_i,                  // Machine interrupt occured
-    input   int_cause_t                 int_cause_i,            // Machine interrupt cause
-    input   int_t                       int_pend_i,             // Machine interrupts pending
-    output  logic                       int_ena_o,              // Machine interrupts enabled (globally)
-    output  int_t                       int_ena_vec_o,          // Machine interrupts enabled (external, timer etc.)
+    input   logic                       int_i,                  // Interrupt occured
+    input   int_cause_t                 int_cause_i,            // Interrupt cause
+    input   int_t                       int_pend_i,             // Interrupt pending
+    output  logic                       int_ena_o,              // Interrupt handling enabled
+    output  int_t                       int_ena_vec_o,          // Enabled interrupts (external, timer etc.)
 
     input   logic                       except_i,               // Exception occured
     input   except_cause_t              except_cause_i          // Exception type
@@ -133,7 +133,7 @@ module csr_regs #(
                 mstatus <= mstatus_mret(mstatus);
             end
 
-            else if (m_mode && csr_we_i && csr_adr_i == CSR_ADDR_MSTATUS) begin
+            else if (m_mode && csr_we_i && csr_adr_i == CSR_ADR_MSTATUS) begin
                 // TODO ...
             end
         end
@@ -142,7 +142,7 @@ module csr_regs #(
     /*
      * Machine Trap Handling
      */
-    logic [XLEN-1:0] mscratch, mscratch_next;   // Machine Scratch
+    logic [XLEN-1:0] mscratch;                  // Machine Scratch
     logic [XLEN-1:0] mepc;                      // Machine Exception Program Counter
     mcause_t         mcause;                    // Machine Cause
     logic [XLEN-1:0] mtval;                     // Machine Trap Value
@@ -168,8 +168,6 @@ module csr_regs #(
         end
 
         else begin
-            mscratch <= mscratch_next;
-
             if (int_i) begin
                 mepc         <= trap_pc_i;
                 mcause       <= 'h0;
@@ -200,6 +198,9 @@ module csr_regs #(
                 mtval   <= 'h0;
                 mstatus <= mstatus_mret(mstatus);
             end
+
+            if (m_mode && csr_we_i && csr_adr_i == CSR_ADR_MSCRATCH)
+                mscratch <= csr_dat_i;
         end
     end
 
@@ -258,28 +259,28 @@ module csr_regs #(
 
         case (csr_adr_i)
             // Machine Status and Control
-            CSR_ADDR_MSTATUS    : csr_dat_o = mstatus;
-            CSR_ADDR_MISA       : csr_dat_o = misa_default();
-            CSR_ADDR_MIE        : csr_dat_o = mie;
-            CSR_ADDR_MTVEC      : csr_dat_o = mtvec;
-            CSR_ADDR_MCOUNTEREN : csr_dat_o = mcounteren;
+            CSR_ADR_MSTATUS    : csr_dat_o = mstatus;
+            CSR_ADR_MISA       : csr_dat_o = misa_default();
+            CSR_ADR_MIE        : csr_dat_o = mie;
+            CSR_ADR_MTVEC      : csr_dat_o = mtvec;
+            CSR_ADR_MCOUNTEREN : csr_dat_o = mcounteren;
 
             // Machine Trap Handling
-            CSR_ADDR_MSCRATCH   : csr_dat_o = mscratch;
-            CSR_ADDR_MEPC       : csr_dat_o = mepc;
-            CSR_ADDR_MCAUSE     : csr_dat_o = mcause;
-            CSR_ADDR_MTVAL      : csr_dat_o = mtval;
-            CSR_ADDR_MIP        : csr_dat_o = mip;
+            CSR_ADR_MSCRATCH   : csr_dat_o = mscratch;
+            CSR_ADR_MEPC       : csr_dat_o = mepc;
+            CSR_ADR_MCAUSE     : csr_dat_o = mcause;
+            CSR_ADR_MTVAL      : csr_dat_o = mtval;
+            CSR_ADR_MIP        : csr_dat_o = mip;
 
             // Machine Timer
-            CSR_ADDR_MCYCLE     : csr_dat_o = mcycle;
-            CSR_ADDR_MINSTRET   : csr_dat_o = minstret;
+            CSR_ADR_MCYCLE     : csr_dat_o = mcycle;
+            CSR_ADR_MINSTRET   : csr_dat_o = minstret;
 
             // Machine Information Registers
-            CSR_ADDR_MVENDORID  : csr_dat_o = MVENDORID;
-            CSR_ADDR_MARCHID    : csr_dat_o = MARCHID;
-            CSR_ADDR_MIMPID     : csr_dat_o = MIMPID;
-            CSR_ADDR_MHARTID    : csr_dat_o = hartid_reg(hartid_i);
+            CSR_ADR_MVENDORID  : csr_dat_o = MVENDORID;
+            CSR_ADR_MARCHID    : csr_dat_o = MARCHID;
+            CSR_ADR_MIMPID     : csr_dat_o = MIMPID;
+            CSR_ADR_MHARTID    : csr_dat_o = hartid_reg(hartid_i);
 
             default:
                 csr_dat_o = 'h0;

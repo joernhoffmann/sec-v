@@ -16,53 +16,53 @@ package csr_pkg;
    // --- Addresses ------------------------------------------------------------------------------------------------- //
     typedef enum logic [11:0] {
         // User Mode
-        CSR_ADDR_USTATUS     = 12'h000,     // User Status Register
-        CSR_ADDR_UIE         = 12'h004,     // User Interrupt Enable Register
-        CSR_ADDR_UTVEC       = 12'h005,     // User Trap-Vector Base-Address Register
+        CSR_ADR_USTATUS     = 12'h000,     // User Status Register
+        CSR_ADR_UIE         = 12'h004,     // User Interrupt Enable Register
+        CSR_ADR_UTVEC       = 12'h005,     // User Trap-Vector Base-Address Register
 
         // User Trap Handling
-        CSR_ADDR_USCRATCH    = 12'h040,     // User Scratch Register
-        CSR_ADDR_UEPC        = 12'h041,     // User Exception Program Counter
-        CSR_ADDR_UCAUSE      = 12'h042,     // User Cause Register
-        CSR_ADDR_UTVAL       = 12'h043,     // User Trap Value
-        CSR_ADDR_UIP         = 12'h044,     // User Interrupt Pending
+        CSR_ADR_USCRATCH    = 12'h040,     // User Scratch Register
+        CSR_ADR_UEPC        = 12'h041,     // User Exception Program Counter
+        CSR_ADR_UCAUSE      = 12'h042,     // User Cause Register
+        CSR_ADR_UTVAL       = 12'h043,     // User Trap Value
+        CSR_ADR_UIP         = 12'h044,     // User Interrupt Pending
 
         // Machine Status and Control
-        CSR_ADDR_MSTATUS     = 12'h300,     // Machine Status
-        CSR_ADDR_MISA        = 12'h301,     // ISA and Extensions
-        CSR_ADDR_MIE         = 12'h304,     // Machine Interrupt Enable
-        CSR_ADDR_MTVEC       = 12'h305,     // Machine Trap-Vector Base-Address
-        CSR_ADDR_MCOUNTEREN  = 12'h306,     // Machine Counter Enable
+        CSR_ADR_MSTATUS     = 12'h300,     // Machine Status
+        CSR_ADR_MISA        = 12'h301,     // ISA and Extensions
+        CSR_ADR_MIE         = 12'h304,     // Machine Interrupt Enable
+        CSR_ADR_MTVEC       = 12'h305,     // Machine Trap-Vector Base-Address
+        CSR_ADR_MCOUNTEREN  = 12'h306,     // Machine Counter Enable
 
         // Machine Trap Handling
-        CSR_ADDR_MSCRATCH    = 12'h340,     // Machine Scratch
-        CSR_ADDR_MEPC        = 12'h341,     // Machine Exception Program Counter
-        CSR_ADDR_MCAUSE      = 12'h342,     // Machine Cause
-        CSR_ADDR_MTVAL       = 12'h343,     // Machine Trap Value (WARL)
-        CSR_ADDR_MIP         = 12'h344,     // Machine Interrupt Pending
+        CSR_ADR_MSCRATCH    = 12'h340,     // Machine Scratch
+        CSR_ADR_MEPC        = 12'h341,     // Machine Exception Program Counter
+        CSR_ADR_MCAUSE      = 12'h342,     // Machine Cause
+        CSR_ADR_MTVAL       = 12'h343,     // Machine Trap Value (WARL)
+        CSR_ADR_MIP         = 12'h344,     // Machine Interrupt Pending
 
         // Machine Memory Protection
-        CSR_ADDR_PMPCFG0     = 12'h3A0,     // Configuration for PMP entries 0-3
-        CSR_ADDR_PMPCFG1     = 12'h3A1,     // Configuration for PMP entries 4-7
-        CSR_ADDR_PMPADDR0    = 12'h3B0,
-        CSR_ADDR_PMPADDR1    = 12'h3B1,
-        CSR_ADDR_PMPADDR2    = 12'h3B2,
-        CSR_ADDR_PMPADDR3    = 12'h3B3,
-        CSR_ADDR_PMPADDR4    = 12'h3B4,
-        CSR_ADDR_PMPADDR5    = 12'h3B5,
-        CSR_ADDR_PMPADDR6    = 12'h3B6,
-        CSR_ADDR_PMPADDR7    = 12'h3B7,
+        CSR_ADR_PMPCFG0     = 12'h3A0,     // Configuration for PMP entries 0-3
+        CSR_ADR_PMPCFG1     = 12'h3A1,     // Configuration for PMP entries 4-7
+        CSR_ADR_PMPADDR0    = 12'h3B0,
+        CSR_ADR_PMPADDR1    = 12'h3B1,
+        CSR_ADR_PMPADDR2    = 12'h3B2,
+        CSR_ADR_PMPADDR3    = 12'h3B3,
+        CSR_ADR_PMPADDR4    = 12'h3B4,
+        CSR_ADR_PMPADDR5    = 12'h3B5,
+        CSR_ADR_PMPADDR6    = 12'h3B6,
+        CSR_ADR_PMPADDR7    = 12'h3B7,
 
         // Machine Timer Registers
-        CSR_ADDR_MCYCLE      = 12'hB00,     // Machine Cycle Counter
-        CSR_ADDR_MINSTRET    = 12'hB02,     // Machine Instructions-Retired Counter
+        CSR_ADR_MCYCLE      = 12'hB00,     // Machine Cycle Counter
+        CSR_ADR_MINSTRET    = 12'hB02,     // Machine Instructions-Retired Counter
 
         // Machine Information Registers
-        CSR_ADDR_MVENDORID   = 12'hF11,     // Vendor ID
-        CSR_ADDR_MARCHID     = 12'hF12,     // Architecture ID
-        CSR_ADDR_MIMPID      = 12'hF13,     // Implementation ID
-        CSR_ADDR_MHARTID     = 12'hF14      // Hardware Thread ID
-    } csr_addr_t;
+        CSR_ADR_MVENDORID   = 12'hF11,     // Vendor ID
+        CSR_ADR_MARCHID     = 12'hF12,     // Architecture ID
+        CSR_ADR_MIMPID      = 12'hF13,     // Implementation ID
+        CSR_ADR_MHARTID     = 12'hF14      // Hardware Thread ID
+    } csr_adr_t;
 
     // --- Registers ------------------------------------------------------------------------------------------------ //
     /*
