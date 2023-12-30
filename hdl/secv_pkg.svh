@@ -375,13 +375,13 @@ package secv_pkg;
     // Function unit output interface
     typedef struct packed {
         // Control
-        logic               rdy;    // Unit ready, operation completed
-        logic               err;    // Error occured
-        logic               res_wb; // Result is valid (write back)
+        logic               rdy;        // Unit ready, operation completed
+        logic               err;        // Error occured
+        logic               res_wb;     // Result is valid, write-back to register
         logic               reserved;
 
         // Payload
-        logic   [XLEN-1:0]  res;    // Result
+        logic   [XLEN-1:0]  res;        // Result
     } funit_out_t;
 
     // FU input defaults

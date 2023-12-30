@@ -40,18 +40,19 @@ module csr_regs #(
     // Traps: interrupts, exceptions, faults
     input   logic [XLEN-1:0]            trap_pc_i,              // Current PC when trap occurs
     input   logic [XLEN-1:0]            trap_adr_i,             // Trap address (faulting memory address etc.)
-    output  logic [XLEN-1:0]            trap_vect_o,            // Trap vector address (= next pc or base address)
-    output  logic                       trap_vect_is_base_o,    // Trap vector is base address
+    output  logic [XLEN-1:0]            trap_vec_o,             // Trap vector address (= next pc or base address)
     input   logic                       mret_i,                 // Return from trap
 
-    input   logic                       int_i,                  // Interrupt occured
-    input   int_cause_t                 int_cause_i,            // Interrupt cause
-    input   int_t                       int_pend_i,             // Interrupt pending
-    output  logic                       int_ena_o,              // Interrupt handling enabled
-    output  int_t                       int_ena_vec_o,          // Enabled interrupts (external, timer etc.)
+    // Interrupts
+    input   logic                       irq_i,                  // Interrupt occured
+    input   irq_cause_t                 irq_cause_i,            // Interrupt cause
+    input   irq_vec_t                   irq_pend_i,             // Interrupt pending
+    output  logic                       irq_ena_o,              // Interrupt handling enabled
+    output  irq_vec_t                   irq_ena_vec_o,          // Enabled interrupts (external, timer etc.)
 
-    input   logic                       except_i,               // Exception occured
-    input   except_cause_t              except_cause_i          // Exception type
+    // Exceptions
+    input   logic                       ex_i,                   // Exception occured
+    input   ex_cause_t                  ex_cause_i              // Exception type
 );
     localparam int HARTS_WIDTH = HARTS > 1 ? $clog2(HARTS) : 1;
     // --- Functions ------------------------------------------------------------------------------------------------ //
@@ -108,7 +109,7 @@ module csr_regs #(
      * Machine Status and Control
      */
     mstatus_t        mstatus;       // Machine Status
-    mint_reg_t       mie;           // Machine Interrupt Enable
+    irq_reg_t        mie;           // Machine Interrupt Enable
     logic [XLEN-1:0] mtvec;         // Machine Trap-Vector Base-Address
     logic [XLEN-1:0] mcounteren;    // Machine Counter Enable
 
@@ -121,11 +122,11 @@ module csr_regs #(
         end
 
         else begin
-            if (int_i) begin
+            if (irq_i) begin
                 mstatus <= mstatus_trap(mstatus, priv_i);
             end
 
-            else if (except_i) begin
+            else if (ex_i) begin
                 mstatus <= mstatus_trap(mstatus, priv_i);
             end
 
@@ -146,15 +147,15 @@ module csr_regs #(
     logic [XLEN-1:0] mepc;                      // Machine Exception Program Counter
     mcause_t         mcause;                    // Machine Cause
     logic [XLEN-1:0] mtval;                     // Machine Trap Value
-    mint_reg_t       mip;                       // Machine Interrupt Pending
+    irq_reg_t        mip;                       // Machine Interrupt Pending
 
     // Outputs
-    assign int_ena_o = mstatus.mie;
+    assign irq_ena_o = mstatus.mie;
     always_comb begin : intr_en_impl
-        int_ena_vec_o = 'b0;
-        int_ena_vec_o.mei = mie.mei;
-        int_ena_vec_o.mti = mie.mti;
-        int_ena_vec_o.msi = mie.msi;
+        irq_ena_vec_o = 'b0;
+        irq_ena_vec_o.mei = mie.mei;
+        irq_ena_vec_o.mti = mie.mti;
+        irq_ena_vec_o.msi = mie.msi;
     end
 
     // Registers
@@ -168,25 +169,25 @@ module csr_regs #(
         end
 
         else begin
-            if (int_i) begin
+            if (irq_i) begin
                 mepc         <= trap_pc_i;
                 mcause       <= 'h0;
                 mcause.intr  <= 1'b1;
-                mcause.cause <= int_cause_i;
+                mcause.cause <= irq_cause_i;
                 mtval        <= 'h0;
             end
 
-            else if (except_i) begin
+            else if (ex_i) begin
                 mepc         <= trap_pc_i;
                 mcause       <= 'h0;
                 mcause.intr  <= 1'b0;
-                mcause.cause <= except_cause_i;
+                mcause.cause <= ex_cause_i;
 
-                if (except_cause_i == EXCEPT_CAUSE_LOAD_ADDRESS_MISALIGNED  ||
-                    except_cause_i == EXCEPT_CAUSE_LOAD_ACCESS_FAULT        ||
-                    except_cause_i == EXCEPT_CAUSE_STORE_ADDRESS_MISALIGNED ||
-                    except_cause_i == EXCEPT_CAUSE_STORE_ACCESS_FAULT       ||
-                    except_cause_i == EXCEPT_CAUSE_MTAG_INVLD)
+                if (ex_cause_i == EX_CAUSE_LOAD_ADDRESS_MISALIGNED  ||
+                    ex_cause_i == EX_CAUSE_LOAD_ACCESS_FAULT        ||
+                    ex_cause_i == EX_CAUSE_STORE_ADDRESS_MISALIGNED ||
+                    ex_cause_i == EX_CAUSE_STORE_ACCESS_FAULT       ||
+                    ex_cause_i == EX_CAUSE_MTAG_INVLD)
                 begin
                     mtval <= trap_adr_i;
                 end

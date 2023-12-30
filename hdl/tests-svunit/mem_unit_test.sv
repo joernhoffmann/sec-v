@@ -102,19 +102,19 @@ module mem_unit_test;
 
     `SVTEST(MEM_ready_if_enabled_with_invalid_opcode)
         fu_i.ena = 1;
-      	#1 
+      	#1
         `FAIL_UNLESS(fu_o.rdy);
     `SVTEST_END
 
     `SVTEST(MEM_signals_error_if_enabled_with_invalid_opcode)
         fu_i.ena = 1;
-        #1 
+        #1
         `FAIL_UNLESS(fu_o.err);
     `SVTEST_END
 
     `SVTEST(MEM_does_not_write_back_if_enabled_with_invalid_opcode)
         fu_i.ena = 1;
-        #1 
+        #1
         `FAIL_UNLESS(!fu_o.res_wb);
     `SVTEST_END
 
@@ -138,7 +138,7 @@ module mem_unit_test;
       fu_i.ena = 1;
   	  fu_i.op = MEM_OP_LW;
       dmem_ack_i = 1'b1;
-      #1 
+      #1
       `FAIL_UNLESS(fu_o.rdy);
     `SVTEST_END
 

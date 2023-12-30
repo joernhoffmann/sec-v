@@ -205,8 +205,13 @@ module secv #(
 
     // Control and status register unit
     csr csr0 (
+        .clk_i (clk_i),
+        .rst_i (rst_i),
+
         .fu_i (funit_in_bus[FUNIT_CSR]),
-        .fu_o (funit_out_bus[FUNIT_CSR])
+        .fu_o (funit_out_bus[FUNIT_CSR]),
+
+        .funct_i (0)
     );
 
     // Function unit bus
