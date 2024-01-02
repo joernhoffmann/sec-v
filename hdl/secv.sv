@@ -211,7 +211,9 @@ module secv #(
         .fu_i (funit_in_bus[FUNIT_CSR]),
         .fu_o (funit_out_bus[FUNIT_CSR]),
 
-        .funct_i (0)
+        .rd_zero_i  (rd_adr == '0),
+        .rs1_zero_i (rs1_adr == '0),
+        .funct_i    (0)
     );
 
     // Function unit bus
