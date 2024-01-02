@@ -141,6 +141,5 @@ module csr #(
                 end
             endcase
         end
-
     end
 endmodule
