@@ -78,6 +78,9 @@ package csr_pkg;
         logic [2:0]     reserved3;
     } mstatus_t;
 
+    // Writable mask
+    parameter mstatus_t MSTATUS_MASK = (1 << 3);    // MIE-Bit
+
     /*
      * Machine ISA register
      */
@@ -93,13 +96,18 @@ package csr_pkg;
      */
     typedef struct packed {
         logic [63:12]   reserved;
-        logic           mei;                // Machine External Interrupt (Enable / Pending)
+        logic           mei;                // 11: Machine External Interrupt (Enable / Pending)
         logic [2:0]     reserved1;
-        logic           mti;                // Machine Timer Interrupt (Enable / Pending)
+        logic           mti;                // 7: Machine Timer Interrupt (Enable / Pending)
         logic [2:0]     reserved2;
-        logic           msi;                // Machine Software Interrupt (Enable / Pending)
+        logic           msi;                // 3: Machine Software Interrupt (Enable / Pending)
         logic [2:0]     reserved3;
     } irq_reg_t;
+
+    parameter irq_reg_t IRQ_REG_MASK =
+        (1 << IRQ_CAUSE_MEI) |
+        (1 << IRQ_CAUSE_MTI) |
+        (1 << IRQ_CAUSE_MSI);
 
     /*
      * Interrupt Vector
@@ -118,15 +126,26 @@ package csr_pkg;
         logic [1:0]     mode;               // Trap-Vector Base-Address Mode
     } mtvec_t;
 
+    typedef enum logic [1:0] {
+        MTVEC_MODE_DIRECT       = 0,        // All exectptions set pc to BASE
+        MTVEC_MODE_VECTORED     = 1         // Async. interrupts set pc to BASE+(4*cause)
+    } mtvec_mode_t;
+
+    // Bitmask for base register (currently only direct mode (0) supported)
+    parameter mtvec_t MTVEC_MASK = ~(64'h3);
+
     /*
      * Machine Counter Enable Register
      */
     typedef struct packed {
-        logic [31:3]    reserved;
+        logic [63:3]    reserved;
         logic           ir;                 // Enable Instructions-Retired Counter
         logic           tm;                 // Enable Timer Register
         logic           cy;                 // Enable Cycle Counter
     } mcounteren_t;
+
+    // Bitmask for mcounter enable register
+    parameter mcounteren_t MCOUNTEREN_MASK = 64'h7;
 
     /*
      * Machine Trap Cause
@@ -216,9 +235,9 @@ package csr_pkg;
      * Machine Interrupt cause (1-prefix in mcause)
      */
     typedef enum logic [5:0] {
-        IRQ_CAUSE_MSI                  = 3,    // Machine software interrupt
-        IRQ_CAUSE_MTI                  = 7,    // Machine timer interrupt
-        IRQ_CAUSE_MEI                  = 11    // Machine external interrupt
+        IRQ_CAUSE_MSI           = 3,    // Machine software interrupt
+        IRQ_CAUSE_MTI           = 7,    // Machine timer interrupt
+        IRQ_CAUSE_MEI           = 11    // Machine external interrupt
         // 12 .. 15 Reserved
         //    >= 16 Platform use
     } irq_cause_t;

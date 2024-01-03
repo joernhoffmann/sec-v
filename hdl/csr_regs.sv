@@ -101,8 +101,7 @@ module csr_regs #(
 
     // --- Internal signals  ------------------------------------------------------------------------------------------ //
     logic m_mode;
-    assign m_mode = !rst_i && priv_i == PRIV_MODE_MACHINE;
-
+    assign m_mode = !rst_i && (priv_i == PRIV_MODE_MACHINE);
 
     // --- Register Implementation ---------------------------------------------------------------------------------- //
     /*
@@ -134,9 +133,27 @@ module csr_regs #(
                 mstatus <= mstatus_mret(mstatus);
             end
 
-            else if (m_mode && csr_we_i && csr_adr_i == CSR_ADR_MSTATUS) begin
-                // TODO ...
+            // Write
+            else if (m_mode && csr_we_i) begin
+                case (csr_adr_i)
+                    CSR_ADR_MSTATUS:
+                        mstatus <= (mstatus & ~MSTATUS_MASK) | (csr_dat_i & MSTATUS_MASK);
+
+                    CSR_ADR_MIE:
+                        mie <=csr_dat_i & IRQ_REG_MASK;
+
+                    CSR_ADR_MTVEC:
+                        mtvec <= csr_dat_i & MTVEC_MASK;
+
+                    CSR_ADR_MCOUNTEREN:
+                        mcounteren <= csr_dat_i & MCOUNTEREN_MASK;
+
+                    default:
+                        ;
+                endcase
             end
+
+
         end
     end
 
@@ -148,15 +165,6 @@ module csr_regs #(
     mcause_t         mcause;                    // Machine Cause
     logic [XLEN-1:0] mtval;                     // Machine Trap Value
     irq_reg_t        mip;                       // Machine Interrupt Pending
-
-    // Outputs
-    assign irq_ena_o = mstatus.mie;
-    always_comb begin : intr_en_impl
-        irq_ena_vec_o = 'b0;
-        irq_ena_vec_o.mei = mie.mei;
-        irq_ena_vec_o.mti = mie.mti;
-        irq_ena_vec_o.msi = mie.msi;
-    end
 
     // Registers
     always_ff @( posedge clk_i ) begin: trap_impl
@@ -200,10 +208,23 @@ module csr_regs #(
                 mstatus <= mstatus_mret(mstatus);
             end
 
+            // mscratch
             if (m_mode && csr_we_i && csr_adr_i == CSR_ADR_MSCRATCH)
                 mscratch <= csr_dat_i;
+
+            // TODO: mip - interrupt pending
         end
     end
+
+    // Outputs
+    assign irq_ena_o = mstatus.mie;
+    always_comb begin : intr_en_impl
+        irq_ena_vec_o = 'b0;
+        irq_ena_vec_o.mei = mie.mei;
+        irq_ena_vec_o.mti = mie.mti;
+        irq_ena_vec_o.msi = mie.msi;
+    end
+
 
     /*
      * Machine Memory Protection
@@ -250,7 +271,7 @@ module csr_regs #(
 
         else begin
             mcycle   <= mcycle + 1;
-            minstret <= mcycle;
+            minstret <= mcycle[1:0] == 2'b11 ? minstret + 1 : minstret;
         end
     end
 

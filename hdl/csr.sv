@@ -42,7 +42,7 @@ module csr #(
     assign src2 = fu_i.src2;
 
     // CSR access
-    logic csr_re, csr_we;
+    logic csr_we;
     logic [XLEN-1:0] csr_dat_i, csr_dat_o;
     logic [11:0] csr_adr;
     priv_mode_t priv_prev;
@@ -99,7 +99,6 @@ module csr #(
     always_comb begin
         fu_o = funit_out_default();
         csr_adr     = '0;
-        csr_re      = '0;
         csr_we      = '0;
         csr_dat_i   = '0;
 
@@ -111,7 +110,6 @@ module csr #(
                 FUNCT3_CSR_RW,
                 FUNCT3_CSR_RWI : begin
                     fu_o.res = csr_dat_o;
-                    csr_re = 1'b1 & !rd_zero_i;
 
                     csr_dat_i = src1;
                     csr_we    = 1'b1;
