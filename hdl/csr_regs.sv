@@ -208,11 +208,13 @@ module csr_regs #(
                 mstatus <= mstatus_mret(mstatus);
             end
 
-            // mscratch
-            if (m_mode && csr_we_i && csr_adr_i == CSR_ADR_MSCRATCH)
-                mscratch <= csr_dat_i;
+            // Writes
+            if (m_mode && csr_we_i) begin
+                if (csr_adr_i == CSR_ADR_MSCRATCH)
+                    mscratch <= csr_dat_i;
 
-            // TODO: mip - interrupt pending
+                 // TODO: machine interrupt pending (mip)
+            end
         end
     end
 
