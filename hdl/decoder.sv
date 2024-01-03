@@ -174,7 +174,7 @@ module decoder (
             OPCODE_SYSTEM: begin
                 funit       = FUNIT_CSR;
 
-                src1_sel    = SRC1_SEL_RS1;     // RS1 (register value, UIMM for immediate is decoded in funit)
+                src1_sel    = csr_is_imm(funct3) ? SRC1_SEL_UIMM : SRC1_SEL_RS1;
                 src2_sel    = SRC2_SEL_IMM;     // CSR address
                 imm_sel     = IMM_SEL_I;        // I-type immediate (msb 12'bits)
 

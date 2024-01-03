@@ -12,10 +12,11 @@
  *      [ ] Seperate units (e.g. main fsm, pipeline etc.)
  *      [ ] Introduce more data types (e. g. wishbone, function unit, function unit array)
  *  [ ] Micro-arch improvements
+ *      [ ] Trap, fault, exception handling
  *      [ ] Implement pipeline
  *          [ ] a) regular pipelin
  *          [ ] b) interleaved multi threading
- *      [ ] Add Out-of-order or superscalar processing
+ *      [ ] Add Out-of-order or superscalar processing (for a variant)
  *      [ ] Add security functions (mem tagging)
  *  [ ] ISA extension
  *      [ ] Add CSR
@@ -237,6 +238,7 @@ module secv #(
             SRC1_SEL_RS1        : src1 = rs1_dat;
             SRC1_SEL_RS1_IMM    : src1 = rs1_dat + imm;
             SRC1_SEL_PC         : src1 = pc;
+            SRC1_SEL_UIMM       : src1 = {(XLEN - REG_ADR)'(0), rs1_adr};
             default             : src1 = '0;
         endcase
     end

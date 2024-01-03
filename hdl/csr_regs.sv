@@ -9,7 +9,7 @@
  *
  * TODO
  *  [ ] User mode
- *  [ ] Memory Protection
+ *  [ ] Physical Memory Protection (PMP)
  *  [ ] Counter
  *
  * History
@@ -33,7 +33,6 @@ module csr_regs #(
 
     // CSR access
     input   logic [11:0]                csr_adr_i,              // CSR address
-    input   logic                       csr_re_i,               // CSR read enable
     input   logic                       csr_we_i,               // CSR write enable
     input   logic [XLEN-1:0]            csr_dat_i,              // CSR write data
     output  logic [XLEN-1:0]            csr_dat_o,              // CSR read data (old value)
@@ -259,35 +258,33 @@ module csr_regs #(
     always_comb begin : csr_read
         csr_dat_o = 'h0;
 
-        if (csr_re_i) begin
-            case (csr_adr_i)
-                // Machine Status and Control
-                CSR_ADR_MSTATUS    : csr_dat_o = mstatus;
-                CSR_ADR_MISA       : csr_dat_o = misa_default();
-                CSR_ADR_MIE        : csr_dat_o = mie;
-                CSR_ADR_MTVEC      : csr_dat_o = mtvec;
-                CSR_ADR_MCOUNTEREN : csr_dat_o = mcounteren;
+        case (csr_adr_i)
+            // Machine Status and Control
+            CSR_ADR_MSTATUS    : csr_dat_o = mstatus;
+            CSR_ADR_MISA       : csr_dat_o = misa_default();
+            CSR_ADR_MIE        : csr_dat_o = mie;
+            CSR_ADR_MTVEC      : csr_dat_o = mtvec;
+            CSR_ADR_MCOUNTEREN : csr_dat_o = mcounteren;
 
-                // Machine Trap Handling
-                CSR_ADR_MSCRATCH   : csr_dat_o = mscratch;
-                CSR_ADR_MEPC       : csr_dat_o = mepc;
-                CSR_ADR_MCAUSE     : csr_dat_o = mcause;
-                CSR_ADR_MTVAL      : csr_dat_o = mtval;
-                CSR_ADR_MIP        : csr_dat_o = mip;
+            // Machine Trap Handling
+            CSR_ADR_MSCRATCH   : csr_dat_o = mscratch;
+            CSR_ADR_MEPC       : csr_dat_o = mepc;
+            CSR_ADR_MCAUSE     : csr_dat_o = mcause;
+            CSR_ADR_MTVAL      : csr_dat_o = mtval;
+            CSR_ADR_MIP        : csr_dat_o = mip;
 
-                // Machine Timer
-                CSR_ADR_MCYCLE     : csr_dat_o = mcycle;
-                CSR_ADR_MINSTRET   : csr_dat_o = minstret;
+            // Machine Timer
+            CSR_ADR_MCYCLE     : csr_dat_o = mcycle;
+            CSR_ADR_MINSTRET   : csr_dat_o = minstret;
 
-                // Machine Information Registers
-                CSR_ADR_MVENDORID  : csr_dat_o = MVENDORID;
-                CSR_ADR_MARCHID    : csr_dat_o = MARCHID;
-                CSR_ADR_MIMPID     : csr_dat_o = MIMPID;
-                CSR_ADR_MHARTID    : csr_dat_o = hartid_reg(hartid_i);
+            // Machine Information Registers
+            CSR_ADR_MVENDORID  : csr_dat_o = MVENDORID;
+            CSR_ADR_MARCHID    : csr_dat_o = MARCHID;
+            CSR_ADR_MIMPID     : csr_dat_o = MIMPID;
+            CSR_ADR_MHARTID    : csr_dat_o = hartid_reg(hartid_i);
 
-                default:
-                    csr_dat_o = 'h0;
-            endcase
-        end
+            default:
+                csr_dat_o = 'h0;
+        endcase
     end
 endmodule

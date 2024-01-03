@@ -73,7 +73,6 @@ module csr #(
 
         // CSR access
         .csr_adr_i      (csr_adr),
-        .csr_re_i       (csr_re),
         .csr_we_i       (csr_we),
         .csr_dat_i      (csr_dat_i),
         .csr_dat_o      (csr_dat_o),
