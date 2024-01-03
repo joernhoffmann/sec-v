@@ -205,7 +205,7 @@ package secv_pkg;
     /*
      * Returns true if funct3 encodes an immediate.
      */
-    function automatic logic csr_is_imm(logic [2:0] funct);
+    function automatic csr_is_imm(funct3_t funct);
         return funct[2] == 1'b1;
     endfunction
 

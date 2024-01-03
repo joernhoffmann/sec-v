@@ -258,7 +258,32 @@ module decoder_testbench();
         inst_i = {25'bx, OPCODE_SYSTEM};
         #1
         `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_CSR);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
+    `UNIT_TEST_END
+
+   `UNIT_TEST("CSR with Register Operand")
+        inst_i = {25'bx, OPCODE_SYSTEM};
+        inst_i.r_type.funct3 = 'b001;
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_CSR);
         `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_RS1);
+        `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
+        `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
+        `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
+        `FAIL_IF_NOT_EQUAL(pc_sel,   PC_SEL_NXTPC);
+        `FAIL_IF_NOT_EQUAL(err,      1'b0);
+    `UNIT_TEST_END
+
+   `UNIT_TEST("CSR with UIMM Operand")
+        inst_i = {25'bx, OPCODE_SYSTEM};
+        inst_i.r_type.funct3 = 'b100;
+        #1
+        `FAIL_IF_NOT_EQUAL(funit_o, FUNIT_CSR);
+        `FAIL_IF_NOT_EQUAL(src1_sel, SRC1_SEL_UIMM);
         `FAIL_IF_NOT_EQUAL(src2_sel, SRC2_SEL_IMM);
         `FAIL_IF_NOT_EQUAL(imm_sel,  IMM_SEL_I);
         `FAIL_IF_NOT_EQUAL(rd_sel,   RD_SEL_FUNIT);
