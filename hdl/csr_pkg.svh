@@ -15,7 +15,7 @@
 package csr_pkg;
    // --- Addresses ------------------------------------------------------------------------------------------------- //
     typedef enum logic [11:0] {
-        // User Mode
+        // User Trap Setup
         CSR_ADR_USTATUS     = 12'h000,     // User Status Register
         CSR_ADR_UIE         = 12'h004,     // User Interrupt Enable Register
         CSR_ADR_UTVEC       = 12'h005,     // User Trap-Vector Base-Address Register
@@ -27,7 +27,7 @@ package csr_pkg;
         CSR_ADR_UTVAL       = 12'h043,     // User Trap Value
         CSR_ADR_UIP         = 12'h044,     // User Interrupt Pending
 
-        // Machine Status and Control
+        // Machine Trap Setup
         CSR_ADR_MSTATUS     = 12'h300,     // Machine Status
         CSR_ADR_MISA        = 12'h301,     // ISA and Extensions
         CSR_ADR_MIE         = 12'h304,     // Machine Interrupt Enable
@@ -53,7 +53,7 @@ package csr_pkg;
         CSR_ADR_PMPADDR6    = 12'h3B6,
         CSR_ADR_PMPADDR7    = 12'h3B7,
 
-        // Machine Timer Registers
+        // Machine Counter / Timers
         CSR_ADR_MCYCLE      = 12'hB00,     // Machine Cycle Counter
         CSR_ADR_MINSTRET    = 12'hB02,     // Machine Instructions-Retired Counter
 
@@ -66,7 +66,7 @@ package csr_pkg;
 
     // --- Registers ------------------------------------------------------------------------------------------------ //
     /*
-     * Machine Status
+     * Machine Status Register
      */
     typedef struct packed {
         logic [63:13]   reserved0;
@@ -78,7 +78,7 @@ package csr_pkg;
         logic [2:0]     reserved3;
     } mstatus_t;
 
-    // Writable mask
+    // MSTATUS write mask
     parameter mstatus_t MSTATUS_MASK = (1 << 3);    // MIE-Bit
 
     /*
@@ -104,9 +104,7 @@ package csr_pkg;
         logic [2:0]     reserved3;
     } ireg_t;
 
-    /*
-     * Write mask for machine interrupt enable register (mie)
-     */
+    // MIE write mask
     parameter ireg_t MIE_MASK =
         (1 << IRQ_CAUSE_MEI) |
         (1 << IRQ_CAUSE_MTI) |
@@ -151,7 +149,7 @@ package csr_pkg;
     parameter mcounteren_t MCOUNTEREN_MASK = 64'h7;
 
     /*
-     * Machine Trap Cause
+     * Machine Trap Cause Register
      */
     typedef struct packed {
         logic           intr;               // Interrupt occured

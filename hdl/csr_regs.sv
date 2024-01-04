@@ -351,7 +351,7 @@ module csr_regs #(
         csr_dat_o = 'h0;
 
         case (csr_adr_i)
-            // Machine Status and Control
+            // Machine Trap Setup
             CSR_ADR_MSTATUS    : csr_dat_o = mstatus;
             CSR_ADR_MISA       : csr_dat_o = misa_default();
             CSR_ADR_MIE        : csr_dat_o = mie;
