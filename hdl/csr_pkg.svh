@@ -113,9 +113,9 @@ package csr_pkg;
      * Interrupt Vector
      */
     typedef struct packed {
-        logic           mei;               // Machine External Interrupt
-        logic           mti;               // Machine Timer Interrupt Enable
-        logic           msi;               // Machine Softwarte Interrupt Enable
+        logic   mei;        // Machine External Interrupt
+        logic   mti;        // Machine Timer Interrupt Enable
+        logic   msi;        // Machine Softwarte Interrupt Enable
     } irq_vec_t;
 
     /*

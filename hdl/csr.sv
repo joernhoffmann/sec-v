@@ -12,6 +12,7 @@
  *
  * Todo
  *  [ ] Add basic (machine mode) functionality
+ *  [ ] Add timer
  *
  * History
  *  v1.0    - Initial version

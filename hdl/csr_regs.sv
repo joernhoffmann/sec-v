@@ -10,7 +10,7 @@
  * TODO
  *  [ ] User mode
  *  [ ] Physical Memory Protection (PMP)
- *  [ ] Counter
+ *  [ ] Counter / Timer
  *
  * History
  *  v1.0    - Initial version
@@ -99,6 +99,31 @@ module csr_regs #(
         return mstatus;
     endfunction;
 
+    /*
+     * IRQ vector to IRQ register conversion
+     */
+    function automatic irq_reg_t to_ireg (irq_vec_t ivec);
+        irq_reg_t ireg;
+        ireg = '0;
+        ireg.mei = ivec.mei;
+        ireg.mti = ivec.mti;
+        ireg.msi = ivec.msi;
+        return ireg;
+    endfunction
+
+    /*
+     * IRQ register to IRQ vector conversion
+     */
+    function automatic irq_vec_t to_ivec (irq_reg_t ireg);
+        irq_vec_t ivec;
+        ivec = '0;
+        ivec.mei = ireg.mei;
+        ivec.mti = ireg.mti;
+        ivec.msi = ireg.msi;
+        return ivec;
+    endfunction
+
+
     // --- Internal signals  ------------------------------------------------------------------------------------------ //
     logic m_mode;
     assign m_mode = !rst_i && (priv_i == PRIV_MODE_MACHINE);
@@ -178,6 +203,9 @@ module csr_regs #(
             trap_vec_o = mtvec + (XLEN'(irq_cause_i) << 2);
     end
 
+    // Machine interrupt pending computation
+    assign mip = to_ireg(irq_pend_i);
+
     // Registers
     always_ff @( posedge clk_i ) begin: trap_impl
         if (rst_i) begin
@@ -185,7 +213,6 @@ module csr_regs #(
             mepc        <= 'h0;
             mcause      <= 'h0;
             mtval       <= 'h0;
-            mip         <= 'h0;
         end
 
         else begin
@@ -224,21 +251,13 @@ module csr_regs #(
             if (m_mode && csr_we_i) begin
                 if (csr_adr_i == CSR_ADR_MSCRATCH)
                     mscratch <= csr_dat_i;
-
-                 // TODO: machine interrupt pending (mip)
             end
         end
     end
 
     // Outputs
     assign irq_ena_o = mstatus.mie;
-    always_comb begin : intr_en_impl
-        irq_ena_vec_o = 'b0;
-        irq_ena_vec_o.mei = mie.mei;
-        irq_ena_vec_o.mti = mie.mti;
-        irq_ena_vec_o.msi = mie.msi;
-    end
-
+    assign irq_ena_vec_o = to_ivec(mie);
 
     /*
      * Machine Memory Protection
