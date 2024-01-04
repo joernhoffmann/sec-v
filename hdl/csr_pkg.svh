@@ -64,7 +64,7 @@ package csr_pkg;
         CSR_ADR_MHARTID     = 12'hF14      // Hardware Thread ID
     } csr_adr_t;
 
-    // --- Registers ------------------------------------------------------------------------------------------------ //
+    // --- Machine Trap Setup --------------------------------------------------------------------------------------- //
     /*
      * Machine Status Register
      */
@@ -78,7 +78,19 @@ package csr_pkg;
         logic [2:0]     reserved3;
     } mstatus_t;
 
-    // MSTATUS write mask
+    /*
+     * MSTATUS: Machine Previous Previlige (mpp)
+     */
+    typedef enum logic [1:0] {
+        MSTATUS_MPP_USER        = 2'b00,
+        MSTATUS_MPP_SUPERVISOR  = 2'b01,
+        MSTATUS_MPP_RESERVED    = 2'b10,
+        MSTATUS_MPP_MACHINE     = 2'b11
+    } mstatus_mpp_t;
+
+    /*
+     * MSTATUS: write mask
+     */
     parameter mstatus_t MSTATUS_MASK = (1 << 3);    // MIE-Bit
 
     /*
@@ -90,7 +102,50 @@ package csr_pkg;
         logic [25:0]    extensions;         // Extensions (bit position corresponds to letter, e.g., bit 0 for "A")
     } misa_t;
 
-    /* Interrupt Registers
+    /*
+     * MISA: extensions (from a..z)
+     */
+    typedef enum logic [25:0] {
+        MISA_EXT_A = 26'h0000001,      // Atomic
+        MISA_EXT_B = 26'h0000002,      // Bit manipulation
+        MISA_EXT_C = 26'h0000004,      // Compressed
+        MISA_EXT_D = 26'h0000008,      // Double-precision floating-point
+        MISA_EXT_E = 26'h0000010,      // Embedded
+        MISA_EXT_F = 26'h0000020,      // Single-precision floating-point
+        MISA_EXT_G = 26'h0000040,      // General-purpose registers
+        MISA_EXT_H = 26'h0000080,      // Hypervisor
+        MISA_EXT_I = 26'h0000100,      // Base integer
+        MISA_EXT_J = 26'h0000200,      // Dynamically Translated Languages (Java)
+        MISA_EXT_K = 26'h0000400,      // Custom
+        MISA_EXT_L = 26'h0000800,      // 64-bit integer
+        MISA_EXT_M = 26'h0001000,      // Integer multiplication and division
+        MISA_EXT_N = 26'h0002000,      // User-level interrupts
+        MISA_EXT_O = 26'h0004000,      // Custom
+        MISA_EXT_P = 26'h0008000,      // Packed SIMD
+        MISA_EXT_Q = 26'h0010000,      // Quad-precision floating-point
+        MISA_EXT_R = 26'h0020000,      // Custom
+        MISA_EXT_S = 26'h0040000,      // Supervisor mode
+        MISA_EXT_T = 26'h0080000,      // Transactional memory
+        MISA_EXT_U = 26'h0100000,      // User-level extensions
+        MISA_EXT_V = 26'h0200000,      // Custom
+        MISA_EXT_W = 26'h0400000,      // Custom
+        MISA_EXT_X = 26'h0800000,      // Non-standard extension
+        MISA_EXT_Y = 26'h1000000,      // Custom
+        MISA_EXT_Z = 26'h2000000       // Custom
+    } misa_ext_t;
+
+    /*
+     * MISA: Machine X-Length field
+     */
+    typedef enum logic [1:0] {
+        MISA_MXL_RES    = 2'b00,
+        MISA_MXL_RV32   = 2'b01,
+        MISA_MXL_RV64   = 2'b10,
+        MISA_MXL_RV128  = 2'b11
+    } misa_mxl_t;
+
+    /*
+     *  Interrupt Registers
      *  e.g. Interrupt Enable Registers (mie, sie, ...)
      *  e.g. Interrupt Pending Registers (mip, sip, ...)
      */
@@ -104,7 +159,9 @@ package csr_pkg;
         logic [2:0]     reserved3;
     } ireg_t;
 
-    // MIE write mask
+    /*
+     * MIE: write mask
+     */
     parameter ireg_t MIE_MASK =
         (1 << IRQ_CAUSE_MEI) |
         (1 << IRQ_CAUSE_MTI) |
@@ -127,12 +184,17 @@ package csr_pkg;
         logic [1:0]     mode;               // Trap-Vector Base-Address Mode
     } mtvec_t;
 
+    /*
+     * MTVEC: Modes
+     */
     typedef enum logic [1:0] {
         MTVEC_MODE_DIRECT       = 0,        // All exectptions set pc to BASE
         MTVEC_MODE_VECTORED     = 1         // Async. interrupts set pc to BASE+(4*cause)
     } mtvec_mode_t;
 
-    // Bitmask for base register (direct (0) and vectored mode (1) are supported)
+    /*
+     * MTVEC: Bitmask for base register (direct (0) and vectored mode (1) are supported)
+     */
     parameter mtvec_t MTVEC_MASK = ~(64'h2);
 
     /*
@@ -145,9 +207,12 @@ package csr_pkg;
         logic           cy;                 // Enable Cycle Counter
     } mcounteren_t;
 
-    // Bitmask for mcounter enable register
+    /*
+     * MTCOUNTEREN: write bitmask
+     */
     parameter mcounteren_t MCOUNTEREN_MASK = 64'h7;
 
+    // --- Machine Trap Handling ------------------------------------------------------------------------------------ //
     /*
      * Machine Trap Cause Register
      */
@@ -157,65 +222,8 @@ package csr_pkg;
         logic [ 5: 0]   cause;              // Trap cause
     } mcause_t;
 
-    // --- Default values ------------------------------------------------------------------------------------------- //
-    localparam logic [63:0] MVENDORID   = 64'h4254_4147;    // Bitaggregat - BTAG
-    localparam logic [63:0] MARCHID     = 64'hbabe_0001;
-    localparam logic [63:0] MIMPID      = 64'hcaff_0001;
-
     /*
-     * Machine Status Privileges
-     */
-    typedef enum logic [1:0] {
-        MSTATUS_PRIV_USER        = 2'b00,
-        MSTATUS_PRIV_SUPERVISOR  = 2'b01,
-        MSTATUS_PRIV_RESERVED    = 2'b10,
-        MSTATUS_PRIV_MACHINE     = 2'b11
-    } mstatus_priv_t;
-
-    /*
-     * Machine X-Length field
-     */
-    typedef enum logic [1:0] {
-        MISA_MXL_RES    = 2'b00,
-        MISA_MXL_RV32   = 2'b01,
-        MISA_MXL_RV64   = 2'b10,
-        MISA_MXL_RV128  = 2'b11
-    } misa_mxl_t;
-
-    /*
-     * ISA extensions
-     */
-    typedef enum logic [25:0] {
-        MISA_EXT_A = 26'h00000001,      // Atomic
-        MISA_EXT_B = 26'h00000002,      // Bit manipulation
-        MISA_EXT_C = 26'h00000004,      // Compressed
-        MISA_EXT_D = 26'h00000008,      // Double-precision floating-point
-        MISA_EXT_E = 26'h00000010,      // Embedded
-        MISA_EXT_F = 26'h00000020,      // Single-precision floating-point
-        MISA_EXT_G = 26'h00000040,      // General-purpose registers
-        MISA_EXT_H = 26'h00000080,      // Hypervisor
-        MISA_EXT_I = 26'h00000100,      // Base integer
-        MISA_EXT_J = 26'h00000200,      // Dynamically Translated Languages (Java)
-        MISA_EXT_K = 26'h00000400,      // Custom
-        MISA_EXT_L = 26'h00000800,      // 64-bit integer
-        MISA_EXT_M = 26'h00001000,      // Integer multiplication and division
-        MISA_EXT_N = 26'h00002000,      // User-level interrupts
-        MISA_EXT_O = 26'h00004000,      // Custom
-        MISA_EXT_P = 26'h00008000,      // Packed SIMD
-        MISA_EXT_Q = 26'h00010000,      // Quad-precision floating-point
-        MISA_EXT_R = 26'h00020000,      // Custom
-        MISA_EXT_S = 26'h00040000,      // Supervisor mode
-        MISA_EXT_T = 26'h00080000,      // Transactional memory
-        MISA_EXT_U = 26'h00100000,      // User-level extensions
-        MISA_EXT_V = 26'h00200000,      // Custom
-        MISA_EXT_W = 26'h00400000,      // Custom
-        MISA_EXT_X = 26'h00800000,      // Non-standard extension
-        MISA_EXT_Y = 26'h01000000,      // Custom
-        MISA_EXT_Z = 26'h02000000       // Custom
-    } misa_ext_t;
-
-    /*
-     * Exception cause (0-prefix in mcause)
+     * Exception causes (0-prefix in mcause)
      */
     typedef enum logic [5:0] {
         EX_CAUSE_INST_MISALIGNED            = 0,    // Instruction address misaligned
@@ -233,15 +241,19 @@ package csr_pkg;
     } ex_cause_t;
 
     /*
-     * Machine Interrupt cause (1-prefix in mcause)
+     * Interrupt Causes (1-prefix in mcause)
      */
     typedef enum logic [5:0] {
-        IRQ_CAUSE_MSI           = 3,    // Machine software interrupt
-        IRQ_CAUSE_MTI           = 7,    // Machine timer interrupt
-        IRQ_CAUSE_MEI           = 11    // Machine external interrupt
-        // 12 .. 15                     // Reserved
-        // 16 ..                        // Platform / implementation definded local interrupts
+        IRQ_CAUSE_MSI                       = 3,    // Machine software interrupt
+        IRQ_CAUSE_MTI                       = 7,    // Machine timer interrupt
+        IRQ_CAUSE_MEI                       = 11    // Machine external interrupt
+        // 12 .. 15                                 // Reserved
+        // 16 ..                                    // Platform / implementation definded local interrupts
     } irq_cause_t;
 
+    // --- Machine Information Registers ---------------------------------------------------------------------------- //
+    localparam logic [63:0] MVENDORID   = 64'h4254_4147;    // Bitaggregat - BTAG
+    localparam logic [63:0] MARCHID     = 64'hbabe_0001;
+    localparam logic [63:0] MIMPID      = 64'hcaff_0001;
 endpackage
 `endif

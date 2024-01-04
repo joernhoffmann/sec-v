@@ -29,7 +29,7 @@ module csr_regs #(
     // Generic
     input   logic [HARTS_WIDTH-1 : 0]   hartid_i,               // Hardware thread id
     input   priv_mode_t                 priv_i,                 // Privilege mode of the hart
-    output  priv_mode_t                 priv_prev_o,            // Revious privilege mode of the hart
+    output  priv_mode_t                 priv_prev_o,            // Previous privilege mode of the hart
 
     // CSR access
     input   logic [11:0]                csr_adr_i,              // CSR address
@@ -82,7 +82,7 @@ module csr_regs #(
 
         // Currently only machine mode supported, otherwise:
         // mstatus.mpp = (priv_mode == PRIV_MODE_MACHINE) ? MSTATUS_MPP_MACHINE : MSTATUS_MPP_USER;
-        mstatus.mpp  = MSTATUS_PRIV_MACHINE;
+        mstatus.mpp  = MSTATUS_MPP_MACHINE;
         mstatus.mpie = mstatus_i.mie;
         mstatus.mie  = 1'b0;
         return mstatus;
@@ -93,10 +93,32 @@ module csr_regs #(
      */
     function automatic mstatus_t mstatus_mret(mstatus_t mstatus_i);
         mstatus_t mstatus = mstatus_i;
-        mstatus.mpp  = MSTATUS_PRIV_MACHINE;
+        mstatus.mpp  = MSTATUS_MPP_MACHINE;
         mstatus.mpie = 1'b0;
         mstatus.mie  = mstatus_i.mpie;
         return mstatus;
+    endfunction;
+
+    /*
+     * SEC-V privilege mode to mstatus.mpp field conversion
+     */
+    function automatic mstatus_mpp_t to_mstatus_mpp (priv_mode_t priv);
+        case (priv)
+            PRIV_MODE_USER    : return MSTATUS_MPP_USER;
+            PRIV_MODE_MACHINE : return MSTATUS_MPP_MACHINE;
+            default           : return MSTATUS_MPP_USER;
+        endcase
+    endfunction;
+
+    /*
+     * mstatus.mpp field to SEC-V privilige mode conversion
+     */
+    function automatic priv_mode_t to_priv_mode (mstatus_mpp_t mpp);
+        case (mpp)
+            MSTATUS_MPP_USER    : return PRIV_MODE_USER;
+            MSTATUS_MPP_MACHINE : return PRIV_MODE_MACHINE;
+            default             : return PRIV_MODE_USER;
+        endcase
     endfunction;
 
     /*
@@ -130,7 +152,7 @@ module csr_regs #(
 
     // --- Register Implementation ---------------------------------------------------------------------------------- //
     /*
-     * Machine Status and Control
+     * Machine Trap Setup
      */
     mstatus_t        mstatus;       // Machine Status
     ireg_t           mie;           // Machine Interrupt Enable
@@ -180,10 +202,11 @@ module csr_regs #(
                         ;
                 endcase
             end
-
-
         end
     end
+
+    // Outputs
+    assign priv_prev_o = PRIV_MODE_MACHINE;
 
     /*
      * Machine Trap Handling
@@ -203,7 +226,7 @@ module csr_regs #(
             trap_vec_o = mtvec + (XLEN'(irq_cause_i) << 2);
     end
 
-    // Machine interrupt pending computation
+    // Machine interrupt pending signal
     assign mip = to_ireg(irq_pend_i);
 
     // Registers

@@ -214,7 +214,7 @@ module secv #(
 
         .rd_zero_i  (rd_adr == '0),
         .rs1_zero_i (rs1_adr == '0),
-        .funct_i    (0)
+        .funct_i    (funct3)
     );
 
     // Function unit bus

@@ -10,6 +10,8 @@
 `include "mem_decoder.sv"
 `include "secv.sv"
 `include "gpr.sv"
+`include "csr.sv"
+`include "csr_regs.sv"
 
 module secv_testbench();
     `SVUT_SETUP
