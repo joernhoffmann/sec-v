@@ -239,7 +239,7 @@ package csr_pkg;
         IRQ_CAUSE_MTI           = 7,    // Machine timer interrupt
         IRQ_CAUSE_MEI           = 11    // Machine external interrupt
         // 12 .. 15                     // Reserved
-        // >= 16                        // Platform use
+        // 16 ..                        // Platform / implementation definded local interrupts
     } irq_cause_t;
 
 endpackage
