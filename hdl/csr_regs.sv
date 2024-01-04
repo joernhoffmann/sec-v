@@ -233,8 +233,8 @@ module csr_regs #(
      */
     logic [XLEN-1:0] pmpcfg0;       // Configuration for PMP entries 0-3
     logic [XLEN-1:0] pmpcfg1;       // Configuration for PMP entries 4-7
-    logic [XLEN-1:0] pmpaddr0;      // PMP Address Register 0
-    logic [XLEN-1:0] pmpaddr1;      // ...
+    logic [XLEN-1:0] pmpaddr0;
+    logic [XLEN-1:0] pmpaddr1;
     logic [XLEN-1:0] pmpaddr2;
     logic [XLEN-1:0] pmpaddr3;
     logic [XLEN-1:0] pmpaddr4;
@@ -256,7 +256,45 @@ module csr_regs #(
             pmpaddr7 <= 'h0;
         end
 
-        // TODO...
+        else begin
+            // Writes
+            if (m_mode && csr_we_i) begin
+                case(csr_adr_i)
+                    CSR_ADR_PMPCFG0:
+                        pmpcfg0 <= csr_dat_i;
+
+                    CSR_ADR_PMPCFG1:
+                        pmpcfg1 <= csr_dat_i;
+
+                    CSR_ADR_PMPADDR0:
+                        pmpaddr0 <= csr_dat_i;
+
+                    CSR_ADR_PMPADDR1:
+                        pmpaddr1 <= csr_dat_i;
+
+                    CSR_ADR_PMPADDR2:
+                        pmpaddr2 <= csr_dat_i;
+
+                    CSR_ADR_PMPADDR3:
+                        pmpaddr3 <= csr_dat_i;
+
+                    CSR_ADR_PMPADDR4:
+                        pmpaddr4 <= csr_dat_i;
+
+                    CSR_ADR_PMPADDR5:
+                        pmpaddr5 <= csr_dat_i;
+
+                    CSR_ADR_PMPADDR6:
+                        pmpaddr6 <= csr_dat_i;
+
+                    CSR_ADR_PMPADDR7:
+                        pmpaddr7 <= csr_dat_i;
+
+                    default:
+                        ;
+                endcase
+            end
+        end
     end
 
     /*
@@ -295,6 +333,18 @@ module csr_regs #(
             CSR_ADR_MCAUSE     : csr_dat_o = mcause;
             CSR_ADR_MTVAL      : csr_dat_o = mtval;
             CSR_ADR_MIP        : csr_dat_o = mip;
+
+            // Machine Memory Protection
+            CSR_ADR_PMPCFG0    : csr_dat_o = pmpcfg0;
+            CSR_ADR_PMPCFG1    : csr_dat_o = pmpcfg1;
+            CSR_ADR_PMPADDR0   : csr_dat_o = pmpaddr0;
+            CSR_ADR_PMPADDR1   : csr_dat_o = pmpaddr1;
+            CSR_ADR_PMPADDR2   : csr_dat_o = pmpaddr2;
+            CSR_ADR_PMPADDR3   : csr_dat_o = pmpaddr3;
+            CSR_ADR_PMPADDR4   : csr_dat_o = pmpaddr4;
+            CSR_ADR_PMPADDR5   : csr_dat_o = pmpaddr5;
+            CSR_ADR_PMPADDR6   : csr_dat_o = pmpaddr6;
+            CSR_ADR_PMPADDR7   : csr_dat_o = pmpaddr7;
 
             // Machine Timer
             CSR_ADR_MCYCLE     : csr_dat_o = mcycle;
