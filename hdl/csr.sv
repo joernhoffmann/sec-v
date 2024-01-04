@@ -29,14 +29,15 @@ module csr #(
     input   logic clk_i,
     input   logic rst_i,
 
-    input   funit_in_t      fu_i,
-    output  funit_out_t     fu_o,
+    // FU interface
+    input   funit_in_t      fu_i,           // Function unit input
+    output  funit_out_t     fu_o,           // Function unit output
 
-    input   funct3_csr_t    funct_i,
-    input   logic           rd_zero_i,      // rd is x0
-    input   logic           rs1_zero_i      // rs1 is x0 / uimm is 0
+    // Other signals
+    input   funct3_csr_t    funct_i,        // Function to perform
+    input   logic           rd_zero_i,      // Destination register is register x0
+    input   logic           rs1_zero_i      // Source register 1 is register x0 or uimm is 0
 );
-
     // Alias signals
     logic [XLEN-1:0] src1, src2;
     assign src1 = fu_i.src1;
@@ -48,7 +49,7 @@ module csr #(
     logic [11:0] csr_adr;
     priv_mode_t priv_prev;
 
-    // Trap
+    // Trap Handling
     logic mret;
     logic [XLEN-1:0] trap_pc, trap_adr, trap_vec;
 
@@ -61,6 +62,10 @@ module csr #(
     logic ex;
     ex_cause_t ex_cause;
 
+
+    /*
+     * CSR registers instantiation
+     */
     csr_regs #(
         .HARTS(1)
     ) csr_regs0 (
