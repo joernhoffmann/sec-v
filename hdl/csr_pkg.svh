@@ -90,21 +90,24 @@ package csr_pkg;
         logic [25:0]    extensions;         // Extensions (bit position corresponds to letter, e.g., bit 0 for "A")
     } misa_t;
 
-    /*
-     * Interrupt enable register (mie, sie, ...)
-     * Interrupt pending register (mip, sip, ...)
+    /* Interrupt Registers
+     *  e.g. Interrupt Enable Registers (mie, sie, ...)
+     *  e.g. Interrupt Pending Registers (mip, sip, ...)
      */
     typedef struct packed {
         logic [63:12]   reserved;
         logic           mei;                // 11: Machine External Interrupt (Enable / Pending)
         logic [2:0]     reserved1;
-        logic           mti;                // 7: Machine Timer Interrupt (Enable / Pending)
+        logic           mti;                //  7: Machine Timer Interrupt (Enable / Pending)
         logic [2:0]     reserved2;
-        logic           msi;                // 3: Machine Software Interrupt (Enable / Pending)
+        logic           msi;                //  3: Machine Software Interrupt (Enable / Pending)
         logic [2:0]     reserved3;
-    } irq_reg_t;
+    } ireg_t;
 
-    parameter irq_reg_t IRQ_REG_MASK =
+    /*
+     * Write mask for machine interrupt enable register (mie)
+     */
+    parameter ireg_t MIE_MASK =
         (1 << IRQ_CAUSE_MEI) |
         (1 << IRQ_CAUSE_MTI) |
         (1 << IRQ_CAUSE_MSI);
@@ -116,7 +119,7 @@ package csr_pkg;
         logic   mei;        // Machine External Interrupt
         logic   mti;        // Machine Timer Interrupt Enable
         logic   msi;        // Machine Softwarte Interrupt Enable
-    } irq_vec_t;
+    } ivec_t;
 
     /*
      * Machine Trap Vector Register

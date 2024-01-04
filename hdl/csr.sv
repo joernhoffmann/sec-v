@@ -55,7 +55,7 @@ module csr #(
     // Interrupts
     logic irq, irq_ena;
     irq_cause_t irq_cause;
-    irq_vec_t irq_pend, irq_ena_vec;
+    ivec_t irq_pend, irq_ena_vec;
 
     // Exeptions
     logic ex;

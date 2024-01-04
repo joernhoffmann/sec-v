@@ -46,9 +46,9 @@ module csr_regs #(
     // Interrupts
     input   logic                       irq_i,                  // Interrupt occured
     input   irq_cause_t                 irq_cause_i,            // Interrupt cause
-    input   irq_vec_t                   irq_pend_i,             // Interrupt pending
+    input   ivec_t                      irq_pend_i,             // Interrupt pending
     output  logic                       irq_ena_o,              // Interrupt handling enabled
-    output  irq_vec_t                   irq_ena_vec_o,          // Enabled interrupts (external, timer etc.)
+    output  ivec_t                      irq_ena_vec_o,          // Enabled interrupts (external, timer etc.)
 
     // Exceptions
     input   logic                       ex_i,                   // Exception occured
@@ -102,8 +102,8 @@ module csr_regs #(
     /*
      * IRQ vector to IRQ register conversion
      */
-    function automatic irq_reg_t to_ireg (irq_vec_t ivec);
-        irq_reg_t ireg;
+    function automatic ireg_t to_ireg (ivec_t ivec);
+        ireg_t ireg;
         ireg = '0;
         ireg.mei = ivec.mei;
         ireg.mti = ivec.mti;
@@ -114,8 +114,8 @@ module csr_regs #(
     /*
      * IRQ register to IRQ vector conversion
      */
-    function automatic irq_vec_t to_ivec (irq_reg_t ireg);
-        irq_vec_t ivec;
+    function automatic ivec_t to_ivec (ireg_t ireg);
+        ivec_t ivec;
         ivec = '0;
         ivec.mei = ireg.mei;
         ivec.mti = ireg.mti;
@@ -133,7 +133,7 @@ module csr_regs #(
      * Machine Status and Control
      */
     mstatus_t        mstatus;       // Machine Status
-    irq_reg_t        mie;           // Machine Interrupt Enable
+    ireg_t           mie;           // Machine Interrupt Enable
     logic [XLEN-1:0] mtvec;         // Machine Trap-Vector Base-Address
     logic [XLEN-1:0] mcounteren;    // Machine Counter Enable
 
@@ -168,10 +168,10 @@ module csr_regs #(
                         mstatus <= (mstatus & ~MSTATUS_MASK) | (csr_dat_i & MSTATUS_MASK);
 
                     CSR_ADR_MIE:
-                        mie <=csr_dat_i & IRQ_REG_MASK;
+                        mie     <= csr_dat_i & MIE_MASK;
 
                     CSR_ADR_MTVEC:
-                        mtvec <= csr_dat_i & MTVEC_MASK;
+                        mtvec   <= csr_dat_i & MTVEC_MASK;
 
                     CSR_ADR_MCOUNTEREN:
                         mcounteren <= csr_dat_i & MCOUNTEREN_MASK;
@@ -192,7 +192,7 @@ module csr_regs #(
     logic [XLEN-1:0] mepc;                      // Machine Exception Program Counter
     mcause_t         mcause;                    // Machine Cause
     logic [XLEN-1:0] mtval;                     // Machine Trap Value
-    irq_reg_t        mip;                       // Machine Interrupt Pending
+    ireg_t           mip;                       // Machine Interrupt Pending
 
     // Trap vector computation
     always_comb begin : trap_vec_impl
