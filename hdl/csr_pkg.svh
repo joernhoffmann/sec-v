@@ -131,8 +131,8 @@ package csr_pkg;
         MTVEC_MODE_VECTORED     = 1         // Async. interrupts set pc to BASE+(4*cause)
     } mtvec_mode_t;
 
-    // Bitmask for base register (currently only direct mode (0) supported)
-    parameter mtvec_t MTVEC_MASK = ~(64'h3);
+    // Bitmask for base register (direct (0) and vectored mode (1) are supported)
+    parameter mtvec_t MTVEC_MASK = ~(64'h2);
 
     /*
      * Machine Counter Enable Register
@@ -238,8 +238,8 @@ package csr_pkg;
         IRQ_CAUSE_MSI           = 3,    // Machine software interrupt
         IRQ_CAUSE_MTI           = 7,    // Machine timer interrupt
         IRQ_CAUSE_MEI           = 11    // Machine external interrupt
-        // 12 .. 15 Reserved
-        //    >= 16 Platform use
+        // 12 .. 15                     // Reserved
+        // >= 16                        // Platform use
     } irq_cause_t;
 
 endpackage

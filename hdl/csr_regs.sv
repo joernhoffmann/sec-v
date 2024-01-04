@@ -112,6 +112,9 @@ module csr_regs #(
     logic [XLEN-1:0] mtvec;         // Machine Trap-Vector Base-Address
     logic [XLEN-1:0] mcounteren;    // Machine Counter Enable
 
+    logic mtvec_mode_vectored;
+    assign mtvec_mode_vectored = mtvec[0];
+
     always_ff @( posedge clk_i ) begin: status_control_impl
         if (rst_i) begin
             mstatus     <= 'h0;
@@ -165,6 +168,15 @@ module csr_regs #(
     mcause_t         mcause;                    // Machine Cause
     logic [XLEN-1:0] mtval;                     // Machine Trap Value
     irq_reg_t        mip;                       // Machine Interrupt Pending
+
+    // Trap vector computation
+    always_comb begin : trap_vec_impl
+        trap_vec_o = mtvec;
+
+        if (irq_i && mtvec_mode_vectored)
+            // vec = base + 4*cause
+            trap_vec_o = mtvec + (XLEN'(irq_cause_i) << 2);
+    end
 
     // Registers
     always_ff @( posedge clk_i ) begin: trap_impl
@@ -298,7 +310,7 @@ module csr_regs #(
     end
 
     /*
-     * Machhine Timer Registers
+     * Machine Timer Registers
      */
     logic [XLEN-1:0] mcycle;        // Machine Cycle Counter
     logic [XLEN-1:0] minstret;      // Machine Instructions-Retired Counter
