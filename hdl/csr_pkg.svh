@@ -150,12 +150,12 @@ package csr_pkg;
      *  e.g. Interrupt Pending Registers (mip, sip, ...)
      */
     typedef struct packed {
-        logic [63:12]   reserved;
-        logic           mei;                // 11: Machine External Interrupt (Enable / Pending)
+        logic [63:12]   reserved0;
+        logic           mei;        // 11: Machine External Interrupt (Enable / Pending)
         logic [2:0]     reserved1;
-        logic           mti;                //  7: Machine Timer Interrupt (Enable / Pending)
+        logic           mti;        //  7: Machine Timer Interrupt (Enable / Pending)
         logic [2:0]     reserved2;
-        logic           msi;                //  3: Machine Software Interrupt (Enable / Pending)
+        logic           msi;        //  3: Machine Software Interrupt (Enable / Pending)
         logic [2:0]     reserved3;
     } ireg_t;
 
@@ -218,8 +218,8 @@ package csr_pkg;
      */
     typedef struct packed {
         logic           intr;               // Interrupt occured
-        logic [62: 6]   unused;
-        logic [ 5: 0]   cause;              // Trap cause
+        logic [62:6]    unused;
+        logic [5:0]     cause;              // Trap cause
     } mcause_t;
 
     /*

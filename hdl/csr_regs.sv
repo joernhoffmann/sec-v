@@ -171,11 +171,11 @@ module csr_regs #(
         end
 
         else begin
-            if (irq_i) begin
+            if (ex_i) begin
                 mstatus <= mstatus_trap(mstatus, priv_i);
             end
 
-            else if (ex_i) begin
+            else if (irq_i) begin
                 mstatus <= mstatus_trap(mstatus, priv_i);
             end
 
@@ -183,7 +183,7 @@ module csr_regs #(
                 mstatus <= mstatus_mret(mstatus);
             end
 
-            // Write
+            // Register writes
             else if (m_mode && csr_we_i) begin
                 case (csr_adr_i)
                     CSR_ADR_MSTATUS:
@@ -239,15 +239,7 @@ module csr_regs #(
         end
 
         else begin
-            if (irq_i) begin
-                mepc         <= trap_pc_i;
-                mcause       <= 'h0;
-                mcause.intr  <= 1'b1;
-                mcause.cause <= irq_cause_i;
-                mtval        <= 'h0;
-            end
-
-            else if (ex_i) begin
+            if (ex_i) begin
                 mepc         <= trap_pc_i;
                 mcause       <= 'h0;
                 mcause.intr  <= 1'b0;
@@ -263,6 +255,14 @@ module csr_regs #(
                 end
             end
 
+            else if (irq_i) begin
+                mepc         <= trap_pc_i;
+                mcause       <= 'h0;
+                mcause.intr  <= 1'b1;
+                mcause.cause <= irq_cause_i;
+                mtval        <= 'h0;
+            end
+
             else if (mret_i) begin
                 mepc    <= 'h0;
                 mcause  <= 'h0;
@@ -270,7 +270,7 @@ module csr_regs #(
                 mstatus <= mstatus_mret(mstatus);
             end
 
-            // Writes
+            // Register writes
             if (m_mode && csr_we_i) begin
                 if (csr_adr_i == CSR_ADR_MSCRATCH)
                     mscratch <= csr_dat_i;
@@ -284,10 +284,13 @@ module csr_regs #(
 
     /*
      * Machine Memory Protection
+     * TODO:
+     *  [ ] Implementation
+     *  [ ] Generalization
      */
     logic [XLEN-1:0] pmpcfg0;       // Configuration for PMP entries 0-3
     logic [XLEN-1:0] pmpcfg1;       // Configuration for PMP entries 4-7
-    logic [XLEN-1:0] pmpaddr0;
+    logic [XLEN-1:0] pmpaddr0;      // PMP address register
     logic [XLEN-1:0] pmpaddr1;
     logic [XLEN-1:0] pmpaddr2;
     logic [XLEN-1:0] pmpaddr3;
@@ -311,7 +314,7 @@ module csr_regs #(
         end
 
         else begin
-            // Writes
+            // Register writes
             if (m_mode && csr_we_i) begin
                 case(csr_adr_i)
                     CSR_ADR_PMPCFG0:
