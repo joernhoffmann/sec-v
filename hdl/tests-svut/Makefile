@@ -1,7 +1,7 @@
 SVUTRUN ?= $(HOME)/lib/svut/svutRun
 OPS = -no-splash
 
-all: alu_core alu_decoder alu branch decoder gpr mem_decoder secv
+all: alu_core alu_decoder alu branch csr_regs decoder gpr mem_decoder secv
 
 alu_core:
 	$(SVUTRUN) $(OPS) -test alu_core_testbench.sv
@@ -14,6 +14,9 @@ alu:
 
 branch:
 	$(SVUTRUN) $(OPS) -test branch_testbench.sv
+
+csr_regs:
+	$(SVUTRUN) $(OPS) -test csr_regs_testbench.sv
 
 decoder:
 	$(SVUTRUN) $(OPS) -test decoder_testbench.sv
