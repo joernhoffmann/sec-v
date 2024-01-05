@@ -170,6 +170,15 @@ module csr_regs_testbench();
     end
     endtask
 
+    task mret();
+    begin
+        @(posedge clk_i);
+        mret_i = 1'b1;
+        #1;
+        mret_i = 1'b0;
+    end
+    endtask
+
     `define BIT(pos) (1 << pos)
 
     `TEST_SUITE("CSR_REGS Test")
@@ -244,18 +253,21 @@ module csr_regs_testbench();
     `UNIT_TEST("mstatus returns zero after reset")
         reset();
         csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+
         `FAIL_IF_NOT_EQUAL(dat, 0);
     `UNIT_TEST_END
 
     `UNIT_TEST("mstatus allows write to mie bit (idx: 3)")
         csr_write(.adr(CSR_ADR_MSTATUS), .dat(`BIT(MSTATUS_MIE)));
         csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+
         `FAIL_IF_NOT_EQUAL(dat, `BIT(MSTATUS_MIE));
     `UNIT_TEST_END
 
     `UNIT_TEST("mstatus only allows write to mie bit (idx: 3)")
         csr_write(.adr(CSR_ADR_MSTATUS), .dat(~0));
         csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+
         `FAIL_IF_NOT_EQUAL(dat, `BIT(MSTATUS_MIE));
     `UNIT_TEST_END
 
@@ -263,6 +275,7 @@ module csr_regs_testbench();
         csr_write(.adr(CSR_ADR_MSTATUS), .dat(`BIT(MSTATUS_MIE)));
         exception(EX_CAUSE_INST_ILLEGAL);
         csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+
         `FAIL_IF_NOT_EQUAL((dat & `BIT(MSTATUS_MPIE)), `BIT(MSTATUS_MPIE));
     `UNIT_TEST_END
 
@@ -270,6 +283,7 @@ module csr_regs_testbench();
         priv_i = PRIV_MODE_MACHINE;
         exception(EX_CAUSE_INST_ILLEGAL);
         csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+
         `FAIL_IF_NOT_EQUAL(dat, XLEN'(MSTATUS_MPP_MACHINE) << MSTATUS_MPP);
     `UNIT_TEST_END
 
@@ -277,6 +291,7 @@ module csr_regs_testbench();
         priv_i = PRIV_MODE_USER;
         exception(EX_CAUSE_INST_ILLEGAL);
         csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+
         `FAIL_IF_NOT_EQUAL(dat, XLEN'(MSTATUS_MPP_MACHINE) << MSTATUS_MPP);
     `UNIT_TEST_END
 
@@ -284,28 +299,30 @@ module csr_regs_testbench();
         csr_write(.adr(CSR_ADR_MSTATUS), .dat(`BIT(MSTATUS_MIE)));
         exception(EX_CAUSE_INST_ILLEGAL);
         csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+
         `FAIL_IF((dat & `BIT(MSTATUS_MIE)) > 0);
     `UNIT_TEST_END
 
     `UNIT_TEST("mstatus recovers mie bit after mret")
         csr_write(.adr(CSR_ADR_MSTATUS), .dat(`BIT(MSTATUS_MIE)));
         exception(EX_CAUSE_INST_ILLEGAL);
+        mret();
 
-        @(posedge clk_i);
-        mret_i = 1'b1;
-        #1 `FAIL_IF((csr_dat_o & `BIT(MSTATUS_MIE)) == 0);
+        `FAIL_IF((csr_dat_o & `BIT(MSTATUS_MIE)) == 0);
     `UNIT_TEST_END
 
     `UNIT_TEST("mie is 0 after reset")
         csr_write(.adr(CSR_ADR_MIE), .dat(~0));
         reset();
         csr_read (.adr(CSR_ADR_MIE), .dat(dat));
+
         `FAIL_IF_NOT_EQUAL(dat, 0);
     `UNIT_TEST_END
 
     `UNIT_TEST("mie writes only mask bits")
         csr_write(.adr(CSR_ADR_MIE), .dat(~0));
         csr_read (.adr(CSR_ADR_MIE), .dat(dat));
+
         `FAIL_IF_NOT_EQUAL(dat, MIE_MASK);
     `UNIT_TEST_END
 
@@ -313,12 +330,14 @@ module csr_regs_testbench();
         csr_write(.adr(CSR_ADR_MTVEC), .dat('h4711_0815));
         reset();
         csr_read (.adr(CSR_ADR_MTVEC), .dat(dat));
+
         `FAIL_IF_NOT_EQUAL(dat, 0);
     `UNIT_TEST_END
 
     `UNIT_TEST("mtvec is r/w")
         csr_write(.adr(CSR_ADR_MTVEC), .dat('h4711_0815));
         csr_read (.adr(CSR_ADR_MTVEC), .dat(dat));
+
         `FAIL_IF_NOT_EQUAL(dat, 'h4711_0815);
     `UNIT_TEST_END
 
@@ -326,15 +345,29 @@ module csr_regs_testbench();
         csr_write(.adr(CSR_ADR_MCOUNTEREN), .dat(~0));
         reset();
         csr_read (.adr(CSR_ADR_MTVEC), .dat(dat));
+
         `FAIL_IF_NOT_EQUAL(dat, 0);
     `UNIT_TEST_END
 
-    `UNIT_TEST("mcounteren writes mask‚")
+    `UNIT_TEST("mcounteren writes mask")
         csr_write(.adr(CSR_ADR_MCOUNTEREN), .dat(~0));
         csr_read (.adr(CSR_ADR_MCOUNTEREN), .dat(dat));
+
         `FAIL_IF_NOT_EQUAL(dat, MCOUNTEREN_MASK);
     `UNIT_TEST_END
 
-    `TEST_SUITE_END
+    `UNIT_TEST("priv_prev_o keeps machine mode on exception and mret")
+        reset();
+        `FAIL_IF_NOT_EQUAL(priv_prev_o, PRIV_MODE_MACHINE);
 
+        exception(EX_CAUSE_INST_ILLEGAL);
+        `FAIL_IF_NOT_EQUAL(priv_prev_o, PRIV_MODE_MACHINE);
+
+        mret();
+        `FAIL_IF_NOT_EQUAL(priv_prev_o, PRIV_MODE_MACHINE);
+    `UNIT_TEST_END
+
+    // --- Machine Trap Handling ------------------------------------------------------------------------------------ //
+
+    `TEST_SUITE_END
 endmodule
