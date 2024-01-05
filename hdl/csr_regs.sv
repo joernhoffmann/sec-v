@@ -54,7 +54,9 @@ module csr_regs #(
     input   logic                       ex_i,                   // Exception occured
     input   ex_cause_t                  ex_cause_i              // Exception type
 );
-    localparam int HARTS_WIDTH = HARTS > 1 ? $clog2(HARTS) : 1;
+
+    localparam int HARTS_WIDTH = (HARTS > 1) ? $clog2(HARTS) : 1;
+
     // --- Functions ------------------------------------------------------------------------------------------------ //
     /*
      * Machine ISA register
@@ -144,7 +146,6 @@ module csr_regs #(
         ivec.msi = ireg.msi;
         return ivec;
     endfunction
-
 
     // --- Internal signals  ------------------------------------------------------------------------------------------ //
     logic m_mode;

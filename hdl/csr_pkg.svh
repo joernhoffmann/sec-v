@@ -16,35 +16,35 @@ package csr_pkg;
    // --- Addresses ------------------------------------------------------------------------------------------------- //
     typedef enum logic [11:0] {
         // User Trap Setup
-        CSR_ADR_USTATUS     = 12'h000,     // User Status Register
-        CSR_ADR_UIE         = 12'h004,     // User Interrupt Enable Register
-        CSR_ADR_UTVEC       = 12'h005,     // User Trap-Vector Base-Address Register
+        CSR_ADR_USTATUS     = 12'h000,      // User Status Register
+        CSR_ADR_UIE         = 12'h004,      // User Interrupt Enable Register
+        CSR_ADR_UTVEC       = 12'h005,      // User Trap-Vector Base-Address Register
 
         // User Trap Handling
-        CSR_ADR_USCRATCH    = 12'h040,     // User Scratch Register
-        CSR_ADR_UEPC        = 12'h041,     // User Exception Program Counter
-        CSR_ADR_UCAUSE      = 12'h042,     // User Cause Register
-        CSR_ADR_UTVAL       = 12'h043,     // User Trap Value
-        CSR_ADR_UIP         = 12'h044,     // User Interrupt Pending
+        CSR_ADR_USCRATCH    = 12'h040,      // User Scratch Register
+        CSR_ADR_UEPC        = 12'h041,      // User Exception Program Counter
+        CSR_ADR_UCAUSE      = 12'h042,      // User Cause Register
+        CSR_ADR_UTVAL       = 12'h043,      // User Trap Value
+        CSR_ADR_UIP         = 12'h044,      // User Interrupt Pending
 
         // Machine Trap Setup
-        CSR_ADR_MSTATUS     = 12'h300,     // Machine Status
-        CSR_ADR_MISA        = 12'h301,     // ISA and Extensions
-        CSR_ADR_MIE         = 12'h304,     // Machine Interrupt Enable
-        CSR_ADR_MTVEC       = 12'h305,     // Machine Trap-Vector Base-Address
-        CSR_ADR_MCOUNTEREN  = 12'h306,     // Machine Counter Enable
+        CSR_ADR_MSTATUS     = 12'h300,      // Machine Status
+        CSR_ADR_MISA        = 12'h301,      // ISA and Extensions
+        CSR_ADR_MIE         = 12'h304,      // Machine Interrupt Enable
+        CSR_ADR_MTVEC       = 12'h305,      // Machine Trap-Vector Base-Address
+        CSR_ADR_MCOUNTEREN  = 12'h306,      // Machine Counter Enable
 
         // Machine Trap Handling
-        CSR_ADR_MSCRATCH    = 12'h340,     // Machine Scratch
-        CSR_ADR_MEPC        = 12'h341,     // Machine Exception Program Counter
-        CSR_ADR_MCAUSE      = 12'h342,     // Machine Cause
-        CSR_ADR_MTVAL       = 12'h343,     // Machine Trap Value (WARL)
-        CSR_ADR_MIP         = 12'h344,     // Machine Interrupt Pending
+        CSR_ADR_MSCRATCH    = 12'h340,      // Machine Scratch
+        CSR_ADR_MEPC        = 12'h341,      // Machine Exception Program Counter
+        CSR_ADR_MCAUSE      = 12'h342,      // Machine Cause
+        CSR_ADR_MTVAL       = 12'h343,      // Machine Trap Value (WARL)
+        CSR_ADR_MIP         = 12'h344,      // Machine Interrupt Pending
 
         // Machine Memory Protection
-        CSR_ADR_PMPCFG0     = 12'h3A0,     // Configuration for PMP entries 0-3
-        CSR_ADR_PMPCFG1     = 12'h3A1,     // Configuration for PMP entries 4-7
-        CSR_ADR_PMPADDR0    = 12'h3B0,
+        CSR_ADR_PMPCFG0     = 12'h3A0,      // Configuration for PMP entries 0-3
+        CSR_ADR_PMPCFG1     = 12'h3A1,      // Configuration for PMP entries 4-7
+        CSR_ADR_PMPADDR0    = 12'h3B0,      // PMP address register 0
         CSR_ADR_PMPADDR1    = 12'h3B1,
         CSR_ADR_PMPADDR2    = 12'h3B2,
         CSR_ADR_PMPADDR3    = 12'h3B3,
@@ -54,14 +54,14 @@ package csr_pkg;
         CSR_ADR_PMPADDR7    = 12'h3B7,
 
         // Machine Counter / Timers
-        CSR_ADR_MCYCLE      = 12'hB00,     // Machine Cycle Counter
-        CSR_ADR_MINSTRET    = 12'hB02,     // Machine Instructions-Retired Counter
+        CSR_ADR_MCYCLE      = 12'hB00,      // Machine Cycle Counter
+        CSR_ADR_MINSTRET    = 12'hB02,      // Machine Instructions-Retired Counter
 
         // Machine Information Registers
-        CSR_ADR_MVENDORID   = 12'hF11,     // Vendor ID
-        CSR_ADR_MARCHID     = 12'hF12,     // Architecture ID
-        CSR_ADR_MIMPID      = 12'hF13,     // Implementation ID
-        CSR_ADR_MHARTID     = 12'hF14      // Hardware Thread ID
+        CSR_ADR_MVENDORID   = 12'hF11,      // Vendor ID
+        CSR_ADR_MARCHID     = 12'hF12,      // Architecture ID
+        CSR_ADR_MIMPID      = 12'hF13,      // Implementation ID
+        CSR_ADR_MHARTID     = 12'hF14       // Hardware Thread ID
     } csr_adr_t;
 
     // --- Machine Trap Setup --------------------------------------------------------------------------------------- //
@@ -70,11 +70,11 @@ package csr_pkg;
      */
     typedef struct packed {
         logic [63:13]   reserved0;
-        logic [1:0]     mpp;                // Machine Previous Privilege
+        logic [1:0]     mpp;            // Machine Previous Privilege
         logic [2:0]     reserved1;
-        logic           mpie;               // Machine Previous Interrupt Enable
+        logic           mpie;           // Machine Previous Interrupt Enable
         logic [2:0]     reserved2;
-        logic           mie;                // Machine Interrupt Enable
+        logic           mie;            // Machine Interrupt Enable
         logic [2:0]     reserved3;
     } mstatus_t;
 
@@ -97,9 +97,9 @@ package csr_pkg;
      * Machine ISA register
      */
     typedef struct packed {
-        logic [1:0]     mxl;                // Machine x-length (1 = RV32, 2 = RV64, 3 = RV128)
+        logic [1:0]     mxl;            // Machine x-length (1 = RV32, 2 = RV64, 3 = RV128)
         logic [35:0]    reserved;
-        logic [25:0]    extensions;         // Extensions (bit position corresponds to letter, e.g., bit 0 for "A")
+        logic [25:0]    extensions;     // Extensions (bit position corresponds to letter, e.g., bit 0 for "A")
     } misa_t;
 
     /*
@@ -151,11 +151,11 @@ package csr_pkg;
      */
     typedef struct packed {
         logic [63:12]   reserved0;
-        logic           mei;        // 11: Machine External Interrupt (Enable / Pending)
+        logic           mei;            // 11: Machine External Interrupt (Enable / Pending)
         logic [2:0]     reserved1;
-        logic           mti;        //  7: Machine Timer Interrupt (Enable / Pending)
+        logic           mti;            // 7 : Machine Timer Interrupt (Enable / Pending)
         logic [2:0]     reserved2;
-        logic           msi;        //  3: Machine Software Interrupt (Enable / Pending)
+        logic           msi;            // 3 : Machine Software Interrupt (Enable / Pending)
         logic [2:0]     reserved3;
     } ireg_t;
 
@@ -171,25 +171,25 @@ package csr_pkg;
      * Interrupt Vector
      */
     typedef struct packed {
-        logic   mei;        // Machine External Interrupt
-        logic   mti;        // Machine Timer Interrupt Enable
-        logic   msi;        // Machine Softwarte Interrupt Enable
+        logic           mei;            // Machine External Interrupt
+        logic           mti;            // Machine Timer Interrupt Enable
+        logic           msi;            // Machine Softwarte Interrupt Enable
     } ivec_t;
 
     /*
      * Machine Trap Vector Register
      */
     typedef struct packed {
-        logic [63:2]    base;               // Base address of the trap vector
-        logic [1:0]     mode;               // Trap-Vector Base-Address Mode
+        logic [63:2]    base;           // Base address of the trap vector
+        logic [1:0]     mode;           // Trap-Vector Base-Address Mode
     } mtvec_t;
 
     /*
      * MTVEC: Modes
      */
     typedef enum logic [1:0] {
-        MTVEC_MODE_DIRECT       = 0,        // All exectptions set pc to BASE
-        MTVEC_MODE_VECTORED     = 1         // Async. interrupts set pc to BASE+(4*cause)
+        MTVEC_MODE_DIRECT       = 0,    // All exectptions set pc to BASE
+        MTVEC_MODE_VECTORED     = 1     // Async. interrupts set pc to BASE+(4*cause)
     } mtvec_mode_t;
 
     /*
@@ -241,7 +241,7 @@ package csr_pkg;
     } ex_cause_t;
 
     /*
-     * Interrupt Causes (1-prefix in mcause)
+     * Interrupt eauses (1-prefix in mcause)
      */
     typedef enum logic [5:0] {
         IRQ_CAUSE_MSI                       = 3,    // Machine software interrupt
@@ -252,8 +252,8 @@ package csr_pkg;
     } irq_cause_t;
 
     // --- Machine Information Registers ---------------------------------------------------------------------------- //
-    localparam logic [63:0] MVENDORID   = 64'h4254_4147;    // Bitaggregat - BTAG
-    localparam logic [63:0] MARCHID     = 64'hbabe_0001;
-    localparam logic [63:0] MIMPID      = 64'hcaff_0001;
+    localparam logic [63:0] MVENDORID   = 64'h4269_7400;    // Bitaggregat - Bit\0
+    localparam logic [63:0] MARCHID     = 64'h0000_0001;
+    localparam logic [63:0] MIMPID      = 64'h0000_0001;
 endpackage
 `endif
