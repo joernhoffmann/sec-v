@@ -62,8 +62,6 @@ module csr #(
     irq_cause_t irq_cause;
     ivec_t irq_pend, irq_ena_vec;
 
-
-
     /*
      * CSR registers instantiation
      */
