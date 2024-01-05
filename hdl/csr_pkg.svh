@@ -78,6 +78,12 @@ package csr_pkg;
         logic [2:0]     reserved3;
     } mstatus_t;
 
+    typedef enum {
+        MSTATUS_MPP     = 11,
+        MSTATUS_MPIE    = 7,
+        MSTATUS_MIE     = 3
+    } mstatus_e;
+
     /*
      * MSTATUS: Machine Previous Previlige (mpp)
      */
@@ -160,12 +166,21 @@ package csr_pkg;
     } ireg_t;
 
     /*
+     * MIE: bit positions
+     */
+    typedef enum {
+        IREG_MEI = 11,
+        IREG_MTI = 7,
+        IREG_MSI = 3
+    } ireg_e;
+
+    /*
      * MIE: write mask
      */
     parameter ireg_t MIE_MASK =
-        (1 << IRQ_CAUSE_MEI) |
-        (1 << IRQ_CAUSE_MTI) |
-        (1 << IRQ_CAUSE_MSI);
+        (1 << IREG_MEI) |
+        (1 << IREG_MTI) |
+        (1 << IREG_MSI);
 
     /*
      * Interrupt Vector
@@ -241,7 +256,7 @@ package csr_pkg;
     } ex_cause_t;
 
     /*
-     * Interrupt eauses (1-prefix in mcause)
+     * Interrupt causes (1-prefix in mcause)
      */
     typedef enum logic [5:0] {
         IRQ_CAUSE_MSI                       = 3,    // Machine software interrupt

@@ -199,7 +199,7 @@ module csr_regs_testbench();
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MVENDORID);
     `UNIT_TEST_END
 
-    `UNIT_TEST("mvendorid does not change after write")
+    `UNIT_TEST("mvendorid is r/o")
         csr_write   (.adr(CSR_ADR_MVENDORID), .dat('h4711));
         csr_read    (.adr(CSR_ADR_MVENDORID), .dat(dat));
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MVENDORID);
@@ -210,18 +210,18 @@ module csr_regs_testbench();
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MARCHID);
     `UNIT_TEST_END
 
-    `UNIT_TEST("mvendorid does not change after write")
+    `UNIT_TEST("mvendorid is r/o")
         csr_write   (.adr(CSR_ADR_MARCHID), .dat('h4711));
         csr_read    (.adr(CSR_ADR_MARCHID), .dat(dat));
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MARCHID);
     `UNIT_TEST_END
 
-    `UNIT_TEST("mimpid read succeeds")
+    `UNIT_TEST("mimpid returns correct MIMPID")
         csr_read(.adr(CSR_ADR_MARCHID), .dat(dat));
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MARCHID);
     `UNIT_TEST_END
 
-    `UNIT_TEST("mimpid does not change after write")
+    `UNIT_TEST("mimpid is r/o")
         csr_write   (.adr(CSR_ADR_MIMPID), .dat('h4711));
         csr_read    (.adr(CSR_ADR_MIMPID), .dat(dat));
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MIMPID);
@@ -233,7 +233,7 @@ module csr_regs_testbench();
         `FAIL_IF_NOT_EQUAL(csr_dat_o, 1);
     `UNIT_TEST_END
 
-    `UNIT_TEST("mhartid does change after write")
+    `UNIT_TEST("mhartid is r/o")
         hartid_i = 1;
         csr_write   (.adr(CSR_ADR_MHARTID), .dat('h4711));
         csr_read    (.adr(CSR_ADR_MHARTID), .dat(dat));
@@ -241,48 +241,100 @@ module csr_regs_testbench();
     `UNIT_TEST_END
 
     // --- Machine Trap Setup --------------------------------------------------------------------------------------- //
-
     `UNIT_TEST("mstatus returns zero after reset")
         reset();
         csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
-        `FAIL_IF_NOT_EQUAL(csr_dat_o, 0);
+        `FAIL_IF_NOT_EQUAL(dat, 0);
     `UNIT_TEST_END
 
     `UNIT_TEST("mstatus allows write to mie bit (idx: 3)")
-        csr_write(.adr(CSR_ADR_MSTATUS), .dat(`BIT(3)));
+        csr_write(.adr(CSR_ADR_MSTATUS), .dat(`BIT(MSTATUS_MIE)));
         csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
-        `FAIL_IF_NOT_EQUAL(csr_dat_o, `BIT(3));
+        `FAIL_IF_NOT_EQUAL(dat, `BIT(MSTATUS_MIE));
     `UNIT_TEST_END
 
     `UNIT_TEST("mstatus only allows write to mie bit (idx: 3)")
         csr_write(.adr(CSR_ADR_MSTATUS), .dat(~0));
         csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
-        `FAIL_IF_NOT_EQUAL(csr_dat_o, `BIT(3));
+        `FAIL_IF_NOT_EQUAL(dat, `BIT(MSTATUS_MIE));
     `UNIT_TEST_END
 
-    `UNIT_TEST("mstatus saves mie-bit (3) to mpie-bit (7) ")
-        csr_write(.adr(CSR_ADR_MSTATUS), .dat(`BIT(3)));
+    `UNIT_TEST("mstatus saves mie-bit (3) to mpie-bit (7) on exception")
+        csr_write(.adr(CSR_ADR_MSTATUS), .dat(`BIT(MSTATUS_MIE)));
         exception(EX_CAUSE_INST_ILLEGAL);
-
         csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
-        `FAIL_IF_NOT_EQUAL((csr_dat_o & `BIT(7)), `BIT(7));
+        `FAIL_IF_NOT_EQUAL((dat & `BIT(MSTATUS_MPIE)), `BIT(MSTATUS_MPIE));
     `UNIT_TEST_END
 
-    `UNIT_TEST("mstatus saves machine mode to mpp-field [12:11]")
+    `UNIT_TEST("mstatus saves machine mode to mpp-field [12:11] on exception")
         priv_i = PRIV_MODE_MACHINE;
         exception(EX_CAUSE_INST_ILLEGAL);
-
         csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
-        `FAIL_IF_NOT_EQUAL(csr_dat_o, XLEN'(MSTATUS_MPP_MACHINE) << 11);
+        `FAIL_IF_NOT_EQUAL(dat, XLEN'(MSTATUS_MPP_MACHINE) << MSTATUS_MPP);
     `UNIT_TEST_END
 
-    `UNIT_TEST("mstatus saves machine mode to mpp-field [12:11], even if user mode provided (user not supportet yet)")
+    `UNIT_TEST("mstatus saves machine mode to mpp-field [12:11] (user mode) on exception")
         priv_i = PRIV_MODE_USER;
         exception(EX_CAUSE_INST_ILLEGAL);
-
         csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
-        `FAIL_IF_NOT_EQUAL(csr_dat_o, XLEN'(MSTATUS_MPP_MACHINE) << 11);
+        `FAIL_IF_NOT_EQUAL(dat, XLEN'(MSTATUS_MPP_MACHINE) << MSTATUS_MPP);
     `UNIT_TEST_END
+
+    `UNIT_TEST("mstatus cleats mie bit after exception")
+        csr_write(.adr(CSR_ADR_MSTATUS), .dat(`BIT(MSTATUS_MIE)));
+        exception(EX_CAUSE_INST_ILLEGAL);
+        csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+        `FAIL_IF((dat & `BIT(MSTATUS_MIE)) > 0);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("mstatus recovers mie bit after mret")
+        csr_write(.adr(CSR_ADR_MSTATUS), .dat(`BIT(MSTATUS_MIE)));
+        exception(EX_CAUSE_INST_ILLEGAL);
+
+        @(posedge clk_i);
+        mret_i = 1'b1;
+        #1 `FAIL_IF((csr_dat_o & `BIT(MSTATUS_MIE)) == 0);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("mie is 0 after reset")
+        csr_write(.adr(CSR_ADR_MIE), .dat(~0));
+        reset();
+        csr_read (.adr(CSR_ADR_MIE), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(dat, 0);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("mie writes only mask bits")
+        csr_write(.adr(CSR_ADR_MIE), .dat(~0));
+        csr_read (.adr(CSR_ADR_MIE), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(dat, MIE_MASK);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("mtvec is 0 after reset")
+        csr_write(.adr(CSR_ADR_MTVEC), .dat('h4711_0815));
+        reset();
+        csr_read (.adr(CSR_ADR_MTVEC), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(dat, 0);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("mtvec is r/w")
+        csr_write(.adr(CSR_ADR_MTVEC), .dat('h4711_0815));
+        csr_read (.adr(CSR_ADR_MTVEC), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(dat, 'h4711_0815);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("mcounteren is 0 after reset")
+        csr_write(.adr(CSR_ADR_MCOUNTEREN), .dat(~0));
+        reset();
+        csr_read (.adr(CSR_ADR_MTVEC), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(dat, 0);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("mcounteren writes mask‚")
+        csr_write(.adr(CSR_ADR_MCOUNTEREN), .dat(~0));
+        csr_read (.adr(CSR_ADR_MCOUNTEREN), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(dat, MCOUNTEREN_MASK);
+    `UNIT_TEST_END
+
     `TEST_SUITE_END
 
 endmodule
