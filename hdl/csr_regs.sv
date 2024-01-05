@@ -148,7 +148,7 @@ module csr_regs #(
         return ivec;
     endfunction
 
-    // --- Internal signals  ------------------------------------------------------------------------------------------ //
+    // --- Internal signals ----------------------------------------------------------------------------------------- //
     logic m_mode;
     assign m_mode = !rst_i && (priv_i == PRIV_MODE_MACHINE);
 

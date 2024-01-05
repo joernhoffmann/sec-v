@@ -160,6 +160,17 @@ module csr_regs_testbench();
     end
     endtask
 
+    task exception(ex_cause_t cause);
+    begin
+        @(posedge clk_i);
+        ex_cause_i = cause;
+        ex_i = 1'b1;
+        #1;
+        ex_i = 1'b0;
+    end
+    endtask
+
+    `define BIT(pos) (1 << pos)
 
     `TEST_SUITE("CSR_REGS Test")
     //  Available macros:"
@@ -183,53 +194,95 @@ module csr_regs_testbench();
     //    - `LAST_STATUS: tied to 1 is last macro did experience a failure, else tied to 0
 
     // --- Machine Information registers ---------------------------------------------------------------------------- //
-    `UNIT_TEST("Read from mvendorid returns MVENDORID")
+    `UNIT_TEST("mvendorid returns correct MVENDORID")
         csr_read(.adr(CSR_ADR_MVENDORID), .dat(dat));
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MVENDORID);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Write to mvendorid dos not affect MVENDORID")
+    `UNIT_TEST("mvendorid does not change after write")
         csr_write   (.adr(CSR_ADR_MVENDORID), .dat('h4711));
         csr_read    (.adr(CSR_ADR_MVENDORID), .dat(dat));
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MVENDORID);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Read from marchid succeeds")
+    `UNIT_TEST("marchid returns correct MARCHID")
         csr_read(.adr(CSR_ADR_MARCHID), .dat(dat));
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MARCHID);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Write to mvendorid fails")
+    `UNIT_TEST("mvendorid does not change after write")
         csr_write   (.adr(CSR_ADR_MARCHID), .dat('h4711));
         csr_read    (.adr(CSR_ADR_MARCHID), .dat(dat));
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MARCHID);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Read from mimpid succeeds")
+    `UNIT_TEST("mimpid read succeeds")
         csr_read(.adr(CSR_ADR_MARCHID), .dat(dat));
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MARCHID);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Write to mimpid fails")
+    `UNIT_TEST("mimpid does not change after write")
         csr_write   (.adr(CSR_ADR_MIMPID), .dat('h4711));
         csr_read    (.adr(CSR_ADR_MIMPID), .dat(dat));
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MIMPID);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Read from mhardid returns correct hartid")
+    `UNIT_TEST("mhartid returns correct hartid")
         hartid_i = 1;
         csr_read(.adr(CSR_ADR_MHARTID), .dat(dat));
         `FAIL_IF_NOT_EQUAL(csr_dat_o, 1);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Write to mhardid does not affect hardid")
+    `UNIT_TEST("mhartid does change after write")
         hartid_i = 1;
         csr_write   (.adr(CSR_ADR_MHARTID), .dat('h4711));
         csr_read    (.adr(CSR_ADR_MHARTID), .dat(dat));
         `FAIL_IF_NOT_EQUAL(csr_dat_o, 1);
     `UNIT_TEST_END
 
+    // --- Machine Trap Setup --------------------------------------------------------------------------------------- //
 
+    `UNIT_TEST("mstatus returns zero after reset")
+        reset();
+        csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(csr_dat_o, 0);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("mstatus allows write to mie bit (idx: 3)")
+        csr_write(.adr(CSR_ADR_MSTATUS), .dat(`BIT(3)));
+        csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(csr_dat_o, `BIT(3));
+    `UNIT_TEST_END
+
+    `UNIT_TEST("mstatus only allows write to mie bit (idx: 3)")
+        csr_write(.adr(CSR_ADR_MSTATUS), .dat(~0));
+        csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(csr_dat_o, `BIT(3));
+    `UNIT_TEST_END
+
+    `UNIT_TEST("mstatus saves mie-bit (3) to mpie-bit (7) ")
+        csr_write(.adr(CSR_ADR_MSTATUS), .dat(`BIT(3)));
+        exception(EX_CAUSE_INST_ILLEGAL);
+
+        csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+        `FAIL_IF_NOT_EQUAL((csr_dat_o & `BIT(7)), `BIT(7));
+    `UNIT_TEST_END
+
+    `UNIT_TEST("mstatus saves machine mode to mpp-field [12:11]")
+        priv_i = PRIV_MODE_MACHINE;
+        exception(EX_CAUSE_INST_ILLEGAL);
+
+        csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(csr_dat_o, XLEN'(MSTATUS_MPP_MACHINE) << 11);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("mstatus saves machine mode to mpp-field [12:11], even if user mode provided (user not supportet yet)")
+        priv_i = PRIV_MODE_USER;
+        exception(EX_CAUSE_INST_ILLEGAL);
+
+        csr_read(.adr(CSR_ADR_MSTATUS), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(csr_dat_o, XLEN'(MSTATUS_MPP_MACHINE) << 11);
+    `UNIT_TEST_END
     `TEST_SUITE_END
 
 endmodule
