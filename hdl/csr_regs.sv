@@ -125,7 +125,7 @@ module csr_regs #(
     endfunction;
 
     /*
-     * IRQ vector to IRQ register conversion
+     * IRQ vector to register conversion
      */
     function automatic ireg_t to_ireg (ivec_t ivec);
         ireg_t ireg;
@@ -137,7 +137,7 @@ module csr_regs #(
     endfunction
 
     /*
-     * IRQ register to IRQ vector conversion
+     * IRQ register to vector conversion
      */
     function automatic ivec_t to_ivec (ireg_t ireg);
         ivec_t ivec;
@@ -208,6 +208,7 @@ module csr_regs #(
     end
 
     // Outputs
+    // Currently only machine mode is supported
     assign priv_prev_o = PRIV_MODE_MACHINE;
 
     /*
