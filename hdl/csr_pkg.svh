@@ -252,8 +252,8 @@ package csr_pkg;
     } irq_cause_t;
 
     // --- Machine Information Registers ---------------------------------------------------------------------------- //
-    localparam logic [63:0] MVENDORID   = 64'h4269_7400;    // Bitaggregat - Bit\0
-    localparam logic [63:0] MARCHID     = 64'h0000_0001;
+    localparam logic [63:0] MVENDORID   = 64'h4249_5441_4752;    // BITAGR - Bitaggregat
+    localparam logic [63:0] MARCHID     = 64'hcafe_c0de;
     localparam logic [63:0] MIMPID      = 64'h0000_0001;
 endpackage
 `endif

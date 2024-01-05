@@ -11,6 +11,7 @@
  *  [ ] User mode
  *  [ ] Physical Memory Protection (PMP)
  *  [ ] Counter / Timer
+ *  [ ] Exceptions / faults for invalid writes
  *
  * History
  *  v1.0    - Initial version

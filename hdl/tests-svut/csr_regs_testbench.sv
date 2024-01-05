@@ -188,13 +188,46 @@ module csr_regs_testbench();
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MVENDORID);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Write to mvendorid preserves MVENDORID")
+    `UNIT_TEST("Write to mvendorid dos not affect MVENDORID")
         csr_write   (.adr(CSR_ADR_MVENDORID), .dat('h4711));
         csr_read    (.adr(CSR_ADR_MVENDORID), .dat(dat));
         `FAIL_IF_NOT_EQUAL(csr_dat_o, MVENDORID);
     `UNIT_TEST_END
 
+    `UNIT_TEST("Read from marchid succeeds")
+        csr_read(.adr(CSR_ADR_MARCHID), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(csr_dat_o, MARCHID);
+    `UNIT_TEST_END
 
+    `UNIT_TEST("Write to mvendorid fails")
+        csr_write   (.adr(CSR_ADR_MARCHID), .dat('h4711));
+        csr_read    (.adr(CSR_ADR_MARCHID), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(csr_dat_o, MARCHID);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("Read from mimpid succeeds")
+        csr_read(.adr(CSR_ADR_MARCHID), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(csr_dat_o, MARCHID);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("Write to mimpid fails")
+        csr_write   (.adr(CSR_ADR_MIMPID), .dat('h4711));
+        csr_read    (.adr(CSR_ADR_MIMPID), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(csr_dat_o, MIMPID);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("Read from mhardid returns correct hartid")
+        hartid_i = 1;
+        csr_read(.adr(CSR_ADR_MHARTID), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(csr_dat_o, 1);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("Write to mhardid does not affect hardid")
+        hartid_i = 1;
+        csr_write   (.adr(CSR_ADR_MHARTID), .dat('h4711));
+        csr_read    (.adr(CSR_ADR_MHARTID), .dat(dat));
+        `FAIL_IF_NOT_EQUAL(csr_dat_o, 1);
+    `UNIT_TEST_END
 
 
     `TEST_SUITE_END
