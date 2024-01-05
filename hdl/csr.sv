@@ -50,17 +50,18 @@ module csr #(
     priv_mode_t priv_prev;
 
     // Trap Handling
-    logic mret;
     logic [XLEN-1:0] trap_pc, trap_adr, trap_vec;
+    logic mret;
+
+    // Exeptions
+    logic ex;
+    ex_cause_t ex_cause;
 
     // Interrupts
     logic irq, irq_ena;
     irq_cause_t irq_cause;
     ivec_t irq_pend, irq_ena_vec;
 
-    // Exeptions
-    logic ex;
-    ex_cause_t ex_cause;
 
 
     /*
@@ -89,16 +90,16 @@ module csr #(
         .trap_vec_o     (trap_vec),
         .mret_i         (mret),
 
+        // Exceptions
+        .ex_i           (ex),
+        .ex_cause_i     (ex_cause),
+
         // Interrupts
         .irq_i          (irq),
         .irq_cause_i    (irq_cause),
         .irq_pend_i     (irq_pend),
         .irq_ena_o      (irq_ena),
-        .irq_ena_vec_o  (irq_ena_vec),
-
-        // Exceptions
-        .ex_i           (ex),
-        .ex_cause_i     (ex_cause)
+        .irq_ena_vec_o  (irq_ena_vec)
     );
 
 

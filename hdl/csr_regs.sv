@@ -37,22 +37,22 @@ module csr_regs #(
     input   logic [XLEN-1:0]            csr_dat_i,              // CSR write data
     output  logic [XLEN-1:0]            csr_dat_o,              // CSR read data (old value)
 
-    // Traps: interrupts, exceptions, faults
+    // Traps: exceptions, faults, interrupts
     input   logic [XLEN-1:0]            trap_pc_i,              // Current PC when trap occurs
     input   logic [XLEN-1:0]            trap_adr_i,             // Trap address (faulting memory address etc.)
     output  logic [XLEN-1:0]            trap_vec_o,             // Trap vector address (= next pc or base address)
     input   logic                       mret_i,                 // Return from trap
+
+    // Exceptions
+    input   logic                       ex_i,                   // Exception occured
+    input   ex_cause_t                  ex_cause_i,             // Exception type
 
     // Interrupts
     input   logic                       irq_i,                  // Interrupt occured
     input   irq_cause_t                 irq_cause_i,            // Interrupt cause
     input   ivec_t                      irq_pend_i,             // Interrupt pending
     output  logic                       irq_ena_o,              // Interrupt handling enabled
-    output  ivec_t                      irq_ena_vec_o,          // Enabled interrupts (external, timer etc.)
-
-    // Exceptions
-    input   logic                       ex_i,                   // Exception occured
-    input   ex_cause_t                  ex_cause_i              // Exception type
+    output  ivec_t                      irq_ena_vec_o           // Enabled interrupts (external, timer etc.)
 );
 
     localparam int HARTS_WIDTH = (HARTS > 1) ? $clog2(HARTS) : 1;
