@@ -7,7 +7,7 @@
  * Purpose  : Branch decision unit for the SEC-V processor.
  *
  * Opcodes
- *  - Branch : BEQ, BNE, BLT, BGE, BLTU, BGEU
+ *  - BEQ, BNE, BLT, BGE, BLTU, BGEU
  *
  * Todo
  *  [ ] Add unit tests
@@ -25,12 +25,12 @@ import secv_pkg::*;
 module branch #(
     parameter int XLEN = secv_pkg::XLEN
 ) (
-    input   funct3_t        funct3_i,
-    input   [XLEN-1 : 0]    rs1_i,
-    input   [XLEN-1 : 0]    rs2_i,
+    input   funct3_t        funct3_i,   // Branch function to perform
+    input   [XLEN-1 : 0]    rs1_i,      // Source 1
+    input   [XLEN-1 : 0]    rs2_i,      // Source 2
 
-    output  logic           take_o,
-    output  logic           err_o
+    output  logic           take_o,     // Branch taken
+    output  logic           err_o       // Branch decoding error
 );
 
     logic take, err;

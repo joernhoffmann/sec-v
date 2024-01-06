@@ -171,13 +171,13 @@ module secv #(
 
     // --- Internal units ------------------------------------------------------------------------------------------- //
     // Branch decision unit
-    logic brn_take, brn_err;
+    logic brn_take, brn_dec_err;
     branch brn0 (
         .funct3_i   (funct3),
         .rs1_i      (rs1_dat),
         .rs2_i      (rs2_dat),
         .take_o     (brn_take),
-        .err_o      (brn_err)
+        .err_o      (brn_dec_err)
     );
 
     // --- Function units ------------------------------------------------------------------------------------------- //
@@ -248,6 +248,22 @@ module secv #(
     end
     assign funit_out = funit_out_bus[funit];
 
+    // --- Exception handling --------------------------------------------------------------------------------------- //
+    assign ex = pc_align_err |
+                dec_err | mem_dec_err | alu_dec_err | brn_dec_err;
+
+    always_comb begin : ex_cause_impl
+        ex_cause = EX_CAUSE_NONE;
+
+        if (pc_align_err)
+            ex_cause = EX_CAUSE_INST_MISALIGNED;
+
+        else if (dec_err || mem_dec_err || alu_dec_err || brn_dec_err)
+            ex_cause = EX_CAUSE_INST_ILLEGAL;
+    end
+
+
+
     // --- MUXer ---------------------------------------------------------------------------------------------------- //
     // Source 1 selection
     logic [XLEN-1:0] src1;
@@ -294,7 +310,7 @@ module secv #(
             RD_SEL_NONE  : wbstage_rd_dat = '0;
             RD_SEL_FUNIT : wbstage_rd_dat = funit_out.res;
             RD_SEL_IMM   : wbstage_rd_dat = imm;
-            RD_SEL_NXTPC : wbstage_rd_dat = nxtpc;
+            RD_SEL_NXTPC : wbstage_rd_dat = pc_inc;
             default      : wbstage_rd_dat = '0;
         endcase
     end
@@ -303,10 +319,10 @@ module secv #(
     logic [XLEN-1:0] wbstage_pc;
     always_comb begin: wbstage_pc_mux
         unique case (pc_sel)
-            PC_SEL_NXTPC  : wbstage_pc = nxtpc;             // Write-back next pc
+            PC_SEL_NXTPC  : wbstage_pc = pc_inc;            // Write-back next pc (pc + 4)
             PC_SEL_FUNIT  : wbstage_pc = funit_out.res;     // Write-back funit output
-            PC_SEL_BRANCH : wbstage_pc = brn_target;        // Write-back branch target
-            default       : wbstage_pc = nxtpc;
+            PC_SEL_BRANCH : wbstage_pc = pc_target;         // Write-back branch target
+            default       : wbstage_pc = pc_inc;
         endcase
     end
 
@@ -317,9 +333,13 @@ module secv #(
     state_t state, state_next;
     logic [XLEN-1:0] pc, pc_next;       // Program counter register
     logic [ILEN-1:0] ir, ir_next;       // Instruction register
-    logic [XLEN-1:0] nxtpc;             // Next pc
+    logic [XLEN-1:0] pc_inc;            // Next PC (PC + 4)
+    logic pc_align_err;
 
-    assign nxtpc = pc + 4;
+    // PC computations
+    assign pc_inc = pc + 4;
+    assign pc_align_err = pc[1:0] != 0; // Must be 4 byte aligned
+
     always_ff @( posedge clk_i) begin: fsm_regs
         if (rst_i) begin
             state <= STATE_IDLE;
@@ -336,8 +356,8 @@ module secv #(
 
     // Branch target computation
     // If branch, take address from funit else progress with next address
-    logic [XLEN-1:0] brn_target;
-    assign brn_target = brn_take ? funit_out.res : nxtpc;
+    logic [XLEN-1:0] pc_target;
+    assign pc_target = brn_take ? funit_out.res : pc_inc;
 
     // --- Next state logic ----------------------------------------------------------------------------------------- //
     always_comb begin : main_fsm
@@ -414,7 +434,7 @@ module secv #(
 
                 // Check pc update from funit
                 if (pc_sel == PC_SEL_FUNIT)
-                    pc_next = funit_out.err ? nxtpc : wbstage_pc;
+                    pc_next = funit_out.err ? pc_inc : wbstage_pc;
             end
 
             default:
