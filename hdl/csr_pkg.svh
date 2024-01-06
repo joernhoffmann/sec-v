@@ -244,10 +244,12 @@ package csr_pkg;
         EX_CAUSE_INST_MISALIGNED            = 0,    // Instruction address misaligned
         EX_CAUSE_INST_ACCESS_FAULT          = 1,    // Instruction access fault
         EX_CAUSE_INST_ILLEGAL               = 2,    // Illegal instruction
+
         EX_CAUSE_LOAD_ADDRESS_MISALIGNED    = 4,    // Load address misaligned
         EX_CAUSE_LOAD_ACCESS_FAULT          = 5,    // Load access fault
         EX_CAUSE_STORE_ADDRESS_MISALIGNED   = 6,    // Store / AMO address misaligned
         EX_CAUSE_STORE_ACCESS_FAULT         = 7,    // Store / AMO access fault
+
         EX_CAUSE_ENV_CALL_U                 = 8,    // Environment call from U-mode
         EX_CAUSE_ENV_CALL_M                 = 11,   // Environment call from M-mode
         // 16 .. 23 Reserved
@@ -259,12 +261,12 @@ package csr_pkg;
      * Interrupt causes (1-prefix in mcause)
      */
     typedef enum logic [5:0] {
-        IRQ_CAUSE_MSI                       = 3,    // Machine software interrupt
-        IRQ_CAUSE_MTI                       = 7,    // Machine timer interrupt
-        IRQ_CAUSE_MEI                       = 11    // Machine external interrupt
+        INTR_CAUSE_MSI                       = 3,    // Machine software interrupt
+        INTR_CAUSE_MTI                       = 7,    // Machine timer interrupt
+        INTR_CAUSE_MEI                       = 11    // Machine external interrupt
         // 12 .. 15                                 // Reserved
         // 16 ..                                    // Platform / implementation definded local interrupts
-    } irq_cause_t;
+    } intr_cause_t;
 
     // --- Machine Information Registers ---------------------------------------------------------------------------- //
     localparam logic [63:0] MVENDORID   = 64'h4249_5441_4752;    // BITAGR - Bitaggregat

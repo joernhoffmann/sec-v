@@ -30,13 +30,25 @@ module csr #(
     input   logic rst_i,
 
     // FU interface
-    input   funit_in_t      fu_i,           // Function unit input
-    output  funit_out_t     fu_o,           // Function unit output
+    input   funit_in_t          fu_i,           // Function unit input
+    output  funit_out_t         fu_o,           // Function unit output
 
-    // Other signals
-    input   funct3_csr_t    funct_i,        // Function to perform
-    input   logic           rd_zero_i,      // Destination register is register x0
-    input   logic           rs1_zero_i      // Source register 1 is register x0 or uimm is 0
+    // Control signals
+    input   funct3_csr_t        funct_i,        // Function to perform
+    input   logic               rd_zero_i,      // Destination register is register x0
+    input   logic               rs1_zero_i,     // Source register 1 is register x0 or uimm is 0
+
+    // Trap signals
+    input   logic [XLEN-1:0]    trap_pc_i,      // Trapping PC
+    input   logic [XLEN-1:0]    trap_adr_i,     // Trapping memory access address
+    output  logic [XLEN-1:0]    trap_vec_o,     // Trap vector to jump to
+    input   logic               mret_i,         // Mret instruction issued
+
+    // Exceptions
+    input   logic               ex_i,           // Exception occured
+    input   ex_cause_t          ex_cause_i      // Exception cause
+
+    // Interrupts
 );
     // Alias signals
     logic [XLEN-1:0] src1, src2;
@@ -49,21 +61,13 @@ module csr #(
     logic [11:0] csr_adr;
     priv_mode_t priv_prev;
 
-    // Trap Handling
-    logic [XLEN-1:0] trap_pc, trap_adr, trap_vec;
-    logic mret;
-
-    // Exeptions
-    logic ex;
-    ex_cause_t ex_cause;
-
     // Interrupts
-    logic irq, irq_ena;
-    irq_cause_t irq_cause;
-    ivec_t irq_pend, irq_ena_vec;
+    logic intr, intr_ena;
+    intr_cause_t intr_cause;
+    ivec_t intr_pend, intr_ena_vec;
 
     /*
-     * CSR registers instantiation
+     * CSR Register
      */
     csr_regs #(
         .HARTS(1)
@@ -83,25 +87,25 @@ module csr #(
         .csr_dat_o      (csr_dat_o),
 
         // Traps
-        .trap_pc_i      (trap_pc),
-        .trap_adr_i     (trap_adr),
-        .trap_vec_o     (trap_vec),
-        .mret_i         (mret),
+        .trap_pc_i      (trap_pc_i),
+        .trap_adr_i     (trap_adr_i),
+        .trap_vec_o     (trap_vec_o),
+        .mret_i         (mret_i),
 
         // Exceptions
-        .ex_i           (ex),
-        .ex_cause_i     (ex_cause),
+        .ex_i           (ex_i),
+        .ex_cause_i     (ex_cause_i),
 
         // Interrupts
-        .irq_i          (irq),
-        .irq_cause_i    (irq_cause),
-        .irq_pend_i     (irq_pend),
-        .irq_ena_o      (irq_ena),
-        .irq_ena_vec_o  (irq_ena_vec)
+        .intr_i          (intr),
+        .intr_cause_i    (intr_cause),
+        .intr_pend_i     (intr_pend),
+        .intr_ena_o      (intr_ena),
+        .intr_ena_vec_o  (intr_ena_vec)
     );
 
 
-    always_comb begin
+    always_comb begin : csr_access
         fu_o = funit_out_default();
         csr_adr     = '0;
         csr_we      = '0;

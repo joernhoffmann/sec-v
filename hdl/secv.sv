@@ -33,7 +33,9 @@
  *  v1.2    - Add muxer, reduce funit signals
  */
 `include "secv_pkg.svh"
+`include "csr_pkg.svh"
 import secv_pkg::*;
+import csr_pkg::*;
 
 module secv #(
     parameter int IADR_WIDTH = 8,        // Instruction memory address width
@@ -205,16 +207,33 @@ module secv #(
     );
 
     // Control and status register unit
+    logic [XLEN-1:0] trap_adr, trap_vec;
+    logic mret;
+    logic ex;
+    ex_cause_t ex_cause;
+
     csr csr0 (
-        .clk_i (clk_i),
-        .rst_i (rst_i),
+        .clk_i          (clk_i),
+        .rst_i          (rst_i),
 
-        .fu_i (funit_in_bus[FUNIT_CSR]),
-        .fu_o (funit_out_bus[FUNIT_CSR]),
+        // Funit Interface
+        .fu_i           (funit_in_bus[FUNIT_CSR]),
+        .fu_o           (funit_out_bus[FUNIT_CSR]),
 
-        .rd_zero_i  (rd_adr == '0),
-        .rs1_zero_i (rs1_adr == '0),
-        .funct_i    (funct3)
+        // Control
+        .rd_zero_i      (rd_adr == '0),
+        .rs1_zero_i     (rs1_adr == '0),
+        .funct_i        (funct3),
+
+        // Trap
+        .trap_pc_i      (pc),
+        .trap_adr_i     (trap_adr),
+        .trap_vec_o     (trap_vec),
+        .mret_i         (mret),
+
+        // Exceptions
+        .ex_i           (ex),
+        .ex_cause_i     (ex_cause)
     );
 
     // Function unit bus

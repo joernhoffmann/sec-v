@@ -40,7 +40,7 @@ module decoder (
     output alu_op_sel_t alu_op_sel_o,   // Alu operation selection
 
     // Error codes
-    output  logic       err_o       // Decoding error, invalid opcode
+    output  logic       err_o           // Illegal instruction error
 );
 
     // Opcode

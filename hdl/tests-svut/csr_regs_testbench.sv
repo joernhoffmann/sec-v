@@ -28,11 +28,11 @@ module csr_regs_testbench();
     logic                       ex_i;
     ex_cause_t                  ex_cause_i;
 
-    logic                       irq_i;
-    irq_cause_t                 irq_cause_i;
-    ivec_t                      irq_pend_i;
-    logic                       irq_ena_o;
-    ivec_t                      irq_ena_vec_o;
+    logic                       intr_i;
+    intr_cause_t                 intr_cause_i;
+    ivec_t                      intr_pend_i;
+    logic                       intr_ena_o;
+    ivec_t                      intr_ena_vec_o;
 
     logic [XLEN-1:0]            dat;
 
@@ -66,11 +66,11 @@ module csr_regs_testbench();
         .ex_cause_i    (ex_cause_i),
 
         // IRQs
-        .irq_i         (irq_i),
-        .irq_cause_i   (irq_cause_i),
-        .irq_pend_i    (irq_pend_i),
-        .irq_ena_o     (irq_ena_o),
-        .irq_ena_vec_o (irq_ena_vec_o)
+        .intr_i         (intr_i),
+        .intr_cause_i   (intr_cause_i),
+        .intr_pend_i    (intr_pend_i),
+        .intr_ena_o     (intr_ena_o),
+        .intr_ena_vec_o (intr_ena_vec_o)
     );
 
 
@@ -104,9 +104,9 @@ module csr_regs_testbench();
         ex_i        = 0;
         ex_cause_i  = EX_CAUSE_INST_ILLEGAL;
 
-        irq_i       = 0;
-        irq_cause_i = IRQ_CAUSE_MEI;
-        irq_pend_i  = 0;
+        intr_i       = 0;
+        intr_cause_i = INTR_CAUSE_MEI;
+        intr_pend_i  = 0;
     end
     endtask
 
