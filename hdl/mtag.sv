@@ -8,7 +8,6 @@
  *
  * TODO:
  *      - use shift operation to calculate tmem_adr_o
- *      - better ops, immediate based tag assignment
  *
  * History
  *    v1.0        - Initial version
