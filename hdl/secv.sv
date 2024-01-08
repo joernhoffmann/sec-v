@@ -212,6 +212,7 @@ module secv #(
         .fu_o (funit_out_bus[FUNIT_ALU])
     );
 
+    logic tag_mismatch;
     // Data memory inteface unit
     mem  #(
         .ADR_WIDTH(DADR_WIDTH)
@@ -219,6 +220,8 @@ module secv #(
         // Control
         .fu_i (funit_in_bus[FUNIT_MEM]),
         .fu_o (funit_out_bus[FUNIT_MEM]),
+
+        .tag_err(tag_mismatch),
 
         // Wishbone data memory interface
         .dmem_cyc_o (dmem_cyc_o),
@@ -311,7 +314,8 @@ module secv #(
 
     // --- Exception handling --------------------------------------------------------------------------------------- //
     assign ex = pc_align_err |
-                dec_err | mem_dec_err | alu_dec_err | brn_dec_err;
+                dec_err | mem_dec_err | alu_dec_err | brn_dec_err | mtag_dec_err |
+                tag_mismatch;
 
     always_comb begin : ex_cause_impl
         ex_cause = EX_CAUSE_NONE;
@@ -319,8 +323,11 @@ module secv #(
         if (pc_align_err)
             ex_cause = EX_CAUSE_INST_MISALIGNED;
 
-        else if (dec_err || mem_dec_err || alu_dec_err || brn_dec_err)
+        else if (dec_err || mem_dec_err || alu_dec_err || brn_dec_err || mtag_dec_err)
             ex_cause = EX_CAUSE_INST_ILLEGAL;
+
+        else if (tag_mismatch)
+            ex_cause = EX_CAUSE_MTAG_INVALID; // better use LOAD or STORE_ACCESS_FAULT
     end
 
 

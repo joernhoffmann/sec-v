@@ -38,6 +38,8 @@ module mem #(
     input  funit_in_t  fu_i,
     output funit_out_t fu_o,
 
+    output tag_err_o,
+
     // Wishbone data memory interface
     output logic                    dmem_cyc_o,
     output logic                    dmem_stb_o,
@@ -48,7 +50,7 @@ module mem #(
     input  logic [XLEN-1      : 0]  dmem_dat_i,
     input  logic                    dmem_ack_i,
 
-    /* tag memory */
+    // Tag memory
     output logic                    tmem_cyc_o,
     output logic                    tmem_stb_o,
     output logic [TSEL_WIDTH-1 : 0] tmem_sel_o,
@@ -183,6 +185,7 @@ module mem #(
             // Control output
             fu_o.rdy = err || dmem_ack_i || tag_err;
             fu_o.err = err || tag_err;
+            tag_err_o = tag_err;
 
             // Result output
             fu_o.res = dmem_dat;
