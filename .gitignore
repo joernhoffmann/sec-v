@@ -1,16 +1,21 @@
+# OS-specific
+.DS_Store
+
 # IDEs
 .vscode
 
 # Tool artifacts
+obj_dir
+run.log
+qrun.out
+svut.out
+tests.xml
 .*.f
 .*.sv
 .hdl_checker
-obj_dir
-run.log
-tests.xml
-qrun.out
-svut.out
-.DS_Store
+
+# Waveforms
+*.vcd
 
 # Program output
 *.elf
