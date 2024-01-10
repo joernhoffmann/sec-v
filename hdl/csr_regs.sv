@@ -49,11 +49,11 @@ module csr_regs #(
     input   ex_cause_t                  ex_cause_i,             // Exception type
 
     // Interrupts
-    input   logic                       irq_i,                  // Interrupt occured
-    input   irq_cause_t                 irq_cause_i,            // Interrupt cause
-    input   ivec_t                      irq_pend_i,             // Interrupt pending
-    output  logic                       irq_ena_o,              // Interrupt handling enabled
-    output  ivec_t                      irq_ena_vec_o           // Enabled interrupts (external, timer etc.)
+    input   logic                       intr_i,                  // Interrupt occured
+    input   intr_cause_t                intr_cause_i,            // Interrupt cause
+    input   ivec_t                      intr_pend_i,             // Interrupt pending
+    output  logic                       intr_ena_o,              // Interrupt handling enabled
+    output  ivec_t                      intr_ena_vec_o           // Enabled interrupts (external, timer etc.)
 );
 
     localparam int HARTS_WIDTH = (HARTS > 1) ? $clog2(HARTS) : 1;
@@ -125,7 +125,7 @@ module csr_regs #(
     endfunction;
 
     /*
-     * IRQ vector to IRQ register conversion
+     * IRQ vector to register conversion
      */
     function automatic ireg_t to_ireg (ivec_t ivec);
         ireg_t ireg;
@@ -137,7 +137,7 @@ module csr_regs #(
     endfunction
 
     /*
-     * IRQ register to IRQ vector conversion
+     * IRQ register to vector conversion
      */
     function automatic ivec_t to_ivec (ireg_t ireg);
         ivec_t ivec;
@@ -177,7 +177,7 @@ module csr_regs #(
                 mstatus <= mstatus_trap(mstatus, priv_i);
             end
 
-            else if (irq_i) begin
+            else if (intr_i) begin
                 mstatus <= mstatus_trap(mstatus, priv_i);
             end
 
@@ -208,6 +208,7 @@ module csr_regs #(
     end
 
     // Outputs
+    // Currently only machine mode is supported
     assign priv_prev_o = PRIV_MODE_MACHINE;
 
     /*
@@ -215,7 +216,7 @@ module csr_regs #(
      */
     logic [XLEN-1:0] mscratch;                  // Machine Scratch
     logic [XLEN-1:0] mepc;                      // Machine Exception Program Counter
-    mcause_t         mcause;                    // Machine Cause
+    mcause_t         mcause;                    // Machine Cause Register
     logic [XLEN-1:0] mtval;                     // Machine Trap Value
     ireg_t           mip;                       // Machine Interrupt Pending
 
@@ -223,13 +224,13 @@ module csr_regs #(
     always_comb begin : trap_vec_impl
         trap_vec_o = mtvec;
 
-        if (irq_i && mtvec_mode_vectored)
+        if (intr_i && mtvec_mode_vectored)
             // vec = base + 4*cause
-            trap_vec_o = mtvec + (XLEN'(irq_cause_i) << 2);
+            trap_vec_o = mtvec + (XLEN'(intr_cause_i) << 2);
     end
 
     // Machine interrupt pending signal
-    assign mip = to_ireg(irq_pend_i);
+    assign mip = to_ireg(intr_pend_i);
 
     // Registers
     always_ff @( posedge clk_i ) begin: trap_impl
@@ -257,11 +258,11 @@ module csr_regs #(
                 end
             end
 
-            else if (irq_i) begin
+            else if (intr_i) begin
                 mepc         <= trap_pc_i;
                 mcause       <= 'h0;
                 mcause.intr  <= 1'b1;
-                mcause.cause <= irq_cause_i;
+                mcause.cause <= intr_cause_i;
                 mtval        <= 'h0;
             end
 
@@ -281,8 +282,8 @@ module csr_regs #(
     end
 
     // Outputs
-    assign irq_ena_o = mstatus.mie;
-    assign irq_ena_vec_o = to_ivec(mie);
+    assign intr_ena_o = mstatus.mie;
+    assign intr_ena_vec_o = to_ivec(mie);
 
     /*
      * Machine Memory Protection

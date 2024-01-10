@@ -78,6 +78,12 @@ package csr_pkg;
         logic [2:0]     reserved3;
     } mstatus_t;
 
+    typedef enum {
+        MSTATUS_MPP     = 11,
+        MSTATUS_MPIE    = 7,
+        MSTATUS_MIE     = 3
+    } mstatus_e;
+
     /*
      * MSTATUS: Machine Previous Previlige (mpp)
      */
@@ -160,12 +166,21 @@ package csr_pkg;
     } ireg_t;
 
     /*
+     * MIE: bit positions
+     */
+    typedef enum {
+        IREG_MEI = 11,
+        IREG_MTI = 7,
+        IREG_MSI = 3
+    } ireg_e;
+
+    /*
      * MIE: write mask
      */
     parameter ireg_t MIE_MASK =
-        (1 << IRQ_CAUSE_MEI) |
-        (1 << IRQ_CAUSE_MTI) |
-        (1 << IRQ_CAUSE_MSI);
+        (1 << IREG_MEI) |
+        (1 << IREG_MTI) |
+        (1 << IREG_MSI);
 
     /*
      * Interrupt Vector
@@ -226,6 +241,8 @@ package csr_pkg;
      * Exception causes (0-prefix in mcause)
      */
     typedef enum logic [5:0] {
+        EX_CAUSE_NONE                       = -1,
+
         EX_CAUSE_INST_MISALIGNED            = 0,    // Instruction address misaligned
         EX_CAUSE_INST_ACCESS_FAULT          = 1,    // Instruction access fault
         EX_CAUSE_INST_ILLEGAL               = 2,    // Illegal instruction
@@ -244,15 +261,15 @@ package csr_pkg;
     } ex_cause_t;
 
     /*
-     * Interrupt eauses (1-prefix in mcause)
+     * Interrupt causes (1-prefix in mcause)
      */
     typedef enum logic [5:0] {
-        IRQ_CAUSE_MSI                       = 3,    // Machine software interrupt
-        IRQ_CAUSE_MTI                       = 7,    // Machine timer interrupt
-        IRQ_CAUSE_MEI                       = 11    // Machine external interrupt
+        INTR_CAUSE_MSI                       = 3,    // Machine software interrupt
+        INTR_CAUSE_MTI                       = 7,    // Machine timer interrupt
+        INTR_CAUSE_MEI                       = 11    // Machine external interrupt
         // 12 .. 15                                 // Reserved
         // 16 ..                                    // Platform / implementation definded local interrupts
-    } irq_cause_t;
+    } intr_cause_t;
 
     // --- Machine Information Registers ---------------------------------------------------------------------------- //
     localparam logic [63:0] MVENDORID   = 64'h4249_5441_4752;    // BITAGR - Bitaggregat
