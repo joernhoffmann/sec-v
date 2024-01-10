@@ -6,7 +6,7 @@ main:
     lui     a1, 0x8000          # a1 = 0x8000_0000  (IO_LED port)
     sll     a1, a1, 8
 
-    addi    a2, x0, 0xff        # compare
+    addi    a2, x0, 0xff        # load compare value
 
 reset:
     addi    a3, x0, 0xff        # counter
