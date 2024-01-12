@@ -221,7 +221,7 @@ module secv #(
         .fu_i (funit_in_bus[FUNIT_MEM]),
         .fu_o (funit_out_bus[FUNIT_MEM]),
 
-        .tag_err(tag_mismatch),
+        .tag_err_o(tag_mismatch),
 
         // Wishbone data memory interface
         .dmem_cyc_o (dmem_cyc_o),
@@ -327,7 +327,7 @@ module secv #(
             ex_cause = EX_CAUSE_INST_ILLEGAL;
 
         else if (tag_mismatch)
-            ex_cause = EX_CAUSE_MTAG_INVALID; // better use LOAD or STORE_ACCESS_FAULT
+            ex_cause = EX_CAUSE_MTAG_INVLD;
     end
 
 

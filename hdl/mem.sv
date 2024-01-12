@@ -65,6 +65,7 @@ module mem #(
     mem_op_t op;
 
     logic tag_err;
+    assign tag_err_o = tag_err;
 
     // Tag checking
     mtag_chk mtag_chk0 (
@@ -179,13 +180,11 @@ module mem #(
     // Ouptut
     always_comb begin
         fu_o = funit_out_default();
-        tag_err_adr_o = 'b0;
 
         if (fu_i.ena) begin
             // Control output
             fu_o.rdy = err || dmem_ack_i || tag_err;
             fu_o.err = err || tag_err;
-            tag_err_o = tag_err;
 
             // Result output
             fu_o.res = dmem_dat;
