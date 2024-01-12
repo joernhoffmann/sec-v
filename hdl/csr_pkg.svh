@@ -255,6 +255,7 @@ package csr_pkg;
         EX_CAUSE_ENV_CALL_U                 = 8,    // Environment call from U-mode
         EX_CAUSE_ENV_CALL_M                 = 11,   // Environment call from M-mode
         // 16 .. 23 Reserved
+
         // 24 .. 31 Custom use
         EX_CAUSE_MTAG_INVLD                 = 24    // Memory Tag Invalid (needed? cf. LD_ or ST_ACCESS_FAULT)
     } ex_cause_t;

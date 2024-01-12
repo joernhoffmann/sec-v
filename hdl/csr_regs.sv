@@ -291,8 +291,8 @@ module csr_regs #(
      *  [ ] Implementation
      *  [ ] Generalization
      */
-    logic [XLEN-1:0] pmpcfg0;       // Configuration for PMP entries 0-3
-    logic [XLEN-1:0] pmpcfg1;       // Configuration for PMP entries 4-7
+    logic [XLEN-1:0] pmpcfg0;       // Configuration for PMP entries 0-7
+    logic [XLEN-1:0] pmpcfg1;       // Configuration for PMP entries 8-15
     logic [XLEN-1:0] pmpaddr0;      // PMP address register
     logic [XLEN-1:0] pmpaddr1;
     logic [XLEN-1:0] pmpaddr2;
