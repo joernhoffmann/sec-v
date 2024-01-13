@@ -11,13 +11,13 @@
  */
 
 module lfsr_rng #(
-    parameter WIDTH = 32
+    parameter WIDTH = 32,
+    parameter POLY = 'h911111FB,
+    parameter SEED = 'h4569ab90
 ) (
     input logic clk_i,
     input logic rst_i,
 
-    input logic  [WIDTH-1:0] poly,
-    input logic  [WIDTH-1:0] lfsr_i,
     output logic [WIDTH-1:0] lfsr_o
 );
     logic [WIDTH-1:0] feedback;
@@ -26,17 +26,17 @@ module lfsr_rng #(
     always_ff @( posedge clk_i ) begin
         if (rst_i) begin
             feedback <= 0;
-            lfsr <= 0;
+            lfsr <= SEED;
             lfsr_o <= 0;
         end else begin
-            feedback <= lfsr_i & 'h1;
-            lfsr <= lfsr_i >> 1;
+            feedback <= lfsr & 'h1;
+            lfsr <= lfsr >> 1;
 
             if (feedback != 0) begin
-                lfsr_o <= lfsr ^ poly;
-            end else begin
-                lfsr_o <= lfsr;
+                lfsr <= lfsr ^ POLY;
             end
+            lfsr_o <= lfsr;
         end
     end
+
 endmodule

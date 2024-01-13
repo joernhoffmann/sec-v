@@ -18,7 +18,6 @@ module lfsr_rng_testbench();
     logic clk;
     logic rst;
 
-    logic [WIDTH-1:0] poly;
     logic [WIDTH-1:0] lfsr;
     logic [WIDTH-1:0] last_lfsr;
 
@@ -28,8 +27,6 @@ module lfsr_rng_testbench();
         .clk_i(clk),
         .rst_i(rst),
 
-        .poly_i(poly),
-        .lfsr_i(lfsr),
         .lfsr_o(lfsr)
     );
 
@@ -47,9 +44,6 @@ module lfsr_rng_testbench();
 
     task setup(msg="");
     begin
-        rst = 1;
-        #2
-        rst = 0;
     end
     endtask
 
@@ -62,15 +56,17 @@ module lfsr_rng_testbench();
     `TEST_SUITE("LFSR_RNG")
 
     `UNIT_TEST("Generate a number in one clock cycle")
-        poly = 'h911111FB;
+        rst = 1;
+        #4
+        rst = 0;
         last_lfsr = lfsr;
-        #2
+        #4
         `FAIL_IF_EQUAL(last_lfsr, lfsr);
     `UNIT_TEST_END
 
     `UNIT_TEST("Generate a different number the next clock cycle")
         last_lfsr = lfsr;
-        #2
+        #4
         `FAIL_IF_EQUAL(last_lfsr, lfsr);
     `UNIT_TEST_END
 
