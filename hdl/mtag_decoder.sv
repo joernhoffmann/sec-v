@@ -36,6 +36,7 @@ module mtag_decoder (
             case(funct3)
                 FUNCT3_MTAG_TADR:   op = MTAG_OP_TADR;
                 FUNCT3_MTAG_TADRE:  op = MTAG_OP_TADRE;
+                FUNCT3_MTAG_TADRR:  op = MTAG_OP_TADRR;
                 default:            err = 1'b1;
             endcase
         end

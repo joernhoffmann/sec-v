@@ -253,8 +253,10 @@ module secv #(
     mtag #(
         .ADR_WIDTH(DADR_WIDTH)
     ) mtag0 (
-        .fu_i      (funit_in_bus[FUNIT_MTAG]),
-        .fu_o      (funit_out_bus[FUNIT_MTAG]),
+        .fu_i       (funit_in_bus[FUNIT_MTAG]),
+        .fu_o       (funit_out_bus[FUNIT_MTAG]),
+
+        .rnd_i      (rnd),
 
         // Wishbone tag memory interface
         .tmem_cyc_o (tmem_cyc_o_bus[FUNIT_MTAG]),

@@ -31,6 +31,8 @@ module mtag #(
     input funit_in_t fu_i,
     output funit_out_t fu_o,
 
+    input logic [31:0] rnd_i;
+
     /* tag memory */
     output logic                    tmem_cyc_o,
     output logic                    tmem_stb_o,
@@ -50,6 +52,10 @@ module mtag #(
     // decode tag from rs2
     logic [TLEN-1 : 0] r_tag;
     assign r_tag = TLEN'(fu_i.src2);
+
+    // generate random tag from rnd_i
+    logic [TLEN-1 : 0] rnd_tag;
+    assign rnd_tag =  TLEN'(rnd_i) != 0 ? TLEN'(rnd_i) : 'b1;
 
     logic err;
 
@@ -73,12 +79,19 @@ module mtag #(
                     tmem_dat_o = r_tag;
                     tmem_sel_o = '1;
                     tmem_we_o  = 'b1;
+                    fu_o.res   = 'b0;
                 end
                 MTAG_OP_TADRE: begin
-                    /* set tag in tag memory */
                     tmem_dat_o = enc_tag;
                     tmem_sel_o = '1;
                     tmem_we_o  = 'b1;
+                    fu_o.res   = 'b0;
+                end
+                MTAG_OP_TADRR: begin
+                    tmem_dat_o = rnd_tag;
+                    tmem_sel_o = '1;
+                    tmem_we_o  = 'b1;
+                    fu_o.res   = rnd_tag;
                 end
                 default: begin
                     /* unknown opcode */

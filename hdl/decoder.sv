@@ -150,13 +150,13 @@ module decoder (
                 rd_sel      = RD_SEL_NONE;
             end
 
-            OPCODE_CUSTOM_0: begin
+            OPCODE_CUSTOM_0: begin                  // Memory Tagging
                 funit       = FUNIT_MTAG;
 
                 src1_sel    = SRC1_SEL_RS1;         // Address, possibly with encoded tag
                 src2_sel    = SRC2_SEL_RS2;         // Possibly tag
 
-                rd_sel      = RD_SEL_NONE;          // No destination
+                rd_sel      = RD_SEL_FUNIT;          // Possibly tag
             end
 
             OPCODE_OP, OPCODE_OP_32: begin
