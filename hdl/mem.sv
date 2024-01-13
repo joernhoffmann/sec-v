@@ -28,8 +28,11 @@ import secv_pkg::*;
 module mem #(
     parameter int XLEN = secv_pkg::XLEN,
     parameter int ADR_WIDTH = 8,
-    parameter int SEL_WIDTH = XLEN/8
-) (
+    parameter int SEL_WIDTH = XLEN/8,
+    parameter [ADR_WIDTH-1:0] ADR_FAULT_MASK = 'h80
+)
+
+(
     // Function unit interface
     input  funit_in_t  fu_i,
     output funit_out_t fu_o,
@@ -46,12 +49,15 @@ module mem #(
 );
 
     // Signals
-    logic [XLEN-1 : 0] dmem_dat;
-    logic load, err;
+    logic [ADR_WIDTH-1 : 0] dmem_adr;
+    logic [XLEN-1      : 0] dmem_dat;
+    logic load;
+    error_t err;
     mem_op_t op;
 
     // Mem access
     assign op = mem_op_t'(fu_i.op.mem);
+    assign dmem_adr = ADR_WIDTH'(fu_i.src1);
     always_comb begin : mem_access
         // Bus signals
         dmem_cyc_o = 1'b0;
@@ -64,12 +70,12 @@ module mem #(
         // Data signals
         dmem_dat = '0;
         load     = 1'b0;
-        err      = 1'b0;
+        err      = ERROR_NONE;
 
         if (fu_i.ena) begin
             dmem_cyc_o = 1'b1;
             dmem_stb_o = 1'b1;
-            dmem_adr_o = ADR_WIDTH'(fu_i.src1);
+            dmem_adr_o = dmem_adr;
 
             unique case(op)
                 // Loads
@@ -141,8 +147,18 @@ module mem #(
                 end
 
                 default:
-                    err = 1'b1;
+                    err = ERROR_OP_INVALID;
             endcase
+
+            // Access fault simulation (example for later MEMTAG, PMP implementation)
+            if ((dmem_adr & ADR_FAULT_MASK) == ADR_FAULT_MASK) begin
+                dmem_cyc_o = 0;
+                dmem_stb_o = 0;
+                dmem_dat_o = 0;
+                dmem_adr_o = 0;
+                dmem_we_o  = 0;
+                err = load ? ERROR_LOAD_ACCESS_FAULT : ERROR_STORE_ACCESS_FAULT;
+            end
         end
     end
 
@@ -152,12 +168,12 @@ module mem #(
 
         if (fu_i.ena) begin
                 // Control output
-                fu_o.rdy = err || dmem_ack_i;
+                fu_o.rdy = (err > 0) || dmem_ack_i;
                 fu_o.err = err;
 
                 // Result output
                 fu_o.res = dmem_dat;
-                fu_o.res_wb = load && !err;
+                fu_o.res_wb = load && err == ERROR_NONE;
         end
     end
 endmodule
