@@ -204,6 +204,14 @@ module secv #(
         .err_o      (brn_dec_err)
     );
 
+    // Random number generator
+
+    logic [31:0] rnd;
+    lfsr_rng lfsr_rng0 (
+        .clk_i(clk_i),
+        .rst_i(rst_i),
+        .lfsr_o(rnd)
+    );
 
     // --- Function units ------------------------------------------------------------------------------------------- //
     // Arithmetic-logic unit
