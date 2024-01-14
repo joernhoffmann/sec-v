@@ -312,17 +312,17 @@ package secv_pkg;
      */
     typedef enum bit [2:0] {
         // Operation
-        ECODE_OP_INVALID,
+        ECODE_OP_INVALID                = 0,
 
         // Data
-        ECODE_LOAD_ADDRESS_MISALIGNED,
-        ECODE_LOAD_ACCESS_FAULT,
-        ECODE_STORE_ADDRESS_MISALIGNED,
-        ECODE_STORE_ACCESS_FAULT,
+        ECODE_LOAD_ADDRESS_MISALIGNED   = 1,
+        ECODE_LOAD_ACCESS_FAULT         = 2,
+        ECODE_STORE_ADDRESS_MISALIGNED  = 3,
+        ECODE_STORE_ACCESS_FAULT        = 4,
 
         // Other
-        ECODE_MTAG_LOAD_INVLD,
-        ECODE_MTAG_STORE_INVLD
+        ECODE_MTAG_LOAD_INVLD           = 5,
+        ECODE_MTAG_STORE_INVLD          = 6
     } ecode_t;
 
     // --- Function unit operations --------------------------------------------------------------------------------- //

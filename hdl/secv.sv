@@ -210,6 +210,8 @@ module secv #(
     // Control and status register unit
     logic [XLEN-1:0] trap_adr, trap_vec;
     logic mret;
+    logic ex;
+    ex_cause_t ex_cause;
 
     csr csr0 (
         .clk_i          (clk_i),
@@ -258,10 +260,16 @@ module secv #(
             default: return EX_CAUSE_INST_MISALIGNED;
         endcase;
     endfunction
-    logic ex;
-    ex_cause_t ex_cause;
 
-    assign ex = pc_align_err | dec_err | alu_dec_err | brn_dec_err | mem_dec_err | funit_out.err;
+    assign ex = pc_align_err | dec_err |
+        funit == FUNIT_ALU && alu_dec_err |
+        funit == FUNIT_ALU && brn_dec_err |
+        funit == FUNIT_MEM && mem_dec_err |
+        funit_out.err;
+
+    logic funit_err;
+    assign funit_err = funit_out.err;
+
     always_comb begin : ex_cause_impl
         ex_cause = EX_CAUSE_INST_MISALIGNED;
 
@@ -271,7 +279,7 @@ module secv #(
         else if (dec_err || alu_dec_err || brn_dec_err || mem_dec_err)
             ex_cause = EX_CAUSE_INST_ILLEGAL;
 
-        else if (funit_out.err) begin
+        else if (funit_err) begin
             ex_cause = to_ex_cause(funit_out.ecode);
         end
     end

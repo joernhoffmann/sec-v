@@ -29,7 +29,7 @@ module mem #(
     parameter int XLEN = secv_pkg::XLEN,
     parameter int ADR_WIDTH = 8,
     parameter int SEL_WIDTH = XLEN/8,
-    parameter logic [ADR_WIDTH-1:0] ADR_FAULT_MASK = 'h80
+    parameter logic [ADR_WIDTH-1:0] ADR_FAULT_MASK = 0
 )
 
 (
@@ -153,14 +153,14 @@ module mem #(
             endcase
 
             // Access fault simulation (example for later MEMTAG, PMP implementation)
-            if ((dmem_adr & ADR_FAULT_MASK) == ADR_FAULT_MASK) begin
+            if ((dmem_adr & ADR_FAULT_MASK) != 0) begin
                 dmem_cyc_o = 0;
                 dmem_stb_o = 0;
                 dmem_dat_o = 0;
                 dmem_adr_o = 0;
                 dmem_we_o  = 0;
                 err = 1'b1;
-                ecode = load ? ECODE_LOAD_ACCESS_FAULT : ECODE_STORE_ACCESS_FAULT;
+                ecode = ecode_t'(load ? ECODE_LOAD_ACCESS_FAULT : ECODE_STORE_ACCESS_FAULT);
             end
         end
     end
