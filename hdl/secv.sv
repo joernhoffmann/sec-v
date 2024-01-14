@@ -149,9 +149,10 @@ module secv #(
         endcase
     end
 
-    // MEM decoder
+    // MEM funit decoder
     mem_op_t mem_op;
     logic mem_dec_err;
+
     mem_decoder mem_dec0 (
         .inst_i     (inst),
         .op_o       (mem_op),
@@ -209,8 +210,6 @@ module secv #(
     // Control and status register unit
     logic [XLEN-1:0] trap_adr, trap_vec;
     logic mret;
-    logic ex;
-    ex_cause_t ex_cause;
 
     csr csr0 (
         .clk_i          (clk_i),
@@ -249,20 +248,33 @@ module secv #(
     assign funit_out = funit_out_bus[funit];
 
     // --- Exception handling --------------------------------------------------------------------------------------- //
-    assign ex = pc_align_err |
-                dec_err | mem_dec_err | alu_dec_err | brn_dec_err;
+    function automatic ex_cause_t to_ex_cause(ecode_t ecode);
+        case (ecode)
+            ECODE_OP_INVALID                : return EX_CAUSE_INST_ILLEGAL;
+            ECODE_LOAD_ACCESS_FAULT         : return EX_CAUSE_LOAD_ACCESS_FAULT;
+            ECODE_LOAD_ADDRESS_MISALIGNED   : return EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
+            ECODE_STORE_ACCESS_FAULT        : return EX_CAUSE_STORE_ACCESS_FAULT;
+            ECODE_STORE_ADDRESS_MISALIGNED  : return EX_CAUSE_STORE_ADDRESS_MISALIGNED;
+            default: return EX_CAUSE_INST_MISALIGNED;
+        endcase;
+    endfunction
+    logic ex;
+    ex_cause_t ex_cause;
 
+    assign ex = pc_align_err | dec_err | alu_dec_err | brn_dec_err | mem_dec_err | funit_out.err;
     always_comb begin : ex_cause_impl
-        ex_cause = EX_CAUSE_NONE;
+        ex_cause = EX_CAUSE_INST_MISALIGNED;
 
         if (pc_align_err)
             ex_cause = EX_CAUSE_INST_MISALIGNED;
 
-        else if (dec_err || mem_dec_err || alu_dec_err || brn_dec_err)
+        else if (dec_err || alu_dec_err || brn_dec_err || mem_dec_err)
             ex_cause = EX_CAUSE_INST_ILLEGAL;
+
+        else if (funit_out.err) begin
+            ex_cause = to_ex_cause(funit_out.ecode);
+        end
     end
-
-
 
     // --- MUXer ---------------------------------------------------------------------------------------------------- //
     // Source 1 selection

@@ -306,26 +306,24 @@ package secv_pkg;
     } funit_t;
 
     /*
-     * Error codes (not yet used)
+     * Error codes
      * Considerations:
-     *      [x] Define codes only for FUNIT, not other cases (op instead of inst)
      *      [ ] Separate memory computation from access / operation etc.
-     *      [ ] Use bitvectors?
      */
     typedef enum bit [2:0] {
         // Operation
-        ERROR_OP_INVALID,
+        ECODE_OP_INVALID,
 
         // Data
-        ERROR_LOAD_ADDRESS_MISALIGNED,
-        ERROR_LOAD_ACCESS_FAULT,
-        ERROR_STORE_ADDRESS_MISALIGNED,
-        ERROR_STORE_ACCESS_FAULT,
+        ECODE_LOAD_ADDRESS_MISALIGNED,
+        ECODE_LOAD_ACCESS_FAULT,
+        ECODE_STORE_ADDRESS_MISALIGNED,
+        ECODE_STORE_ACCESS_FAULT,
 
         // Other
-        ERROR_MTAG_LOAD_INVLD,
-        ERROR_MTAG_STORE_INVLD
-    } error_t;
+        ECODE_MTAG_LOAD_INVLD,
+        ECODE_MTAG_STORE_INVLD
+    } ecode_t;
 
     // --- Function unit operations --------------------------------------------------------------------------------- //
     // ALU
@@ -397,9 +395,10 @@ package secv_pkg;
     typedef struct packed {
         // Control
         logic               rdy;        // Unit ready, operation completed
-        logic               err;        // Error occured
         logic               res_wb;     // Result is valid, write-back to register
-        logic               reserved;
+        logic[1:0]          reserved;
+        logic               err;        // Error occured
+        ecode_t             ecode;      // Error code
 
         // Payload
         logic   [XLEN-1:0]  res;        // Result
@@ -419,9 +418,10 @@ package secv_pkg;
     function automatic funit_out_t funit_out_default();
         funit_out_t fu;
         fu.rdy      = 1'b0;
-        fu.err      = 1'b0;
         fu.res_wb   = 1'b0;
-        fu.reserved = 1'b0;
+        fu.reserved = 2'b0;
+        fu.err      = 1'b0;
+        fu.ecode    = ECODE_OP_INVALID;
         fu.res      =   '0;
         return fu;
     endfunction

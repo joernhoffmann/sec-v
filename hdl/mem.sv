@@ -29,7 +29,7 @@ module mem #(
     parameter int XLEN = secv_pkg::XLEN,
     parameter int ADR_WIDTH = 8,
     parameter int SEL_WIDTH = XLEN/8,
-    parameter [ADR_WIDTH-1:0] ADR_FAULT_MASK = 'h80
+    parameter logic [ADR_WIDTH-1:0] ADR_FAULT_MASK = 'h80
 )
 
 (
@@ -53,6 +53,7 @@ module mem #(
     logic [XLEN-1      : 0] dmem_dat;
     logic load;
     logic err;
+    ecode_t ecode;
     mem_op_t op;
 
     // Mem access
@@ -71,6 +72,7 @@ module mem #(
         dmem_dat = '0;
         load     = 1'b0;
         err      = 1'b0;
+        ecode    = ECODE_OP_INVALID;
 
         if (fu_i.ena) begin
             dmem_cyc_o = 1'b1;
@@ -158,6 +160,7 @@ module mem #(
                 dmem_adr_o = 0;
                 dmem_we_o  = 0;
                 err = 1'b1;
+                ecode = load ? ECODE_LOAD_ACCESS_FAULT : ECODE_STORE_ACCESS_FAULT;
             end
         end
     end
@@ -169,7 +172,10 @@ module mem #(
         if (fu_i.ena) begin
                 // Control output
                 fu_o.rdy = err || dmem_ack_i;
+
+                // Error output
                 fu_o.err = err;
+                fu_o.ecode = ecode;
 
                 // Result output
                 fu_o.res = dmem_dat;
