@@ -373,7 +373,7 @@ package secv_pkg;
 
         MTAG_OP_TADR,   // 1
         MTAG_OP_TADRE,  // 2
-        MTAG_OP_TADRR,  // 3
+        MTAG_OP_TADRR   // 3
     } mtag_op_t;
 
     // Funit operation (input)

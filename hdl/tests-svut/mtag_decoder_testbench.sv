@@ -69,12 +69,30 @@ module mtag_decoder_testbench();
     // -------------------------------------------------------------------------------------------------------------- //
     // --- OPs ---
     // -------------------------------------------------------------------------------------------------------------- //
-    `UNIT_TEST("decode CUSTOM_0")
+    `UNIT_TEST("decode CUSTOM_0 TADR")
         r_inst.opcode = OPCODE_CUSTOM_0;
         r_inst.funct3 = FUNCT3_MTAG_TADR;
         inst_i = r_inst;
         #1
         `FAIL_IF_NOT_EQUAL(op_o, MTAG_OP_TADR);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("decode CUSTOM_0 TADRE")
+        r_inst.opcode = OPCODE_CUSTOM_0;
+        r_inst.funct3 = FUNCT3_MTAG_TADRE;
+        inst_i = r_inst;
+        #1
+        `FAIL_IF_NOT_EQUAL(op_o, MTAG_OP_TADRE);
+        `FAIL_IF(err_o);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("decode CUSTOM_0 TADRR")
+        r_inst.opcode = OPCODE_CUSTOM_0;
+        r_inst.funct3 = FUNCT3_MTAG_TADRR;
+        inst_i = r_inst;
+        #1
+        `FAIL_IF_NOT_EQUAL(op_o, MTAG_OP_TADRR);
         `FAIL_IF(err_o);
     `UNIT_TEST_END
 
