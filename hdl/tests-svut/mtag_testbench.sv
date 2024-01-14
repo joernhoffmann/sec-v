@@ -42,15 +42,18 @@ module mtag_testbench();
     funit_in_t  fu_i;
     funit_out_t fu_o;
 
+    logic [31:0] rnd;
+
     mtag #(
         .TLEN(TLEN),
         .GRANULARITY(GRANULARITY),
         .ADR_WIDTH(MADR_WIDTH),
         .TADR_WIDTH(TADR_WIDTH)
     ) dut (
-        .fu_i      (fu_i),
-        .fu_o      (fu_o),
+        .fu_i       (fu_i),
+        .fu_o       (fu_o),
 
+        .rnd_i      (rnd),
         // Wishbone tag memory interface
         .tmem_cyc_o (tmem_cyc_o),
         .tmem_stb_o (tmem_stb_o),
@@ -93,6 +96,7 @@ module mtag_testbench();
     task setup(msg="");
     begin
         rst = 0;
+        rnd = 0;
     end
     endtask
 
@@ -121,7 +125,6 @@ module mtag_testbench();
         `FAIL_IF_NOT_EQUAL(tmem_we_o, 0);
     `UNIT_TEST_END
 
-    /*** MEMORY ***/
     /** TADRE **/
     `UNIT_TEST("Expose correct tag and tag memory address on MTAG_OP_TADRE")
         fu_i.ena = 1'b1;
@@ -164,7 +167,7 @@ module mtag_testbench();
         `FAIL_IF_NOT_EQUAL(tmem_cyc_o, 1);
         `FAIL_IF_NOT_EQUAL(tmem_stb_o, 1);
         `FAIL_IF_NOT_EQUAL(tmem_sel_o, '1);
-        `FAIL_IF_NOT_EQUAL(tmem_dat_o,42161);
+        `FAIL_IF_NOT_EQUAL(tmem_dat_o, 42161);
         // Tag address = address / GRANULARITY | 229 / 8 = 28
         `FAIL_IF_NOT_EQUAL(tmem_adr_o, 28);
     `UNIT_TEST_END
@@ -180,5 +183,34 @@ module mtag_testbench();
         `FAIL_IF_NOT_EQUAL(tmem_dat_i, 42161);
     `UNIT_TEST_END
 
+    /** TADRR **/
+    `UNIT_TEST("Expose correct tag and tag memory address on MTAG_OP_TADRR")
+        fu_i.ena = 1'b1;
+        fu_i.op = MTAG_OP_TADRR;
+        fu_i.src1 = 'hE7; // Address: 0xE7 = 231
+        fu_i.src2 = 0; // ignored
+        rnd = 'h1ABF; // Tag: 0x1ABF = 6847
+        #1
+        `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
+        `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
+        `FAIL_IF_NOT_EQUAL(tmem_we_o, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_cyc_o, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_stb_o, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_sel_o, '1);
+        `FAIL_IF_NOT_EQUAL(tmem_dat_o, 6847);
+        // Tag address = address / GRANULARITY | 231 / 8 = 28
+        `FAIL_IF_NOT_EQUAL(tmem_adr_o, 28);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("Write successfully to tag memory on MTAG_OP_TADRR")
+        tmem_adr_i = tmem_adr_o;
+        tmem_cyc_i = tmem_cyc_o;
+        tmem_stb_i = tmem_stb_o;
+        tmem_sel_i = tmem_sel_o;
+        #2
+        fu_i.ena = 1'b0;
+        #2
+        `FAIL_IF_NOT_EQUAL(tmem_dat_i, 6847);
+    `UNIT_TEST_END
     `TEST_SUITE_END
 endmodule

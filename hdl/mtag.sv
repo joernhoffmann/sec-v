@@ -31,7 +31,7 @@ module mtag #(
     input funit_in_t fu_i,
     output funit_out_t fu_o,
 
-    input logic [31:0] rnd_i;
+    input logic [31:0] rnd_i,
 
     /* tag memory */
     output logic                    tmem_cyc_o,
