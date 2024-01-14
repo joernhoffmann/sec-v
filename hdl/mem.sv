@@ -52,7 +52,7 @@ module mem #(
     logic [ADR_WIDTH-1 : 0] dmem_adr;
     logic [XLEN-1      : 0] dmem_dat;
     logic load;
-    error_t err;
+    logic err;
     mem_op_t op;
 
     // Mem access
@@ -70,7 +70,7 @@ module mem #(
         // Data signals
         dmem_dat = '0;
         load     = 1'b0;
-        err      = ERROR_NONE;
+        err      = 1'b0;
 
         if (fu_i.ena) begin
             dmem_cyc_o = 1'b1;
@@ -147,7 +147,7 @@ module mem #(
                 end
 
                 default:
-                    err = ERROR_OP_INVALID;
+                    err = 1'b1;
             endcase
 
             // Access fault simulation (example for later MEMTAG, PMP implementation)
@@ -157,7 +157,7 @@ module mem #(
                 dmem_dat_o = 0;
                 dmem_adr_o = 0;
                 dmem_we_o  = 0;
-                err = load ? ERROR_LOAD_ACCESS_FAULT : ERROR_STORE_ACCESS_FAULT;
+                err = 1'b1;
             end
         end
     end
@@ -168,12 +168,12 @@ module mem #(
 
         if (fu_i.ena) begin
                 // Control output
-                fu_o.rdy = (err > 0) || dmem_ack_i;
+                fu_o.rdy = err || dmem_ack_i;
                 fu_o.err = err;
 
                 // Result output
                 fu_o.res = dmem_dat;
-                fu_o.res_wb = load && err == ERROR_NONE;
+                fu_o.res_wb = load && !err;
         end
     end
 endmodule

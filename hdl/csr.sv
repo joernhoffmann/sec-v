@@ -143,7 +143,7 @@ module csr #(
                 end
 
                 default:
-                    fu_o.err = ERROR_OP_INVALID;
+                    fu_o.err = 1'b1;
             endcase
         end
     end

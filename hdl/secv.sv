@@ -426,7 +426,7 @@ module secv #(
                 // Enable destination register update
                 unique case (rd_sel)
                     RD_SEL_NONE  : rd_wb = 1'b0;
-                    RD_SEL_FUNIT : rd_wb = (funit_out.err == ERROR_NONE);
+                    RD_SEL_FUNIT : rd_wb = !funit_out.err;
                     RD_SEL_IMM   : rd_wb = 1'b1;
                     RD_SEL_NXTPC : rd_wb = 1'b1;
                     default      : rd_wb = 1'b0;
@@ -434,7 +434,7 @@ module secv #(
 
                 // Check pc update from funit
                 if (pc_sel == PC_SEL_FUNIT)
-                    pc_next = (funit_out.err == ERROR_NONE) ? wbstage_pc : pc_inc;
+                    pc_next = funit_out.err ? pc_inc : wbstage_pc;
             end
 
             default:

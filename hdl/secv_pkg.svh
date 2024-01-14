@@ -313,8 +313,6 @@ package secv_pkg;
      *      [ ] Use bitvectors?
      */
     typedef enum bit [2:0] {
-        ERROR_NONE = 0,
-
         // Operation
         ERROR_OP_INVALID,
 
@@ -399,7 +397,7 @@ package secv_pkg;
     typedef struct packed {
         // Control
         logic               rdy;        // Unit ready, operation completed
-        error_t             err;        // Error occured
+        logic               err;        // Error occured
         logic               res_wb;     // Result is valid, write-back to register
         logic               reserved;
 
@@ -421,7 +419,7 @@ package secv_pkg;
     function automatic funit_out_t funit_out_default();
         funit_out_t fu;
         fu.rdy      = 1'b0;
-        fu.err      = ERROR_NONE;
+        fu.err      = 1'b0;
         fu.res_wb   = 1'b0;
         fu.reserved = 1'b0;
         fu.res      =   '0;

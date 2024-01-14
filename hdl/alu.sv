@@ -49,7 +49,7 @@ module alu #(
         // Unit is ready as soon as enabled.
         if (fu_i.ena) begin
             fu_o.rdy    = 1'b1;
-            fu_o.err    = err ? ERROR_OP_INVALID : ERROR_NONE;
+            fu_o.err    = err;
             fu_o.res    = res;
             fu_o.res_wb = !err;
         end
