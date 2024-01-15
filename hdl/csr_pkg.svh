@@ -241,8 +241,6 @@ package csr_pkg;
      * Exception causes (0-prefix in mcause)
      */
     typedef enum logic [5:0] {
-        EX_CAUSE_NONE                       = -1,
-
         EX_CAUSE_INST_MISALIGNED            = 0,    // Instruction address misaligned
         EX_CAUSE_INST_ACCESS_FAULT          = 1,    // Instruction access fault
         EX_CAUSE_INST_ILLEGAL               = 2,    // Illegal instruction

@@ -311,12 +311,25 @@ package secv_pkg;
         FUNIT_COUNT
     } funit_t;
 
-    // Error codes (not yet used)
-    typedef enum {
-        FUNIT_ERROR_NONE = 0,
-        FUNIT_ERROR_INVALID_OPCODE,
-        FUNIT_ERROR_NOT_IMPLEMENTED
-    } funit_error_t;
+    /*
+     * Error codes
+     * Considerations:
+     *      [ ] Separate memory computation from access / operation etc.
+     */
+    typedef enum bit [2:0] {
+        // Operation
+        ECODE_OP_INVALID                = 0,
+
+        // Data
+        ECODE_LOAD_ADDRESS_MISALIGNED   = 1,
+        ECODE_LOAD_ACCESS_FAULT         = 2,
+        ECODE_STORE_ADDRESS_MISALIGNED  = 3,
+        ECODE_STORE_ACCESS_FAULT        = 4,
+
+        // Other
+        ECODE_MTAG_LOAD_INVLD           = 5,
+        ECODE_MTAG_STORE_INVLD          = 6
+    } ecode_t;
 
     // --- Function unit operations --------------------------------------------------------------------------------- //
     // ALU
@@ -398,9 +411,10 @@ package secv_pkg;
     typedef struct packed {
         // Control
         logic               rdy;        // Unit ready, operation completed
-        logic               err;        // Error occured
         logic               res_wb;     // Result is valid, write-back to register
-        logic               reserved;
+        logic[1:0]          reserved;
+        logic               err;        // Error occured
+        ecode_t             ecode;      // Error code
 
         // Payload
         logic   [XLEN-1:0]  res;        // Result
@@ -420,9 +434,10 @@ package secv_pkg;
     function automatic funit_out_t funit_out_default();
         funit_out_t fu;
         fu.rdy      = 1'b0;
-        fu.err      = 1'b0;
         fu.res_wb   = 1'b0;
-        fu.reserved = 1'b0;
+        fu.reserved = 2'b0;
+        fu.err      = 1'b0;
+        fu.ecode    = ECODE_OP_INVALID;
         fu.res      =   '0;
         return fu;
     endfunction

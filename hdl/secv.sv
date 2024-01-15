@@ -163,9 +163,10 @@ module secv #(
         endcase
     end
 
-    // MEM decoder
+    // MEM funit decoder
     mem_op_t mem_op;
     logic mem_dec_err;
+
     mem_decoder mem_dec0 (
         .inst_i     (inst),
         .op_o       (mem_op),
@@ -323,12 +324,28 @@ module secv #(
     assign tmem_adr_o = tmem_adr_o_bus[funit];
 
     // --- Exception handling --------------------------------------------------------------------------------------- //
-    assign ex = pc_align_err |
-                dec_err | mem_dec_err | alu_dec_err | brn_dec_err | mtag_dec_err |
-                tag_mismatch;
+    function automatic ex_cause_t to_ex_cause(ecode_t ecode);
+        case (ecode)
+            ECODE_OP_INVALID                : return EX_CAUSE_INST_ILLEGAL;
+            ECODE_LOAD_ACCESS_FAULT         : return EX_CAUSE_LOAD_ACCESS_FAULT;
+            ECODE_LOAD_ADDRESS_MISALIGNED   : return EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
+            ECODE_STORE_ACCESS_FAULT        : return EX_CAUSE_STORE_ACCESS_FAULT;
+            ECODE_STORE_ADDRESS_MISALIGNED  : return EX_CAUSE_STORE_ADDRESS_MISALIGNED;
+            default: return EX_CAUSE_INST_MISALIGNED;
+        endcase;
+    endfunction
+
+    assign ex = pc_align_err | dec_err |
+        funit == FUNIT_ALU && alu_dec_err |
+        funit == FUNIT_ALU && brn_dec_err |
+        funit == FUNIT_MEM && mem_dec_err |
+        funit_out.err;
+
+    logic funit_err;
+    assign funit_err = funit_out.err;
 
     always_comb begin : ex_cause_impl
-        ex_cause = EX_CAUSE_NONE;
+        ex_cause = EX_CAUSE_INST_MISALIGNED;
 
         if (pc_align_err)
             ex_cause = EX_CAUSE_INST_MISALIGNED;
@@ -336,11 +353,10 @@ module secv #(
         else if (dec_err || mem_dec_err || alu_dec_err || brn_dec_err || mtag_dec_err)
             ex_cause = EX_CAUSE_INST_ILLEGAL;
 
-        else if (tag_mismatch)
-            ex_cause = EX_CAUSE_MTAG_INVLD;
+        else if (funit_err) begin
+            ex_cause = to_ex_cause(funit_out.ecode);
+        end
     end
-
-
 
     // --- MUXer ---------------------------------------------------------------------------------------------------- //
     // Source 1 selection

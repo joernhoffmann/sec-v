@@ -29,7 +29,7 @@ module mem #(
     parameter int XLEN = secv_pkg::XLEN,
     parameter int ADR_WIDTH = 8,
     parameter int SEL_WIDTH = XLEN/8,
-
+    parameter logic [ADR_WIDTH-1:0] ADR_FAULT_MASK = 0
     parameter int TLEN = 16,
     parameter int TADR_WIDTH = 16,
     parameter int TSEL_WIDTH = TLEN/8
@@ -60,8 +60,11 @@ module mem #(
 );
 
     // Signals
-    logic [XLEN-1 : 0] dmem_dat;
-    logic load, err;
+    logic [ADR_WIDTH-1 : 0] dmem_adr;
+    logic [XLEN-1      : 0] dmem_dat;
+    logic load;
+    logic err;
+    ecode_t ecode;
     mem_op_t op;
 
     logic tag_err;
@@ -83,6 +86,7 @@ module mem #(
 
     // Mem access
     assign op = mem_op_t'(fu_i.op.mem);
+    assign dmem_adr = ADR_WIDTH'(fu_i.src1);
     always_comb begin : mem_access
         // Bus signals
         dmem_cyc_o = 1'b0;
@@ -96,11 +100,12 @@ module mem #(
         dmem_dat = '0;
         load     = 1'b0;
         err      = 1'b0;
+        ecode    = ECODE_OP_INVALID;
 
         if (fu_i.ena) begin
             dmem_cyc_o = 1'b1;
             dmem_stb_o = 1'b1;
-            dmem_adr_o = ADR_WIDTH'(fu_i.src1);
+            dmem_adr_o = dmem_adr;
 
             unique case(op)
                 // Loads
@@ -174,6 +179,17 @@ module mem #(
                 default:
                     err = 1'b1;
             endcase
+
+            // Access fault simulation (example for later MEMTAG, PMP implementation)
+            if ((dmem_adr & ADR_FAULT_MASK) != 0) begin
+                dmem_cyc_o = 0;
+                dmem_stb_o = 0;
+                dmem_dat_o = 0;
+                dmem_adr_o = 0;
+                dmem_we_o  = 0;
+                err = 1'b1;
+                ecode = ecode_t'(load ? ECODE_LOAD_ACCESS_FAULT : ECODE_STORE_ACCESS_FAULT);
+            end
         end
     end
 
@@ -185,6 +201,9 @@ module mem #(
             // Control output
             fu_o.rdy = err || dmem_ack_i || tag_err;
             fu_o.err = err || tag_err;
+            // Error output
+            fu_o.err = err;
+            fu_o.ecode = ecode;
 
             // Result output
             fu_o.res = dmem_dat;

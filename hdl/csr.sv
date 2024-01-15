@@ -142,9 +142,8 @@ module csr #(
                     csr_we    = 1'b1 & !rs1_zero_i;
                 end
 
-                default: begin
+                default:
                     fu_o.err = 1'b1;
-                end
             endcase
         end
     end
