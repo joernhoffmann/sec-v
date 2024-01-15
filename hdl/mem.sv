@@ -29,7 +29,7 @@ module mem #(
     parameter int XLEN = secv_pkg::XLEN,
     parameter int ADR_WIDTH = 8,
     parameter int SEL_WIDTH = XLEN/8,
-    parameter logic [ADR_WIDTH-1:0] ADR_FAULT_MASK = 0
+    parameter logic [ADR_WIDTH-1:0] ADR_FAULT_MASK = 0,
     parameter int TLEN = 16,
     parameter int TADR_WIDTH = 16,
     parameter int TSEL_WIDTH = TLEN/8
@@ -181,14 +181,18 @@ module mem #(
             endcase
 
             // Access fault simulation (example for later MEMTAG, PMP implementation)
-            if ((dmem_adr & ADR_FAULT_MASK) != 0) begin
+            if (((dmem_adr & ADR_FAULT_MASK) != 0) || tag_err) begin
                 dmem_cyc_o = 0;
                 dmem_stb_o = 0;
                 dmem_dat_o = 0;
                 dmem_adr_o = 0;
                 dmem_we_o  = 0;
                 err = 1'b1;
-                ecode = ecode_t'(load ? ECODE_LOAD_ACCESS_FAULT : ECODE_STORE_ACCESS_FAULT);
+                if (tag_err) begin
+                    ecode = ecode_t'(load ? ECODE_MTAG_LOAD_INVLD : ECODE_MTAG_STORE_INVLD);
+                end else begin
+                    ecode = ecode_t'(load ? ECODE_LOAD_ACCESS_FAULT : ECODE_STORE_ACCESS_FAULT);
+                end
             end
         end
     end
@@ -199,8 +203,8 @@ module mem #(
 
         if (fu_i.ena) begin
             // Control output
-            fu_o.rdy = err || dmem_ack_i || tag_err;
-            fu_o.err = err || tag_err;
+            fu_o.rdy = err || dmem_ack_i;
+
             // Error output
             fu_o.err = err;
             fu_o.ecode = ecode;

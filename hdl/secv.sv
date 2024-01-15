@@ -221,7 +221,6 @@ module secv #(
         .fu_o (funit_out_bus[FUNIT_ALU])
     );
 
-    logic tag_mismatch;
     // Data memory inteface unit
     mem  #(
         .ADR_WIDTH(DADR_WIDTH)
@@ -229,8 +228,6 @@ module secv #(
         // Control
         .fu_i (funit_in_bus[FUNIT_MEM]),
         .fu_o (funit_out_bus[FUNIT_MEM]),
-
-        .tag_err_o(tag_mismatch),
 
         // Wishbone data memory interface
         .dmem_cyc_o (dmem_cyc_o),
@@ -331,6 +328,8 @@ module secv #(
             ECODE_LOAD_ADDRESS_MISALIGNED   : return EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
             ECODE_STORE_ACCESS_FAULT        : return EX_CAUSE_STORE_ACCESS_FAULT;
             ECODE_STORE_ADDRESS_MISALIGNED  : return EX_CAUSE_STORE_ADDRESS_MISALIGNED;
+            ECODE_MTAG_LOAD_INVLD || ECODE_MTAG_STORE_INVLD
+                : return EX_CAUSE_MTAG_INVLD;
             default: return EX_CAUSE_INST_MISALIGNED;
         endcase;
     endfunction
