@@ -6,6 +6,7 @@
 `include "alu.sv"
 `include "branch.sv"
 `include "decoder.sv"
+`include "lfsr_rng.sv"
 `include "mem.sv"
 `include "mem_decoder.sv"
 `include "mtag.sv"
