@@ -17,6 +17,7 @@
 import secv_pkg::*;
 
 module mtag #(
+    parameter int HARTS = 1,
     /* size of tags in bit */
     parameter int TLEN = 16,
     /* size of granules in byte */
@@ -54,8 +55,11 @@ module mtag #(
     assign r_tag = TLEN'(fu_i.src2);
 
     // generate random tag from rnd_i
+    logic [TLEN-1-HARTS : 0] rnd_tag_head;
+    assign rnd_tag_head = (TLEN-HARTS)'((rnd_i) != 0 ? (TLEN-HARTS)'(rnd_i) : 'b1);
+
     logic [TLEN-1 : 0] rnd_tag;
-    assign rnd_tag =  TLEN'(rnd_i) != 0 ? TLEN'(rnd_i) : 'b1;
+    assign rnd_tag = {rnd_tag_head, HARTS'(fu_i.src2)};
 
     logic err;
 
