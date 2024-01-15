@@ -38,8 +38,6 @@ module mem #(
     input  funit_in_t  fu_i,
     output funit_out_t fu_o,
 
-    output tag_err_o,
-
     // Wishbone data memory interface
     output logic                    dmem_cyc_o,
     output logic                    dmem_stb_o,
@@ -68,7 +66,6 @@ module mem #(
     mem_op_t op;
 
     logic tag_err;
-    assign tag_err_o = tag_err;
 
     // Tag checking
     mtag_chk mtag_chk0 (
