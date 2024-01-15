@@ -14,6 +14,7 @@
 import secv_pkg::*;
 
 module mtag_chk #(
+    parameter int HARTS = 1,
     /* size of tags in bit */
     parameter int TLEN = 16,
     /* size of granules in byte */
@@ -27,6 +28,7 @@ module mtag_chk #(
 ) (
     input  logic                   ena_i,
 
+    input  logic [HARTS_WIDTH-1:0] hart_id,
     input  logic [XLEN-1 : 0]      adr_i,
     output logic                   err_o,
 
@@ -38,6 +40,7 @@ module mtag_chk #(
     input  logic [TLEN-1 : 0]       tmem_dat_i,
     input  logic                    tmem_ack_i
 );
+    localparam int HARTS_WIDTH = (HARTS > 1) ? $clog2(HARTS) : 1;
 
     logic [ADR_WIDTH-1 : 0] mem_adr;
     assign mem_adr = ADR_WIDTH'(adr_i);
@@ -61,8 +64,12 @@ module mtag_chk #(
             tmem_stb_o = 1'b1;
             tmem_adr_o = TADR_WIDTH'(mem_adr / GRANULARITY);
             tmem_sel_o = '1;
+            /* check for correct hart */
+            if (tmem_ack_i && HARTS'(tmem_dat_i)[hart_id] != 1'b1) begin
+                err = 1'b1;
+            end
             /* compare tag with tag memory */
-            if (tmem_ack_i && tmem_dat_i != tag) begin
+            else if (tmem_ack_i && tmem_dat_i[TLEN-1:HARTS] != tag) begin
                 err = 1'b1;
             end
         end

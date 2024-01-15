@@ -154,7 +154,7 @@ module decoder (
                 funit       = FUNIT_MTAG;
 
                 src1_sel    = SRC1_SEL_RS1;         // Address, possibly with encoded tag
-                src2_sel    = SRC2_SEL_RS2;         // Possibly tag
+                src2_sel    = SRC2_SEL_RS2;         // Possibly tag or hart bit mask
 
                 rd_sel      = RD_SEL_FUNIT;          // Possibly tag
             end
