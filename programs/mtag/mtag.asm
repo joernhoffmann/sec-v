@@ -2,6 +2,7 @@
 .global main
 
 main:
+    ## TADRE
     # address
     addi    x1, x0, 0xbe    # x1 = 0xbe
     # build tag
@@ -21,24 +22,42 @@ main:
     # successful memory store operation with tag
     sd      x2, 0(x1)       # M[0xbe] = 0xff01 0000 0000 0000
 
-
+    ## TADR
     # address
     addi    x5, x0, 0xfc    # x5 = 0xfc
     # tag
-    addi	x6, x0, 0x4bc	# x6 = 0x4bc
+    addi    x6, x0, 0x4bc   # x6 = 0x4bc
     # custom instruction: tadr
     # tadr x0, x5, x6
     #           opcode6     func3   func7   rd  rs1 rs2
     .insn   r   CUSTOM_0,   0,      0,      x0, x5, x6
     # T[31] = 0x4bc
 
-	# encode tag in address
-	slli	x6, x6, 48		# x6 = 0x04bc 0000 0000 0000
-	or 		x5, x5, x6		# x5 = 0x04bc 0000 0000 00fc
+    # encode tag in address
+    slli    x6, x6, 48      # x6 = 0x04bc 0000 0000 0000
+    or      x5, x5, x6      # x5 = 0x04bc 0000 0000 00fc
     # successful memory store operation with tag
     sd      x2, 0(x5)       # M[0xfc] = 0xff01 0000 0000 0000
 
 
+    # address
+    addi    x28, x0, 0xab  # x28 = 0xab
+    # tag is going to be randomly generated
+
+    # custom instruction: tadr
+    # tadrr x29, x28, x0
+    #           opcode6     func3   func7   rd   rs1  rs2
+    .insn   r   CUSTOM_0,   2,      0,      x29, x28, x0
+    # T[21] = randomly generated tag, same as x29
+
+    # encode tag in address
+    slli    x29, x29, 48    # x29 = 0xRRRR 0000 0000 0000
+    or      x28, x28, x29   # x29 = 0xRRRR 0000 0000 00fc
+    # successful memory store operation with tag
+    sd      x2, 0(x29)      # M[0xfc] = 0xff01 0000 0000 0000
+
+
+    ## TAG MISMATCH
     # address
     addi    x3, x0, 0xaa    # x3 = 0xaa
     # build tag
