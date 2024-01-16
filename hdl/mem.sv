@@ -26,6 +26,7 @@
 import secv_pkg::*;
 
 module mem #(
+    parameter int HARTS = 1,
     parameter int XLEN = secv_pkg::XLEN,
     parameter int ADR_WIDTH = 8,
     parameter int SEL_WIDTH = XLEN/8,
@@ -37,6 +38,8 @@ module mem #(
     // Function unit interface
     input  funit_in_t  fu_i,
     output funit_out_t fu_o,
+
+    input logic [HARTS_WIDTH -1 : 0] hart_id,
 
     // Wishbone data memory interface
     output logic                    dmem_cyc_o,
@@ -56,6 +59,7 @@ module mem #(
     input  logic [TLEN-1       : 0] tmem_dat_i,
     input  logic                    tmem_ack_i
 );
+    localparam int HARTS_WIDTH = (HARTS > 1) ? $clog2(HARTS) : 1;
 
     // Signals
     logic [ADR_WIDTH-1 : 0] dmem_adr;
@@ -68,10 +72,13 @@ module mem #(
     logic tag_err;
 
     // Tag checking
-    mtag_chk mtag_chk0 (
+    mtag_chk #(
+        .HARTS(HARTS),
+    ) mtag_chk0 (
         .ena_i      (fu_i.ena),
         .adr_i      (fu_i.src1),
         .err_o      (tag_err),
+        .hart_id    (hart_id),
 
         .tmem_cyc_o (tmem_cyc_o),
         .tmem_stb_o (tmem_stb_o),

@@ -38,6 +38,7 @@ import secv_pkg::*;
 import csr_pkg::*;
 
 module secv #(
+    parameter int HARTS      = 1,
     parameter int TLEN       = 16,       // Tag size
 
     parameter int IADR_WIDTH = 8,        // Instruction memory address width
@@ -223,11 +224,14 @@ module secv #(
 
     // Data memory inteface unit
     mem  #(
+        .HARTS(HARTS),
         .ADR_WIDTH(DADR_WIDTH)
     ) mem0 (
         // Control
         .fu_i (funit_in_bus[FUNIT_MEM]),
         .fu_o (funit_out_bus[FUNIT_MEM]),
+
+        .hart_id(0),
 
         // Wishbone data memory interface
         .dmem_cyc_o (dmem_cyc_o),
@@ -249,6 +253,7 @@ module secv #(
     );
 
     mtag #(
+        .HARTS(HARTS),
         .ADR_WIDTH(DADR_WIDTH)
     ) mtag0 (
         .fu_i       (funit_in_bus[FUNIT_MTAG]),
