@@ -67,13 +67,36 @@ main:
     # successful memory store operation with tag
     sd      x2, 0(x30)      # M[0xfc] = 0xff01 0000 0000 0000
 
-    ## TAG MISMATCH
+    ## COLOR MISMATCH
     # address
     addi    x3, x0, 0xaa    # x3 = 0xaa
     # build tag
+    # memory color: 0x5605
+    # hart acces: 0b1
     lui     x4, 0xac0b0     # x4 = 0xffff ffff ac0b 0000
     slli    x4, x4, 32      # x4 = 0xac0b 0000 0000 0000
     # encode tag in address
     or      x3, x3, x4      # x1 = 0xac0b 0000 0000 00aa
     # unseccessful memory load operation with tag
     ld      x2, 0(x3)       # tag mismatch on address 0xaa (x3)
+
+    ## HART MISMATCH
+	## TADRR
+    # address
+    addi    x28, x0, 0xcc  # x28 = 0xcc
+    # access forbidden for hart 0
+    addi	x29, x0, 0b0   # x29 = 0b0
+    # tag is going to be randomly generated
+
+    # custom instruction: tadrr
+    # tadrr x30, x28, x29
+    #           opcode6     func3   func7   rd   rs1  rs2
+    .insn   r   CUSTOM_0,   2,      0,      x30, x28, x29
+    # T[25] = randomly generated tag, same as x30, but with
+    # extra bit (from x29) for hart access at the end
+
+    # encode tag in address
+    slli    x30, x30, 49    # x30 = 0xRRRR 0000 0000 0000
+    or      x30, x28, x30   # x30 = 0xRRRR 0000 0000 00fc
+    # unsuccessful memory store operation because hart 0 isn't allowed access
+    sd      x2, 0(x30)		# hart mismatch on address 0xaa
