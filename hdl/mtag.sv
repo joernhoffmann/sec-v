@@ -18,46 +18,38 @@ import secv_pkg::*;
 
 module mtag #(
     parameter int HARTS = 1,
-    /* size of tags in bit */
-    parameter int TLEN = 16,
-    /* size of granules in byte */
-    parameter int GRANULARITY = 8,
-    /* address size in bit */
-    parameter int ADR_WIDTH = 8,
-    /* tag memory address width in bit */
-    parameter int TADR_WIDTH = 16,
-    /* tag memory byte selection width */
-    parameter int TSEL_WIDTH = TLEN / 8
+    parameter int TLEN = 16,        // Size of tags in bit
+    parameter int GRANULARITY = 8,  // Size of granules in byte
+    parameter int ADR_WIDTH = 16,   // Address size in bit
+    parameter int TADR_WIDTH = 16   // Tag memory address width in bit
 ) (
     input funit_in_t fu_i,
     output funit_out_t fu_o,
 
     input logic [31:0] rnd_i,
 
-    /* tag memory */
-    output logic                    tmem_cyc_o,
-    output logic                    tmem_stb_o,
-    output logic [TSEL_WIDTH-1 : 0] tmem_sel_o,
-    output logic [TADR_WIDTH-1 : 0] tmem_adr_o,
+    // Tag memory
     output logic                    tmem_we_o,
+    output logic [TADR_WIDTH-1 : 0] tmem_adr_o,
     output logic [TLEN-1 : 0]       tmem_dat_o,
     input  logic                    tmem_ack_i
 );
     logic [ADR_WIDTH-1 : 0] mem_adr;
     assign mem_adr = ADR_WIDTH'(fu_i.src1);
 
-    // decode encoded tag
+    // Decode encoded tag
     logic [TLEN-1 : 0] enc_tag;
     assign enc_tag = fu_i.src1[XLEN-1 : XLEN-TLEN];
 
-    // decode tag from rs2
+    // Decode tag from rs2
     logic [TLEN-1 : 0] r_tag;
     assign r_tag = TLEN'(fu_i.src2);
 
-    // generate random tag from rnd_i
+    // Generate random tag from rnd_i
     logic [TLEN-1-HARTS : 0] rnd_tag_head;
-    assign rnd_tag_head = (TLEN-HARTS)'((rnd_i) != 0 ? (TLEN-HARTS)'(rnd_i) : 'b1);
+    assign rnd_tag_head = (TLEN-HARTS)'(rnd_i != 0 ? rnd_i : 'b1);
 
+    // Decode hart part of the tag from rs2 and build full tag
     logic [TLEN-1 : 0] rnd_tag;
     assign rnd_tag = {rnd_tag_head, HARTS'(fu_i.src2)};
 
@@ -66,46 +58,38 @@ module mtag #(
     always_comb begin
         err = 'b0;
 
-        tmem_cyc_o = 'b0;
-        tmem_stb_o = 'b0;
-        tmem_sel_o = 'b0;
         tmem_adr_o = 'b0;
         tmem_dat_o = 'b0;
         tmem_we_o  = 'b0;
 
         if (fu_i.ena) begin
-            tmem_cyc_o = 1'b1;
-            tmem_stb_o = 1'b1;
             tmem_adr_o = TADR_WIDTH'(mem_adr / GRANULARITY);
 
             case (fu_i.op)
                 MTAG_OP_TADR: begin
                     tmem_dat_o = r_tag;
-                    tmem_sel_o = '1;
                     tmem_we_o  = 'b1;
                     fu_o.res   = 'b0;
                 end
                 MTAG_OP_TADRE: begin
                     tmem_dat_o = enc_tag;
-                    tmem_sel_o = '1;
                     tmem_we_o  = 'b1;
                     fu_o.res   = 'b0;
                 end
                 MTAG_OP_TADRR: begin
                     tmem_dat_o = rnd_tag;
-                    tmem_sel_o = '1;
                     tmem_we_o  = 'b1;
                     fu_o.res   = rnd_tag;
                 end
                 default: begin
-                    /* unknown opcode */
+                    // Unknown opcode
                     err = 'b1;
                 end
             endcase
         end
     end
 
-    // output
+    // Output
     always_comb begin
         fu_o = funit_out_default();
 
