@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-clause
 /*
- * Copyright (C) Till Mahlburg, 2023
+ * Copyright (C) Till Mahlburg, 2023-2024
  *
  * Project  : Memory Tagged SEC-V
  * Author   : Till Mahlburg
@@ -18,7 +18,7 @@ module mtag_chk_testbench();
     parameter int TLEN = 16;        // Size of tags in bit
     parameter int GRANULARITY = 8;  // Size of granules in byte
     parameter int ADR_WIDTH = 16;   // Address size in bit
-    parameter int TADR_WIDTH = 16;   // Tag memory address width in bit
+    parameter int TADR_WIDTH = 16;  // Tag memory address width in bit
 
     logic clk, rst;
 
