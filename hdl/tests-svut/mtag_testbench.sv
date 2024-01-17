@@ -182,6 +182,7 @@ module mtag_testbench();
         #1
         `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
         `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
+        `FAIL_IF_NOT_EQUAL(fu_o.res, 'hABF);
         `FAIL_IF_NOT_EQUAL(tmem_we, 1);
         `FAIL_IF_NOT_EQUAL(tmem_wdat, 44017);
         // Tag address = address / GRANULARITY | 231 / 8 = 28
