@@ -76,7 +76,7 @@ module mtag #(
                 MTAG_OP_TADRR: begin
                     tmem_dat_o = rnd_tag;
                     tmem_we_o  = 'b1;
-                    fu_o.res   = rnd_tag;
+                    fu_o.res   = rnd_tag[TLEN-1 : HARTS];
                 end
                 default: begin
                     // Unknown opcode

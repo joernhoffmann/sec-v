@@ -5,7 +5,9 @@ main:
     ## TADRE
     # address
     addi    x1, x0, 0xbe    # x1 = 0xbe
-    # build tag
+    # build tag from the memory color (0x7f80)
+    # and the hart access tag (0b1)
+    # resulting tag = 0xff01
     lui     x2, 0xff010     # x2 = 0xffff ffff ff01 0000
     slli    x2, x2, 32      # x2 = 0xff01 0000 0000 0000
     # encode tag in address
@@ -20,42 +22,50 @@ main:
     # T[23] = 0xff01
 
     # successful memory store operation with tag
-    sd      x2, 0(x1)       # M[0xbe] = 0xff01 0000 0000 0000
+    sd      x2, 0(x1)       # M[0xbe] = 0x7f80 0000 0000 0000
 
     ## TADR
     # address
     addi    x5, x0, 0xfc    # x5 = 0xfc
     # tag
-    addi    x6, x0, 0x4bc   # x6 = 0x4bc
+    # memory color = 0x25e
+    # hart access = 0b1
+    addi    x6, x0, 0x4bd   # x6 = 0x4bd
     # custom instruction: tadr
     # tadr x0, x5, x6
     #           opcode6     func3   func7   rd  rs1 rs2
     .insn   r   CUSTOM_0,   0,      0,      x0, x5, x6
-    # T[31] = 0x4bc
+    # T[31] = 0x4bd
 
     # encode tag in address
-    slli    x6, x6, 48      # x6 = 0x04bc 0000 0000 0000
+    # shift tag 1 bit right to get rid of the hart access
+    srli	x6, x6, 1 		# x6 = 0x25e
+    # shift tag 49 bit left to put it inside the top 15 bit
+    slli    x6, x6, 49      # x6 = 0x04bc 0000 0000 0000
+    # add the address
     or      x5, x5, x6      # x5 = 0x04bc 0000 0000 00fc
     # successful memory store operation with tag
     sd      x2, 0(x5)       # M[0xfc] = 0xff01 0000 0000 0000
 
-
+	## TADRR
     # address
     addi    x28, x0, 0xab  # x28 = 0xab
+    # hart access
+    addi	x29, x0, 0b1   # x29 = 0b1
     # tag is going to be randomly generated
 
-    # custom instruction: tadr
-    # tadrr x29, x28, x0
+    # custom instruction: tadrr
+    # tadrr x30, x28, x29
     #           opcode6     func3   func7   rd   rs1  rs2
-    .insn   r   CUSTOM_0,   2,      0,      x29, x28, x0
-    # T[21] = randomly generated tag, same as x29
+    .insn   r   CUSTOM_0,   2,      0,      x30, x28, x29
+    # T[21] = randomly generated tag, same as x30, but with
+    # extra bit (from x29) for hart access at the end
 
     # encode tag in address
-    slli    x29, x29, 48    # x29 = 0xRRRR 0000 0000 0000
-    or      x28, x28, x29   # x29 = 0xRRRR 0000 0000 00fc
+    slli    x30, x30, 49    # x30 = 0xRRRR 0000 0000 0000
+    or      x30, x28, x30   # x30 = 0xRRRR 0000 0000 00fc
     # successful memory store operation with tag
-    sd      x2, 0(x29)      # M[0xfc] = 0xff01 0000 0000 0000
-
+    sd      x2, 0(x30)      # M[0xfc] = 0xff01 0000 0000 0000
 
     ## TAG MISMATCH
     # address

@@ -107,7 +107,7 @@ module secv #(
         .ADR_WIDTH(TADR_WIDTH),
         .DAT_WIDTH(TLEN),
         .RESET_MEM(1)
-    ) mtag_mem (
+    ) mtag_mem0 (
         .clk_i  (clk_i),
         .rst_i  (rst_i),
 

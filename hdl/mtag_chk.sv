@@ -37,7 +37,7 @@ module mtag_chk #(
     logic [ADR_WIDTH-1 : 0] mem_adr;
     assign mem_adr = ADR_WIDTH'(adr_i);
 
-    logic [TLEN-1 : 0] tag;
+    logic [TLEN-1-HARTS : 0] tag;
     assign tag = adr_i[XLEN-1 : XLEN-TLEN+HARTS];
 
     logic err;
