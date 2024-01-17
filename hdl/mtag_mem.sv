@@ -15,9 +15,9 @@
 import secv_pkg::*;
 
 module mtag_mem #(
-    /* tag memory data width (should be the same as TLEN) */
+    // Tag memory data width (should be the same as TLEN)
     parameter int DAT_WIDTH = 16,
-    /* tag memory address width in bit */
+    // Tag memory address width in bit
     parameter int ADR_WIDTH = 16,
     parameter bit RESET_MEM = 0
 ) (
