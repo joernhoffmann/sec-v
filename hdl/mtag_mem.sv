@@ -15,11 +15,11 @@
 import secv_pkg::*;
 
 module mtag_mem #(
-    /* size of tags in bit */
+    /* tag memory data width (should be the same as TLEN) */
     parameter int DAT_WIDTH = 16,
     /* tag memory address width in bit */
-    parameter int ADR_WIDTH = 16,
-    parameter bit RESET_MEM  = 0
+    parameter int ADR_WIDTH = 8,
+    parameter bit RESET_MEM = 0
 ) (
     input  logic                    clk_i,  // Clock input
     input  logic                    rst_i,  // Reset input
@@ -51,29 +51,28 @@ module mtag_mem #(
             assert (ADR_WIDTH > 0) else
             $fatal("ADR_WIDTH must be greater than 0.");
 
-            assert (DAT_WIDTH > 0 && $countones(DAT_WIDTH) == 1) else
-            $fatal("DAT_WIDTH must be a power of 2 and greater than 0.");
+            assert (DAT_WIDTH > 0) else
+            $fatal("DAT_WIDTH greater than 0.");
 
             assert (RESET_MEM === 0 || RESET_MEM === 1) else
             $fatal("RESET_MEM must be 0 or 1.");
-
-            assert (SEL_WIDTH === DAT_WIDTH / 8) else
-            $fatal("SEL_WIDTH must match number of bytes in data word.");
         end
     `endif
 
     always_ff @(posedge clk_i) begin
         // Prevent latches
         dat_o <= 'b0;
-        ackw_o <= 1'b0;
-        ackr_o <= 1'b0;
+        rack_o <= 1'b0;
+        wack_o <= 1'b0;
+        wack_o <= 1'b0;
 
         // Reset condition
         if (rst_i) begin
             dat_o <= 'b0;
-            ack_o <= 1'b0;
+            rack_o <= 1'b0;
+            wack_o <= 1'b0;
 
-            if (RESET_MEM)
+            if (RESET_MEM) begin
 `ifdef VERILATOR
                 memory <= '{default:'0};
 `else
@@ -81,17 +80,18 @@ module mtag_mem #(
                     memory[idx] <= '0;
 `endif
             end
+        end else begin
+            // read access
+            if (re_i) begin
+                dat_o  <= memory[radr_i];
+                rack_o <= 1'b1;
+            end
 
-        // read access
-        if (re_i) begin
-            dat_o  <= memory[radr_i];
-            rack_o <= 1'b1;
-        end
-
-        // write access
-        if (we_i) begin
-            memory[wadrw_i] <= dat_i;
-            wack_o <= 1'b1;
+            // write access
+            if (we_i) begin
+                memory[wadr_i] <= dat_i;
+                wack_o <= 1'b1;
+            end
         end
     end
 endmodule
