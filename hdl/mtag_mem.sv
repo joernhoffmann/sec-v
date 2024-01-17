@@ -18,7 +18,7 @@ module mtag_mem #(
     /* tag memory data width (should be the same as TLEN) */
     parameter int DAT_WIDTH = 16,
     /* tag memory address width in bit */
-    parameter int ADR_WIDTH = 8,
+    parameter int ADR_WIDTH = 16,
     parameter bit RESET_MEM = 0
 ) (
     input  logic                    clk_i,  // Clock input

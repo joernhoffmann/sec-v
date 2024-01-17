@@ -9,21 +9,16 @@
 
 `include "svut_h.sv"
 `include "../mtag_chk.sv"
-`include "../ram_wb.sv"
+`include "../mtag_mem.sv"
 
 module mtag_chk_testbench();
     `SVUT_SETUP
 
-    /* size of tags in bit */
-    parameter int TLEN = 16;
-    /* size of granules in byte */
-    parameter int GRANULARITY = 8;
-    /* address size in bit */
-    parameter int ADR_WIDTH = 16;
-    /* tag memory address width in bit */
-    parameter int TADR_WIDTH = 16;
-    /* tag memory byte selection width */
-    parameter int TSEL_WIDTH = TLEN / 8;
+    parameter int HARTS = 4;        // Amount of harts
+    parameter int TLEN = 16;        // Size of tags in bit
+    parameter int GRANULARITY = 8;  // Size of granules in byte
+    parameter int ADR_WIDTH = 16;   // Address size in bit
+    parameter int TADR_WIDTH = 16;   // Tag memory address width in bit
 
     logic clk, rst;
 
@@ -31,53 +26,52 @@ module mtag_chk_testbench();
     logic [XLEN-1 : 0] adr;
     logic err;
 
-    logic                       tmem_cyc_o;
-    logic                       tmem_cyc_i;
-    logic                       tmem_stb_o;
-    logic                       tmem_stb_i;
-    logic [TSEL_WIDTH-1 : 0]    tmem_sel_o;
-    logic [TSEL_WIDTH-1 : 0]    tmem_sel_i;
-    logic [TADR_WIDTH-1 : 0]    tmem_adr_o;
-    logic [TADR_WIDTH-1 : 0]    tmem_adr_i;
-    logic                       tmem_we_o;
-    logic [TLEN-1 : 0]          tmem_dat_o;
-    logic [TLEN-1 : 0]          tmem_dat_i;
-    logic                       tmem_ack_i;
+    logic                       tmem_re;
+    logic [TADR_WIDTH-1 : 0]    tmem_radr;
+    logic [TLEN-1 : 0]          tmem_rdat;
+    logic                       tmem_rack;
+
+    logic                       tmem_we;
+    logic [TADR_WIDTH-1 : 0]    tmem_wadr;
+    logic [TLEN-1 : 0]          tmem_wdat;
+    logic                       tmem_wack;
 
     mtag_chk #(
+        .HARTS(HARTS),
         .TLEN(TLEN),
         .GRANULARITY(GRANULARITY),
         .ADR_WIDTH(ADR_WIDTH),
-        .TADR_WIDTH(TADR_WIDTH),
-        .TSEL_WIDTH(TSEL_WIDTH)
+        .TADR_WIDTH(TADR_WIDTH)
     ) dut (
         .ena_i      (ena),
         .adr_i      (adr),
         .err_o      (err),
 
-        .tmem_cyc_o (tmem_cyc_o),
-        .tmem_stb_o (tmem_stb_o),
-        .tmem_sel_o (tmem_sel_o),
-        .tmem_adr_o (tmem_adr_o),
-        .tmem_dat_i (tmem_dat_i),
-        .tmem_ack_i (tmem_ack_i)
+        .hart_id    (0),
+
+        .tmem_re_o  (tmem_re),
+        .tmem_adr_o (tmem_radr),
+        .tmem_dat_i (tmem_rdat),
+        .tmem_ack_i (tmem_rack)
     );
 
-    ram_wb #(
+    mtag_mem #(
         .ADR_WIDTH(TADR_WIDTH),
         .DAT_WIDTH(TLEN),
         .RESET_MEM(1)
     ) tmem (
         .clk_i  (clk),
         .rst_i  (rst),
-        .cyc_i  (tmem_cyc_i),
-        .stb_i  (tmem_stb_i),
-        .sel_i  (tmem_sel_i),
-        .adr_i  (tmem_adr_i),
-        .we_i   (tmem_we_o),
-        .dat_i  (tmem_dat_o),
-        .dat_o  (tmem_dat_i),
-        .ack_o  (tmem_ack_i)
+
+        .re_i   (tmem_re),
+        .radr_i (tmem_radr),
+        .dat_o  (tmem_rdat),
+        .rack_o (tmem_rack),
+
+        .we_i   (tmem_we),
+        .wadr_i (tmem_wadr),
+        .dat_i  (tmem_wdat),
+        .wack_o (tmem_wack)
     );
 
     // To create a clock:
@@ -95,9 +89,9 @@ module mtag_chk_testbench();
 
     task setup(msg="");
     begin
-        rst = 1;
+        rst = 1'b1;
         #2
-        rst = 0;
+        rst = 1'b0;
     end
     endtask
 
@@ -113,73 +107,81 @@ module mtag_chk_testbench();
          ena = 1'b0;
          #1
          `FAIL_IF_NOT_EQUAL(err, 0);
-         `FAIL_IF_NOT_EQUAL(err_adr, 0);
-         `FAIL_IF_NOT_EQUAL(tmem_cyc_o, 0);
-         `FAIL_IF_NOT_EQUAL(tmem_stb_o, 0);
-         `FAIL_IF_NOT_EQUAL(tmem_sel_o, 0);
-         `FAIL_IF_NOT_EQUAL(tmem_adr_o, 0);
+         `FAIL_IF_NOT_EQUAL(tmem_re, 0);
+         `FAIL_IF_NOT_EQUAL(tmem_radr, 0);
     `UNIT_TEST_END
 
     `UNIT_TEST("No early error")
         ena = 1'b1;
-        // Tag: 0x01AB = 427 | Address: 0x011F = 287
-        adr = 'h01AB_0000_0000_011F;
+        // Tag: 0x01A = 26
+        // Harts: 0xF = 0b1111 (any hart allowed)
+        // Address: 0x011F = 287
+        adr = 'h01AF_0000_0000_011F;
         #1
         `FAIL_IF_NOT_EQUAL(err, 0);
     `UNIT_TEST_END
 
     `UNIT_TEST("Error on tag mismatch")
         ena = 1'b1;
-        // Tag: 0x01AB = 427 | Address: 0x011F = 287
-        adr = 'h01AB_0000_0000_011F;
-        #1
-        tmem_cyc_i = tmem_cyc_o;
-        tmem_stb_i = tmem_stb_o;
-        tmem_sel_i = tmem_sel_o;
-        tmem_adr_i = tmem_adr_o;
+        // Tag: 0x01A = 26
+        // Harts: 0xF = 0b1111 (any hart allowed)
+        // Address: 0x011F = 287
+        adr = 'h01AF_0000_0000_011F;
         #4
         `FAIL_IF_NOT_EQUAL(err, 1);
-        `FAIL_IF_NOT_EQUAL(tmem_cyc_o, '1);
-        `FAIL_IF_NOT_EQUAL(tmem_stb_o, '1);
-        `FAIL_IF_NOT_EQUAL(tmem_sel_o, '1);
+        `FAIL_IF_NOT_EQUAL(tmem_re, '1);
         // Tag address = address / GRANULARITY | 287 / 8 = 35
-        `FAIL_IF_NOT_EQUAL(tmem_adr_o, 35);
+        `FAIL_IF_NOT_EQUAL(tmem_radr, 35);
         // Tag in memory should be zero, because of memory reset
-        `FAIL_IF_NOT_EQUAL(tmem_dat_i, 0);
+        `FAIL_IF_NOT_EQUAL(tmem_rdat, 0);
     `UNIT_TEST_END
 
-    `UNIT_TEST("No error if tags match")
+    `UNIT_TEST("No error if tags and harts match")
         // Write tag in tag memory
-        tmem_cyc_i = 1'b1;
-        tmem_stb_i = 1'b1;
-        tmem_sel_i = '1;
+        tmem_we = 1'b1;
         // Tag memory address
-        tmem_adr_i = 35;
+        tmem_wadr = 35;
         // Tag value
-        tmem_dat_o = 'h01AB; // = 427
-        tmem_we_o = 1'b1;
+        tmem_wdat = 'h01AF; // 0x01A = 26 | harts: 0xF = 0b1111 (any hart is allowed)
 
         ena = 1'b0;
         #4
-        tmem_we_o = 1'b0;
-        tmem_dat_o = '0;
+        tmem_we = 1'b0;
+
         ena = 1'b1;
-        // Tag: 0x01AB = 427 | Address: 0x011F = 287
-        adr = 'h01AB_0000_0000_011F;
-        #1
-        tmem_cyc_i = tmem_cyc_o;
-        tmem_stb_i = tmem_stb_o;
-        tmem_sel_i = tmem_sel_o;
-        tmem_adr_i = tmem_adr_o;
+        // Tag: 0x01A = 26 | Address: 0x011F = 287
+        adr = 'h01A0_0000_0000_011F;
 
         #4
         `FAIL_IF_NOT_EQUAL(err, 0);
-        `FAIL_IF_NOT_EQUAL(tmem_cyc_o, '1);
-        `FAIL_IF_NOT_EQUAL(tmem_stb_o, '1);
-        `FAIL_IF_NOT_EQUAL(tmem_sel_o, '1);
+        `FAIL_IF_NOT_EQUAL(tmem_re, '1);
         // Tag address = address / GRANULARITY | 287 / 8 = 35
-        `FAIL_IF_NOT_EQUAL(tmem_adr_o, 35);
-        `FAIL_IF_NOT_EQUAL(tmem_dat_i, 'h01AB);
+        `FAIL_IF_NOT_EQUAL(tmem_radr, 35);
+        `FAIL_IF_NOT_EQUAL(tmem_rdat, 'h01AF);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("Error on hart mismatch")
+        // Write tag in tag memory
+        tmem_we = 1'b1;
+        // Tag memory address
+        tmem_wadr = 483;
+        // Tag value
+        tmem_wdat = 'hAF1E; // 0xAF1 = 2801 | harts: 0xF = 0b1110 (hart 0 is forbidden)
+
+        ena = 1'b0;
+        #4
+        tmem_we = 1'b0;
+
+        ena = 1'b1;
+        // Tag: 0xAF1 = 2801 | Address: 0x0F1B = 3867
+        adr = 'hAF10_0000_0000_0F1B;
+
+        #4
+        `FAIL_IF_NOT_EQUAL(err, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_re, '1);
+        // Tag address = address / GRANULARITY | 3867 / 8 = 483
+        `FAIL_IF_NOT_EQUAL(tmem_radr, 483);
+        `FAIL_IF_NOT_EQUAL(tmem_rdat, 'hAF1E);
     `UNIT_TEST_END
 
     `TEST_SUITE_END

@@ -16,7 +16,7 @@ module mtag_mem_testbench();
     // Tag memory data width
     parameter int TDAT_WIDTH = 16;
     // Tag memory adress width
-    parameter int TADR_WIDTH = 8;
+    parameter int TADR_WIDTH = 16;
 
     logic clk;
     logic rst;
