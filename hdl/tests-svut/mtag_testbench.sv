@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-clause
 /*
- * Copyright (C) Till Mahlburg, 2023
+ * Copyright (C) Till Mahlburg, 2023-2024
  *
  * Project  : Memory Tagged SEC-V
  * Author   : Till Mahlburg
@@ -9,7 +9,7 @@
 
 `include "svut_h.sv"
 `include "../mtag.sv"
-`include "../ram_wb.sv"
+`include "../mtag_mem.sv"
 
 module mtag_testbench();
     `SVUT_SETUP
@@ -17,27 +17,22 @@ module mtag_testbench();
     parameter int TLEN          = 16;
     parameter int GRANULARITY   = 8;
 
-    parameter int MADR_WIDTH    = 8; // memory address width (address portion of a pointer)
-    parameter int TADR_WIDTH    = TLEN; // address width within the tag memory
-
-    parameter int TSEL_WIDTH    = TLEN / 8; // tag memory byte selection width
+    parameter int MADR_WIDTH    = 8;        // Memory address width (address portion of a pointer)
+    parameter int TADR_WIDTH    = TLEN;     // Address width within the tag memory
 
     logic   clk;
     logic   rst;
 
-    // tag memory
-    logic                       tmem_cyc_o;
-    logic                       tmem_cyc_i;
-    logic                       tmem_stb_o;
-    logic                       tmem_stb_i;
-    logic [TSEL_WIDTH-1 : 0]    tmem_sel_o;
-    logic [TSEL_WIDTH-1 : 0]    tmem_sel_i;
-    logic [TADR_WIDTH-1 : 0]    tmem_adr_o;
-    logic [TADR_WIDTH-1 : 0]    tmem_adr_i;
-    logic                       tmem_we_o;
-    logic [TLEN-1 : 0]          tmem_dat_o;
-    logic [TLEN-1 : 0]          tmem_dat_i;
-    logic                       tmem_ack_i;
+    // Tag memory
+    logic                       tmem_re;
+    logic [TADR_WIDTH-1 : 0]    tmem_radr;
+    logic [TLEN-1 : 0]          tmem_rdat;
+    logic                       tmem_rack;
+
+    logic                       tmem_we;
+    logic [TADR_WIDTH-1 : 0]    tmem_wadr;
+    logic [TLEN-1 : 0]          tmem_wdat;
+    logic                       tmem_wack;
 
     funit_in_t  fu_i;
     funit_out_t fu_o;
@@ -45,6 +40,7 @@ module mtag_testbench();
     logic [31:0] rnd;
 
     mtag #(
+        .HARTS(4),
         .TLEN(TLEN),
         .GRANULARITY(GRANULARITY),
         .ADR_WIDTH(MADR_WIDTH),
@@ -54,30 +50,30 @@ module mtag_testbench();
         .fu_o       (fu_o),
 
         .rnd_i      (rnd),
-        // Wishbone tag memory interface
-        .tmem_cyc_o (tmem_cyc_o),
-        .tmem_stb_o (tmem_stb_o),
-        .tmem_sel_o (tmem_sel_o),
-        .tmem_adr_o (tmem_adr_o),
-        .tmem_we_o  (tmem_we_o),
-        .tmem_dat_o (tmem_dat_o),
-        .tmem_ack_i (tmem_ack_i)
+
+        .tmem_we_o  (tmem_we),
+        .tmem_adr_o (tmem_wadr),
+        .tmem_dat_o (tmem_wdat),
+        .tmem_ack_i (tmem_wack)
     );
 
-    ram_wb #(
+    mtag_mem #(
         .ADR_WIDTH(TADR_WIDTH),
-        .DAT_WIDTH(TLEN)
+        .DAT_WIDTH(TLEN),
+        .RESET_MEM(1)
     ) tmem (
         .clk_i  (clk),
         .rst_i  (rst),
-        .cyc_i  (tmem_cyc_i),
-        .stb_i  (tmem_stb_i),
-        .sel_i  (tmem_sel_i),
-        .adr_i  (tmem_adr_i),
-        .we_i   (tmem_we_o),
-        .dat_i  (tmem_dat_o),
-        .dat_o  (tmem_dat_i),
-        .ack_o  (tmem_ack_i)
+
+        .re_i   (tmem_re),
+        .radr_i (tmem_radr),
+        .dat_o  (tmem_rdat),
+        .rack_o (tmem_rack),
+
+        .we_i   (tmem_we),
+        .wadr_i (tmem_wadr),
+        .dat_i  (tmem_wdat),
+        .wack_o (tmem_wack)
     );
 
     // To create a clock:
@@ -85,18 +81,17 @@ module mtag_testbench();
     always #1 clk = ~clk;
 
     // To dump data for visualization:
-    //initial begin
-    //    $dumpfile("mtag_testbench.vcd");
-    //    $dumpvars(0, mtag_testbench);
-    //end
+    initial begin
+        $dumpfile("mtag_testbench.vcd");
+        $dumpvars(0, mtag_testbench);
+    end
 
     // Setup time format when printing with $realtime()
     initial $timeformat(-9, 1, "ns", 8);
 
     task setup(msg="");
     begin
-        rst = 0;
-        rnd = 0;
+        // runs when a test begins
     end
     endtask
 
@@ -122,36 +117,32 @@ module mtag_testbench();
         #1
         `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
         `FAIL_IF_NOT_EQUAL(fu_o.err, 1);
-        `FAIL_IF_NOT_EQUAL(tmem_we_o, 0);
+        `FAIL_IF_NOT_EQUAL(tmem_we, 0);
     `UNIT_TEST_END
 
     /** TADRE **/
     `UNIT_TEST("Expose correct tag and tag memory address on MTAG_OP_TADRE")
         fu_i.ena = 1'b1;
         fu_i.op = MTAG_OP_TADRE;
-        fu_i.src1 = 'h214A__0000_0000_0032; // Tag: 0x214A_0032 = 8522 | Address: 0x32 = 50
-        fu_i.src2 = 0; // ignored
+        fu_i.src1 = 'h214A__0000_0000_0032; // Tag: 0x214A = 8522 | Address: 0x32 = 50
+        fu_i.src2 = 0; // Ignored
         #1
         `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
         `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
-        `FAIL_IF_NOT_EQUAL(tmem_we_o, 1);
-        `FAIL_IF_NOT_EQUAL(tmem_cyc_o, 1);
-        `FAIL_IF_NOT_EQUAL(tmem_stb_o, 1);
-        `FAIL_IF_NOT_EQUAL(tmem_sel_o, '1);
-        `FAIL_IF_NOT_EQUAL(tmem_dat_o, 8522);
+        `FAIL_IF_NOT_EQUAL(tmem_we, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_wdat, 8522);
         // Tag address = address / GRANULARITY | 50 / 8 = 6
-        `FAIL_IF_NOT_EQUAL(tmem_adr_o, 6);
+        `FAIL_IF_NOT_EQUAL(tmem_wadr, 6);
     `UNIT_TEST_END
 
     `UNIT_TEST("Write successfully to tag memory on MTAG_OP_TADRE")
-        tmem_adr_i = tmem_adr_o;
-        tmem_cyc_i = tmem_cyc_o;
-        tmem_stb_i = tmem_stb_o;
-        tmem_sel_i = tmem_sel_o;
+        tmem_re = 1'b1;
+        tmem_radr = 6;
         #2
         fu_i.ena = 1'b0;
         #2
-        `FAIL_IF_NOT_EQUAL(tmem_dat_i, 8522);
+        `FAIL_IF_NOT_EQUAL(tmem_rdat, 8522);
+        tmem_re = 1'b0;
     `UNIT_TEST_END
 
     /** TADR **/
@@ -163,54 +154,48 @@ module mtag_testbench();
         #1
         `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
         `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
-        `FAIL_IF_NOT_EQUAL(tmem_we_o, 1);
-        `FAIL_IF_NOT_EQUAL(tmem_cyc_o, 1);
-        `FAIL_IF_NOT_EQUAL(tmem_stb_o, 1);
-        `FAIL_IF_NOT_EQUAL(tmem_sel_o, '1);
-        `FAIL_IF_NOT_EQUAL(tmem_dat_o, 42161);
+        `FAIL_IF_NOT_EQUAL(tmem_we, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_wdat, 42161);
         // Tag address = address / GRANULARITY | 229 / 8 = 28
-        `FAIL_IF_NOT_EQUAL(tmem_adr_o, 28);
+        `FAIL_IF_NOT_EQUAL(tmem_wadr, 28);
     `UNIT_TEST_END
 
     `UNIT_TEST("Write successfully to tag memory on MTAG_OP_TADR")
-        tmem_adr_i = tmem_adr_o;
-        tmem_cyc_i = tmem_cyc_o;
-        tmem_stb_i = tmem_stb_o;
-        tmem_sel_i = tmem_sel_o;
+        tmem_re = 1'b1;
+        tmem_radr = 28;
         #2
         fu_i.ena = 1'b0;
         #2
-        `FAIL_IF_NOT_EQUAL(tmem_dat_i, 42161);
+        `FAIL_IF_NOT_EQUAL(tmem_rdat, 42161);
+        tmem_re = 1'b0;
     `UNIT_TEST_END
 
     /** TADRR **/
     `UNIT_TEST("Expose correct tag and tag memory address on MTAG_OP_TADRR")
+        rnd = 'h1ABF; // Tag: 0xABF = 2751
+        #1
         fu_i.ena = 1'b1;
         fu_i.op = MTAG_OP_TADRR;
         fu_i.src1 = 'hE7; // Address: 0xE7 = 231
-        fu_i.src2 = 0; // ignored
-        rnd = 'h1ABF; // Tag: 0x1ABF = 6847
+        fu_i.src2 = 'b0001; // Allowed harts (none, except 0)
+        // Full tag: 0xABF1 = 44017
         #1
         `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
         `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
-        `FAIL_IF_NOT_EQUAL(tmem_we_o, 1);
-        `FAIL_IF_NOT_EQUAL(tmem_cyc_o, 1);
-        `FAIL_IF_NOT_EQUAL(tmem_stb_o, 1);
-        `FAIL_IF_NOT_EQUAL(tmem_sel_o, '1);
-        `FAIL_IF_NOT_EQUAL(tmem_dat_o, 6847);
+        `FAIL_IF_NOT_EQUAL(tmem_we, 1);
+        `FAIL_IF_NOT_EQUAL(tmem_wdat, 44017);
         // Tag address = address / GRANULARITY | 231 / 8 = 28
-        `FAIL_IF_NOT_EQUAL(tmem_adr_o, 28);
+        `FAIL_IF_NOT_EQUAL(tmem_wadr, 28);
     `UNIT_TEST_END
 
     `UNIT_TEST("Write successfully to tag memory on MTAG_OP_TADRR")
-        tmem_adr_i = tmem_adr_o;
-        tmem_cyc_i = tmem_cyc_o;
-        tmem_stb_i = tmem_stb_o;
-        tmem_sel_i = tmem_sel_o;
+        tmem_re = 1'b1;
+        tmem_radr = 28;
         #2
         fu_i.ena = 1'b0;
         #2
-        `FAIL_IF_NOT_EQUAL(tmem_dat_i, 6847);
+        `FAIL_IF_NOT_EQUAL(tmem_rdat, 44017);
+        tmem_re = 1'b0;
     `UNIT_TEST_END
     `TEST_SUITE_END
 endmodule

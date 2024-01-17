@@ -45,13 +45,10 @@ module mtag #(
     logic [TLEN-1 : 0] r_tag;
     assign r_tag = TLEN'(fu_i.src2);
 
-    // Generate random tag from rnd_i
-    logic [TLEN-1-HARTS : 0] rnd_tag_head;
-    assign rnd_tag_head = (TLEN-HARTS)'(rnd_i != 0 ? rnd_i : 'b1);
-
-    // Decode hart part of the tag from rs2 and build full tag
+    // Generate random tag from rnd_i, decode hart part from rs2
     logic [TLEN-1 : 0] rnd_tag;
-    assign rnd_tag = {rnd_tag_head, HARTS'(fu_i.src2)};
+    assign rnd_tag = {(TLEN-HARTS)'(rnd_i != 0 ? rnd_i : 'b1), HARTS'(fu_i.src2)};
+
 
     logic err;
 
