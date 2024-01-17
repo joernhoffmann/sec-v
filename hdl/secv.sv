@@ -43,11 +43,10 @@ module secv #(
 
     parameter int IADR_WIDTH = 8,        // Instruction memory address width
     parameter int DADR_WIDTH = 8,        // Data memory address width
-    parameter int TADR_WIDTH = 16,       // Tag memory address width
+    parameter int TADR_WIDTH = 8,       // Tag memory address width
 
     parameter int ISEL_WIDTH = ILEN/8,  // Instruction memory byte selection width
-    parameter int DSEL_WIDTH = XLEN/8,  // Data memory byte selection width
-    parameter int TSEL_WIDTH = TLEN/8   // Tag memory byte selection width
+    parameter int DSEL_WIDTH = XLEN/8   // Data memory byte selection width
 ) (
     input   logic   clk_i,
     input   logic   rst_i,
@@ -68,17 +67,7 @@ module secv #(
     output  logic                       dmem_we_o,
     output  logic [XLEN-1 : 0]          dmem_dat_o,
     input   logic [XLEN-1 : 0]          dmem_dat_i,
-    input   logic                       dmem_ack_i,
-
-    // Tag memory
-    output logic                        tmem_cyc_o,
-    output logic                        tmem_stb_o,
-    output logic [TSEL_WIDTH-1 : 0]     tmem_sel_o,
-    output logic [TADR_WIDTH-1 : 0]     tmem_adr_o,
-    output logic                        tmem_we_o,
-    output logic [TLEN-1 : 0]           tmem_dat_o,
-    input  logic [TLEN-1 : 0]           tmem_dat_i,
-    input  logic                        tmem_ack_i
+    input   logic                       dmem_ack_i
 );
     // --- General purpose register file ---------------------------------------------------------------------------- //
     logic [XLEN-1:0] rs1_dat, rs2_dat, rd_dat;
@@ -101,6 +90,36 @@ module secv #(
         .rd_adr_i     (rd_adr),
         .rd_dat_i     (rd_dat),
         .rd_wb_i      (rd_wb)
+    );
+
+    // --- Tag memory ----------------------------------------------------------------------------------------------- //
+    logic                       tmem_re;
+    logic [TADR_WIDTH-1 : 0]    tmem_radr;
+    logic [TLEN-1 : 0]          tmem_rdat;
+    logic                       tmem_rack;
+
+    logic                       tmem_we;
+    logic [TADR_WIDTH-1 : 0]    tmem_wadr;
+    logic [TLEN-1 : 0]          tmem_wdat;
+    logic                       tmem_wack;
+
+    mtag_mem #(
+        .ADR_WIDTH(TADR_WIDTH),
+        .DAT_WIDTH(TLEN),
+        .RESET_MEM(1)
+    ) mtag_mem (
+        .clk_i  (clk_i),
+        .rst_i  (rst_i),
+
+        .re_i   (tmem_re),
+        .radr_i (tmem_radr),
+        .dat_o  (tmem_rdat),
+        .rack_o (tmem_rack),
+
+        .we_i   (tmem_we),
+        .wadr_i (tmem_wadr),
+        .dat_i  (tmem_wdat),
+        .wack_o (tmem_wack)
     );
 
     // --- Decoder -------------------------------------------------------------------------------------------------- //
@@ -243,13 +262,11 @@ module secv #(
         .dmem_dat_i (dmem_dat_i),
         .dmem_ack_i (dmem_ack_i),
 
-        // Wishbone tag memory interface
-        .tmem_cyc_o (tmem_cyc_o_bus[FUNIT_MEM]),
-        .tmem_stb_o (tmem_stb_o_bus[FUNIT_MEM]),
-        .tmem_sel_o (tmem_sel_o_bus[FUNIT_MEM]),
-        .tmem_adr_o (tmem_adr_o_bus[FUNIT_MEM]),
-        .tmem_dat_i (tmem_dat_i),
-        .tmem_ack_i (tmem_ack_i_bus[FUNIT_MEM])
+        // Tag memory
+        .tmem_re_o  (tmem_re),
+        .tmem_adr_o (tmem_radr),
+        .tmem_dat_i (tmem_rdat),
+        .tmem_ack_i (tmem_rack)
     );
 
     mtag #(
@@ -261,14 +278,10 @@ module secv #(
 
         .rnd_i      (rnd),
 
-        // Wishbone tag memory interface
-        .tmem_cyc_o (tmem_cyc_o_bus[FUNIT_MTAG]),
-        .tmem_stb_o (tmem_stb_o_bus[FUNIT_MTAG]),
-        .tmem_sel_o (tmem_sel_o_bus[FUNIT_MTAG]),
-        .tmem_adr_o (tmem_adr_o_bus[FUNIT_MTAG]),
-        .tmem_we_o  (tmem_we_o),
-        .tmem_dat_o (tmem_dat_o),
-        .tmem_ack_i (tmem_ack_i_bus[FUNIT_MTAG])
+        .tmem_we_o  (tmem_we),
+        .tmem_adr_o (tmem_wadr),
+        .tmem_dat_o (tmem_wdat),
+        .tmem_ack_i (tmem_wack)
     );
 
     // Control and status register unit
@@ -307,23 +320,11 @@ module secv #(
     funit_in_t  funit_in;
     funit_out_t funit_out;
 
-    // Tag memory bus
-    logic                   tmem_cyc_o_bus[FUNIT_COUNT];
-    logic                   tmem_stb_o_bus[FUNIT_COUNT];
-    logic [TSEL_WIDTH-1: 0] tmem_sel_o_bus[FUNIT_COUNT];
-    logic [TADR_WIDTH-1: 0] tmem_adr_o_bus[FUNIT_COUNT];
-    logic                   tmem_ack_i_bus[FUNIT_COUNT];
-
     // I/O of selected function unit
     always_comb begin
         funit_in_bus[funit] = funit_in;
-        tmem_ack_i_bus[funit] = tmem_ack_i;
     end
     assign funit_out = funit_out_bus[funit];
-    assign tmem_cyc_o = tmem_cyc_o_bus[funit];
-    assign tmem_stb_o = tmem_stb_o_bus[funit];
-    assign tmem_sel_o = tmem_sel_o_bus[funit];
-    assign tmem_adr_o = tmem_adr_o_bus[funit];
 
     // --- Exception handling --------------------------------------------------------------------------------------- //
     function automatic ex_cause_t to_ex_cause(ecode_t ecode);

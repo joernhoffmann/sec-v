@@ -32,8 +32,7 @@ module mem #(
     parameter int SEL_WIDTH = XLEN/8,
     parameter logic [ADR_WIDTH-1:0] ADR_FAULT_MASK = 0,
     parameter int TLEN = 16,
-    parameter int TADR_WIDTH = 16,
-    parameter int TSEL_WIDTH = TLEN/8
+    parameter int TADR_WIDTH = 16
 ) (
     // Function unit interface
     input  funit_in_t  fu_i,
@@ -52,9 +51,7 @@ module mem #(
     input  logic                    dmem_ack_i,
 
     // Tag memory
-    output logic                    tmem_cyc_o,
-    output logic                    tmem_stb_o,
-    output logic [TSEL_WIDTH-1 : 0] tmem_sel_o,
+    output logic                    tmem_re_o,
     output logic [TADR_WIDTH-1 : 0] tmem_adr_o,
     input  logic [TLEN-1       : 0] tmem_dat_i,
     input  logic                    tmem_ack_i
@@ -73,16 +70,14 @@ module mem #(
 
     // Tag checking
     mtag_chk #(
-        .HARTS(HARTS),
+        .HARTS(HARTS)
     ) mtag_chk0 (
         .ena_i      (fu_i.ena),
         .adr_i      (fu_i.src1),
         .err_o      (tag_err),
         .hart_id    (hart_id),
 
-        .tmem_cyc_o (tmem_cyc_o),
-        .tmem_stb_o (tmem_stb_o),
-        .tmem_sel_o (tmem_sel_o),
+        .tmem_re_o  (tmem_re_o),
         .tmem_adr_o (tmem_adr_o),
         .tmem_dat_i (tmem_dat_i),
         .tmem_ack_i (tmem_ack_i)
