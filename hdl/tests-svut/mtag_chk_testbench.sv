@@ -16,9 +16,13 @@ module mtag_chk_testbench();
 
     parameter int HARTS = 4;        // Amount of harts
     parameter int TLEN = 16;        // Size of tags in bit
-    parameter int GRANULARITY = 8;  // Size of granules in byte
+    /* Size of granules as amount of bits to shift the memory address to the left
+     * Shift in bits    | actual granule size in byte
+     * n                | 2^n
+     */
+    parameter int GRANULARITY = 2;
     parameter int ADR_WIDTH = 16;   // Address size in bit
-    parameter int TADR_WIDTH = 16;  // Tag memory address width in bit
+    parameter int TADR_WIDTH = ADR_WIDTH-GRANULARITY;  // Tag memory address width in bit
 
     logic clk, rst;
 
@@ -41,7 +45,6 @@ module mtag_chk_testbench();
         .TLEN(TLEN),
         .GRANULARITY(GRANULARITY),
         .ADR_WIDTH(ADR_WIDTH),
-        .TADR_WIDTH(TADR_WIDTH)
     ) dut (
         .ena_i      (ena),
         .adr_i      (adr),
@@ -130,8 +133,8 @@ module mtag_chk_testbench();
         #4
         `FAIL_IF_NOT_EQUAL(err, 1);
         `FAIL_IF_NOT_EQUAL(tmem_re, '1);
-        // Tag address = address / GRANULARITY | 287 / 8 = 35
-        `FAIL_IF_NOT_EQUAL(tmem_radr, 35);
+        // Tag address = address >> GRANULARITY | 287 >> 2 = 71
+        `FAIL_IF_NOT_EQUAL(tmem_radr, 71);
         // Tag in memory should be zero, because of memory reset
         `FAIL_IF_NOT_EQUAL(tmem_rdat, 0);
     `UNIT_TEST_END
@@ -140,7 +143,7 @@ module mtag_chk_testbench();
         // Write tag in tag memory
         tmem_we = 1'b1;
         // Tag memory address
-        tmem_wadr = 35;
+        tmem_wadr = 71;
         // Tag value
         tmem_wdat = 'h01AF; // 0x01A = 26 | harts: 0xF = 0b1111 (any hart is allowed)
 
@@ -155,8 +158,8 @@ module mtag_chk_testbench();
         #4
         `FAIL_IF_NOT_EQUAL(err, 0);
         `FAIL_IF_NOT_EQUAL(tmem_re, '1);
-        // Tag address = address / GRANULARITY | 287 / 8 = 35
-        `FAIL_IF_NOT_EQUAL(tmem_radr, 35);
+        // Tag address = address >> GRANULARITY | 287 >> 2 = 71
+        `FAIL_IF_NOT_EQUAL(tmem_radr, 71);
         `FAIL_IF_NOT_EQUAL(tmem_rdat, 'h01AF);
     `UNIT_TEST_END
 
@@ -164,7 +167,7 @@ module mtag_chk_testbench();
         // Write tag in tag memory
         tmem_we = 1'b1;
         // Tag memory address
-        tmem_wadr = 483;
+        tmem_wadr = 966;
         // Tag value
         tmem_wdat = 'hAF1E; // 0xAF1 = 2801 | harts: 0xF = 0b1110 (hart 0 is forbidden)
 
@@ -179,8 +182,8 @@ module mtag_chk_testbench();
         #4
         `FAIL_IF_NOT_EQUAL(err, 1);
         `FAIL_IF_NOT_EQUAL(tmem_re, '1);
-        // Tag address = address / GRANULARITY | 3867 / 8 = 483
-        `FAIL_IF_NOT_EQUAL(tmem_radr, 483);
+        // Tag address = address >> GRANULARITY | 3867 >> 2 = 966
+        `FAIL_IF_NOT_EQUAL(tmem_radr, 966);
         `FAIL_IF_NOT_EQUAL(tmem_rdat, 'hAF1E);
     `UNIT_TEST_END
 

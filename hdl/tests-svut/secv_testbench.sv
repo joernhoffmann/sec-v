@@ -24,9 +24,9 @@ module secv_testbench();
     parameter int ILEN = secv_pkg::ILEN;
     parameter int XLEN = secv_pkg::XLEN;
     parameter int TLEN = 16;
+    parameter int GRANULARTIY = 2;
     parameter int IADR_WIDTH = 10;          // 1K (Byte addressable)
     parameter int DADR_WIDTH = 10;          // 1k (Byte addressable)
-    parameter int TADR_WIDTH = 10;
     parameter int ISEL_WIDTH = ILEN/8;
     parameter int DSEL_WIDTH = XLEN/8;
 
@@ -54,7 +54,6 @@ module secv_testbench();
     secv #(
         .IADR_WIDTH (IADR_WIDTH),
         .DADR_WIDTH (DADR_WIDTH),
-        .TADR_WIDTH (TADR_WIDTH),
         .ISEL_WIDTH (ISEL_WIDTH),
         .DSEL_WIDTH (DSEL_WIDTH)
     ) dut

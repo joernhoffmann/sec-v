@@ -16,9 +16,17 @@ import secv_pkg::*;
 module mtag_chk #(
     parameter int HARTS = 1,
     parameter int TLEN = 16,        // Size of tags in bit
-    parameter int GRANULARITY = 8,  // Size of granules in byte
+    /* Size of granules as amount of bits to shift the memory address to the left
+     * Shift in bits    | actual granule size in byte
+     * 0                | 1
+     * 1                | 2
+     * 2                | 4
+     * 3                | 8
+     * n                | 2^n
+     */
+    parameter int GRANULARITY = 2,
     parameter int ADR_WIDTH = 16,   // Address size in bit
-    parameter int TADR_WIDTH = 16   // Tag memory address width in bit
+    parameter int TADR_WIDTH = ADR_WIDTH - GRANULARITY  // Tag memory address width in bit
 ) (
     input  logic                   ena_i,
 
@@ -51,7 +59,7 @@ module mtag_chk #(
 
         if (ena_i) begin
             tmem_re_o  = 1'b1;
-            tmem_adr_o = TADR_WIDTH'(mem_adr / GRANULARITY);
+            tmem_adr_o = TADR_WIDTH'(mem_adr >> GRANULARITY);
 
             // Check for correct hart
             if (tmem_ack_i && tmem_dat_i[hart_id] != 1'b1) begin

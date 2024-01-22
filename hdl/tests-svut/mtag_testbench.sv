@@ -15,10 +15,10 @@ module mtag_testbench();
     `SVUT_SETUP
 
     parameter int TLEN          = 16;
-    parameter int GRANULARITY   = 8;
+    parameter int GRANULARITY   = 2;
 
     parameter int MADR_WIDTH    = 8;        // Memory address width (address portion of a pointer)
-    parameter int TADR_WIDTH    = TLEN;     // Address width within the tag memory
+    parameter int TADR_WIDTH    = MADR_WIDTH - GRANULARITY;
 
     logic   clk;
     logic   rst;
@@ -132,13 +132,13 @@ module mtag_testbench();
         `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
         `FAIL_IF_NOT_EQUAL(tmem_we, 1);
         `FAIL_IF_NOT_EQUAL(tmem_wdat, 8522);
-        // Tag address = address / GRANULARITY | 50 / 8 = 6
-        `FAIL_IF_NOT_EQUAL(tmem_wadr, 6);
+        // Tag address = address >> GRANULARITY | 50 >> 2 = 12
+        `FAIL_IF_NOT_EQUAL(tmem_wadr, 12);
     `UNIT_TEST_END
 
     `UNIT_TEST("Write successfully to tag memory on MTAG_OP_TADRE")
         tmem_re = 1'b1;
-        tmem_radr = 6;
+        tmem_radr = 12;
         #2
         fu_i.ena = 1'b0;
         #2
@@ -157,13 +157,13 @@ module mtag_testbench();
         `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
         `FAIL_IF_NOT_EQUAL(tmem_we, 1);
         `FAIL_IF_NOT_EQUAL(tmem_wdat, 42161);
-        // Tag address = address / GRANULARITY | 229 / 8 = 28
-        `FAIL_IF_NOT_EQUAL(tmem_wadr, 28);
+        // Tag address = address >> GRANULARITY | 229 >> 2 = 57
+        `FAIL_IF_NOT_EQUAL(tmem_wadr, 57);
     `UNIT_TEST_END
 
     `UNIT_TEST("Write successfully to tag memory on MTAG_OP_TADR")
         tmem_re = 1'b1;
-        tmem_radr = 28;
+        tmem_radr = 57;
         #2
         fu_i.ena = 1'b0;
         #2
@@ -186,13 +186,13 @@ module mtag_testbench();
         `FAIL_IF_NOT_EQUAL(fu_o.res, 'hABF);
         `FAIL_IF_NOT_EQUAL(tmem_we, 1);
         `FAIL_IF_NOT_EQUAL(tmem_wdat, 44017);
-        // Tag address = address / GRANULARITY | 231 / 8 = 28
-        `FAIL_IF_NOT_EQUAL(tmem_wadr, 28);
+        // Tag address = address >> GRANULARITY | 231 >> = 57
+        `FAIL_IF_NOT_EQUAL(tmem_wadr, 57);
     `UNIT_TEST_END
 
     `UNIT_TEST("Write successfully to tag memory on MTAG_OP_TADRR")
         tmem_re = 1'b1;
-        tmem_radr = 28;
+        tmem_radr = 57;
         #2
         fu_i.ena = 1'b0;
         #2

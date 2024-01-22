@@ -40,10 +40,20 @@ import csr_pkg::*;
 module secv #(
     parameter int HARTS      = 1,
     parameter int TLEN       = 16,       // Tag size
+    /* Size of granules as amount of bits to shift the memory address to the left
+     * Shift in bits    | actual granule size in byte
+     * 0                | 1
+     * 1                | 2
+     * 2                | 4
+     * 3                | 8
+     * n                | 2^n
+     */
+    parameter int GRANULARITY = 2,
 
     parameter int IADR_WIDTH = 8,        // Instruction memory address width
     parameter int DADR_WIDTH = 8,        // Data memory address width
-    parameter int TADR_WIDTH = 8,       // Tag memory address width
+    // Tag memory address width
+    parameter int TADR_WIDTH = DADR_WIDTH-GRANULARITY,
 
     parameter int ISEL_WIDTH = ILEN/8,  // Instruction memory byte selection width
     parameter int DSEL_WIDTH = XLEN/8   // Data memory byte selection width
