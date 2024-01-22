@@ -5,21 +5,22 @@ main:
     ## TADRE
     # address
     addi    x1, x0, 0xbe    # x1 = 0xbe
-    # build tag from the memory color (0x7f80)
+    # memory color (0x7f80)
+    lui     x2, 0x7f800     # x2 = 0xffff ffff 7f80 0000
+    slli    x2, x2, 32      # x2 = 0x7f80 0000 0000 0000
+    # encode color in address
+    or      x1, x1, x2      # x1 = 0x7f80 0000 0000 00be
     # and the hart access tag (0b1)
+	addi	x3, x0, 0b1		# x3 = 0b1
     # resulting tag = 0xff01
-    lui     x2, 0xff010     # x2 = 0xffff ffff ff01 0000
-    slli    x2, x2, 32      # x2 = 0xff01 0000 0000 0000
-    # encode tag in address
-    or      x1, x1, x2      # x1 = 0xff01 0000 0000 00be
 
     # custom instruction: tadre
     # .insn: https://sourceware.org/binutils/docs/as/RISC_002dV_002dDirectives.html
     # instruction formats: https://sourceware.org/binutils/docs/as/RISC_002dV_002dFormats.html
     # tadre x0, x1, x0
     #           opcode6     func3   func7   rd  rs1 rs2
-    .insn   r   CUSTOM_0,   1,      0,      x0, x1, x0
-    # T[23] = 0xff01
+    .insn   r   CUSTOM_0,   1,      0,      x0, x1, x3
+    # T[23] = 0x7f81
 
     # successful memory store operation with tag
     sd      x2, 0(x1)       # M[0xbe] = 0x7f80 0000 0000 0000
