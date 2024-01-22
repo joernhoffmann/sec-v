@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-clause
 /*
- * Copyright (C) Till Mahlburg, 2023-2024
+ * Copyright (C) Till Mahlburg, 2023 - 2024
  *
  * Project  : Memory Tagged SEC-V
  * Author   : Till Mahlburg
@@ -124,8 +124,9 @@ module mtag_testbench();
     `UNIT_TEST("Expose correct tag and tag memory address on MTAG_OP_TADRE")
         fu_i.ena = 1'b1;
         fu_i.op = MTAG_OP_TADRE;
-        fu_i.src1 = 'h214A__0000_0000_0032; // Tag: 0x214A = 8522 | Address: 0x32 = 50
-        fu_i.src2 = 0; // Ignored
+        fu_i.src1 = 'h2140__0000_0000_0032; // Tag: 0x214 = 532 | Address: 0x32 = 50
+        fu_i.src2 = 'b1010; // Hart Access: 0b1010 = 0xA
+        // Complete tag: 0x214A = 8522
         #1
         `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
         `FAIL_IF_NOT_EQUAL(fu_o.err, 0);

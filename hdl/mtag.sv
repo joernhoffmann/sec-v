@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-clause
 /*
- * Copyright (C) Till Mahlburg, 2023
+ * Copyright (C) Till Mahlburg, 2023 - 2024
  *
  * Project    : Memory Tagged SEC-V
  * Author     : Till Mahlburg
@@ -37,9 +37,9 @@ module mtag #(
     logic [ADR_WIDTH-1 : 0] mem_adr;
     assign mem_adr = ADR_WIDTH'(fu_i.src1);
 
-    // Decode encoded tag
+    // Decode encoded tag, decode hart part from rs2
     logic [TLEN-1 : 0] enc_tag;
-    assign enc_tag = fu_i.src1[XLEN-1 : XLEN-TLEN];
+    assign enc_tag = {fu_i.src1[XLEN-1 : XLEN-TLEN+HARTS], HARTS'(fu_i.src2)};
 
     // Decode tag from rs2
     logic [TLEN-1 : 0] r_tag;
