@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-clause
 /*
- * Copyright (C) Till Mahlburg, 2023-2024
+ * Copyright (C) Till Mahlburg, 2023 - 2024
  *
  * Project  : Memory Tagged SEC-V
  * Author   : Till Mahlburg

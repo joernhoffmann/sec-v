@@ -153,10 +153,10 @@ module decoder (
             OPCODE_CUSTOM_0: begin                  // Memory Tagging
                 funit       = FUNIT_MTAG;
 
-                src1_sel    = SRC1_SEL_RS1;         // Address, possibly with encoded tag
-                src2_sel    = SRC2_SEL_RS2;         // Possibly tag or hart bit mask
+                src1_sel    = SRC1_SEL_RS1;         // Address, possibly with encoded memory color
+                src2_sel    = SRC2_SEL_RS2;         // Tag or hart bit mask
 
-                rd_sel      = RD_SEL_FUNIT;          // Possibly tag
+                rd_sel      = RD_SEL_FUNIT;          // Possibly memory color
             end
 
             OPCODE_OP, OPCODE_OP_32: begin
