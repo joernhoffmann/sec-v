@@ -32,7 +32,10 @@ module mem #(
     parameter int SEL_WIDTH = XLEN/8,
     parameter logic [ADR_WIDTH-1:0] ADR_FAULT_MASK = 0,
     parameter int TLEN = 16,
-    parameter int TADR_WIDTH = 16
+    // Size of granules as amount of bits to shift
+    // the memory address to the right.
+    parameter int GRANULARITY = 2,
+    parameter int TADR_WIDTH = ADR_WIDTH - GRANULARITY
 ) (
     // Function unit interface
     input  funit_in_t  fu_i,
@@ -71,11 +74,14 @@ module mem #(
 
     // Tag checking
     mtag_chk #(
-        .HARTS(HARTS)
+        .HARTS(HARTS),
+        .TLEN(TLEN),
+        .GRANULARITY(GRANULARITY),
+        .ADR_WIDTH(ADR_WIDTH),
     ) mtag_chk0 (
         .ena_i      (fu_i.ena),
         .adr_i      (fu_i.src1),
-        .hartid_i  (hartid_i),
+        .hartid_i   (hartid_i),
 
         .color_mismatch_o   (color_mismatch),
         .hart_mismatch_o    (hart_mismatch),

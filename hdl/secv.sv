@@ -255,6 +255,8 @@ module secv #(
     mem  #(
         .HARTS(HARTS),
         .ADR_WIDTH(DADR_WIDTH)
+        .TLEN(TLEN),
+        .GRANULARITY(GRANULARITY)
     ) mem0 (
         // Control
         .fu_i (funit_in_bus[FUNIT_MEM]),
@@ -281,6 +283,8 @@ module secv #(
 
     mtag #(
         .HARTS(HARTS),
+        .TLEN(TLEN),
+        .GRANULARITY(GRANULARITY),
         .ADR_WIDTH(DADR_WIDTH)
     ) mtag0 (
         .fu_i       (funit_in_bus[FUNIT_MTAG]),
