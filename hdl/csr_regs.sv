@@ -252,7 +252,8 @@ module csr_regs #(
                     ex_cause_i == EX_CAUSE_LOAD_ACCESS_FAULT        ||
                     ex_cause_i == EX_CAUSE_STORE_ADDRESS_MISALIGNED ||
                     ex_cause_i == EX_CAUSE_STORE_ACCESS_FAULT       ||
-                    ex_cause_i == EX_CAUSE_MTAG_INVLD)
+                    ex_cause_i == EX_CAUSE_MTAG_COLOR_INVLD         ||
+                    ex_cause_i == EX_CAUSE_MTAG_HART_INVLD          )
                 begin
                     mtval <= trap_adr_i;
                 end

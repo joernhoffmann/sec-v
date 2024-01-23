@@ -327,8 +327,8 @@ package secv_pkg;
         ECODE_STORE_ACCESS_FAULT        = 4,
 
         // Other
-        ECODE_MTAG_LOAD_INVLD           = 5,
-        ECODE_MTAG_STORE_INVLD          = 6
+        ECODE_MTAG_COLOR_INVLD          = 5,
+        ECODE_MTAG_HART_INVLD           = 6
     } ecode_t;
 
     // --- Function unit operations --------------------------------------------------------------------------------- //

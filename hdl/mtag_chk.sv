@@ -16,7 +16,7 @@ import secv_pkg::*;
 module mtag_chk #(
     parameter int HARTS = 1,
     parameter int TLEN = 16,        // Size of tags in bit
-    /* Size of granules as amount of bits to shift the memory address to the left
+    /* Size of granules as amount of bits to shift the memory address to the right
      * Shift in bits    | actual granule size in byte
      * 0                | 1
      * 1                | 2
@@ -30,9 +30,11 @@ module mtag_chk #(
 ) (
     input  logic                   ena_i,
 
-    input  logic [HARTS_WIDTH-1:0] hart_id,
+    input  logic [HARTS_WIDTH-1:0] hartid_i,
     input  logic [XLEN-1 : 0]      adr_i,
-    output logic                   err_o,
+
+    output logic                   hart_mismatch_o,
+    output logic                   color_mismatch_o,
 
     // Tag memory
     output logic                    tmem_re_o,
@@ -48,11 +50,15 @@ module mtag_chk #(
     logic [TLEN-1-HARTS : 0] tag;
     assign tag = adr_i[XLEN-1 : XLEN-TLEN+HARTS];
 
-    logic err;
-    assign err_o = err;
+    logic hart_mismatch;
+    assign hart_mismatch_o = hart_mismatch;
+
+    logic color_mismatch;
+    assign color_mismatch_o = color_mismatch;
 
     always_comb begin
-        err = 1'b0;
+        hart_mismatch = 1'b0;
+        color_mismatch = 1'b0;
 
         tmem_re_o   = 'b0;
         tmem_adr_o  = 'b0;
@@ -62,12 +68,12 @@ module mtag_chk #(
             tmem_adr_o = TADR_WIDTH'(mem_adr >> GRANULARITY);
 
             // Check for correct hart
-            if (tmem_ack_i && tmem_dat_i[hart_id] != 1'b1) begin
-                err = 1'b1;
+            if (tmem_ack_i && tmem_dat_i[hartid_i] != 1'b1) begin
+                hart_mismatch = 1'b1;
             end
             // Compare tag with tag memory
             else if (tmem_ack_i && tmem_dat_i[TLEN-1:HARTS] != tag) begin
-                err = 1'b1;
+                color_mismatch = 1'b1;
             end
         end
     end

@@ -38,7 +38,7 @@ module mem #(
     input  funit_in_t  fu_i,
     output funit_out_t fu_o,
 
-    input logic [HARTS_WIDTH -1 : 0] hart_id,
+    input logic [HARTS_WIDTH -1 : 0] hartid_i,
 
     // Wishbone data memory interface
     output logic                    dmem_cyc_o,
@@ -66,7 +66,8 @@ module mem #(
     ecode_t ecode;
     mem_op_t op;
 
-    logic tag_err;
+    logic hart_mismatch;
+    logic color_mismatch;
 
     // Tag checking
     mtag_chk #(
@@ -74,8 +75,10 @@ module mem #(
     ) mtag_chk0 (
         .ena_i      (fu_i.ena),
         .adr_i      (fu_i.src1),
-        .err_o      (tag_err),
-        .hart_id    (hart_id),
+        .hartid_i  (hartid_i),
+
+        .color_mismatch_o   (color_mismatch),
+        .hart_mismatch_o    (hart_mismatch),
 
         .tmem_re_o  (tmem_re_o),
         .tmem_adr_o (tmem_adr_o),
@@ -180,15 +183,17 @@ module mem #(
             endcase
 
             // Access fault simulation (example for later MEMTAG, PMP implementation)
-            if (((dmem_adr & ADR_FAULT_MASK) != 0) || tag_err) begin
+            if (((dmem_adr & ADR_FAULT_MASK) != 0) || hart_mismatch || color_mismatch) begin
                 dmem_cyc_o = 0;
                 dmem_stb_o = 0;
                 dmem_dat_o = 0;
                 dmem_adr_o = 0;
                 dmem_we_o  = 0;
                 err = 1'b1;
-                if (tag_err) begin
-                    ecode = ecode_t'(load ? ECODE_MTAG_LOAD_INVLD : ECODE_MTAG_STORE_INVLD);
+                if (hart_mismatch == 1'b1) begin
+                    ecode = ecode_t'(ECODE_MTAG_HART_INVLD);
+                end else if (color_mismatch == 1'b1) begin
+                    ecode = ecode_t'(ECODE_MTAG_COLOR_INVLD);
                 end else begin
                     ecode = ecode_t'(load ? ECODE_LOAD_ACCESS_FAULT : ECODE_STORE_ACCESS_FAULT);
                 end
@@ -202,10 +207,10 @@ module mem #(
 
         if (fu_i.ena) begin
             // Control output
-            fu_o.rdy = err || dmem_ack_i;
+            fu_o.rdy = err || dmem_ack_i || colorcolorsmatch || hart_mismatch;
 
             // Error output
-            fu_o.err = err;
+            fu_o.err = err || colorcolorsmatch || hart_mismatch;
             fu_o.ecode = ecode;
 
             // Result output

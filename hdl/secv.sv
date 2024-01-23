@@ -40,7 +40,7 @@ import csr_pkg::*;
 module secv #(
     parameter int HARTS      = 1,
     parameter int TLEN       = 16,       // Tag size
-    /* Size of granules as amount of bits to shift the memory address to the left
+    /* Size of granules as amount of bits to shift the memory address to the right
      * Shift in bits    | actual granule size in byte
      * 0                | 1
      * 1                | 2
@@ -260,7 +260,7 @@ module secv #(
         .fu_i (funit_in_bus[FUNIT_MEM]),
         .fu_o (funit_out_bus[FUNIT_MEM]),
 
-        .hart_id(0),
+        .hartid_i   (0),
 
         // Wishbone data memory interface
         .dmem_cyc_o (dmem_cyc_o),
@@ -344,8 +344,8 @@ module secv #(
             ECODE_LOAD_ADDRESS_MISALIGNED   : return EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
             ECODE_STORE_ACCESS_FAULT        : return EX_CAUSE_STORE_ACCESS_FAULT;
             ECODE_STORE_ADDRESS_MISALIGNED  : return EX_CAUSE_STORE_ADDRESS_MISALIGNED;
-            ECODE_MTAG_LOAD_INVLD || ECODE_MTAG_STORE_INVLD
-                : return EX_CAUSE_MTAG_INVLD;
+            ECODE_MTAG_COLOR_INVLD          : return EX_CAUSE_MTAG_COLOR_INVLD;
+            ECODE_MTAG_HART_INVLD           : return EX_CAUSE_MTAG_HART_INVLD;
             default: return EX_CAUSE_INST_MISALIGNED;
         endcase;
     endfunction

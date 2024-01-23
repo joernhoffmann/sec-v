@@ -28,7 +28,9 @@ module mtag_chk_testbench();
 
     logic ena;
     logic [XLEN-1 : 0] adr;
-    logic err;
+
+    logic color_mismatch;
+    logic hart_mismatch;
 
     logic                       tmem_re;
     logic [TADR_WIDTH-1 : 0]    tmem_radr;
@@ -44,13 +46,14 @@ module mtag_chk_testbench();
         .HARTS(HARTS),
         .TLEN(TLEN),
         .GRANULARITY(GRANULARITY),
-        .ADR_WIDTH(ADR_WIDTH),
+        .ADR_WIDTH(ADR_WIDTH)
     ) dut (
         .ena_i      (ena),
         .adr_i      (adr),
-        .err_o      (err),
+        .hartid_i  (0),
 
-        .hart_id    (0),
+        .color_mismatch_o   (color_mismatch),
+        .hart_mismatch_o    (hart_mismatch),
 
         .tmem_re_o  (tmem_re),
         .tmem_adr_o (tmem_radr),
@@ -107,36 +110,50 @@ module mtag_chk_testbench();
     `TEST_SUITE("MTAG_CHK")
 
     `UNIT_TEST("Do nothing, if not enabled")
-         ena = 1'b0;
-         #1
-         `FAIL_IF_NOT_EQUAL(err, 0);
-         `FAIL_IF_NOT_EQUAL(tmem_re, 0);
-         `FAIL_IF_NOT_EQUAL(tmem_radr, 0);
+        ena = 1'b0;
+        #1
+        `FAIL_IF_NOT_EQUAL(color_mismatch, 0);
+        `FAIL_IF_NOT_EQUAL(hart_mismatch, 0);
+        `FAIL_IF_NOT_EQUAL(tmem_re, 0);
+        `FAIL_IF_NOT_EQUAL(tmem_radr, 0);
     `UNIT_TEST_END
 
     `UNIT_TEST("No early error")
         ena = 1'b1;
-        // Tag: 0x01A = 26
+        // Color: 0x01A = 26
         // Harts: 0xF = 0b1111 (any hart allowed)
         // Address: 0x011F = 287
         adr = 'h01AF_0000_0000_011F;
         #1
-        `FAIL_IF_NOT_EQUAL(err, 0);
+        `FAIL_IF_NOT_EQUAL(color_mismatch, 0);
+        `FAIL_IF_NOT_EQUAL(hart_mismatch, 0);
     `UNIT_TEST_END
 
-    `UNIT_TEST("Error on tag mismatch")
+    `UNIT_TEST("Error on color mismatch")
+        // Write tag in tag memory
+        tmem_we = 1'b1;
+        // Tag memory address
+        tmem_wadr = 71;
+        // Tag value
+        tmem_wdat = 'h010F; // 0x010 = 16 | harts: 0xF = 0b1111 (any hart is allowed)
+
+        ena = 1'b0;
+        #4
+        tmem_we = 1'b0;
+
         ena = 1'b1;
-        // Tag: 0x01A = 26
+        // Color: 0x01A = 26
         // Harts: 0xF = 0b1111 (any hart allowed)
         // Address: 0x011F = 287
-        adr = 'h01AF_0000_0000_011F;
+        adr = 'h01A0_0000_0000_011F;
         #4
-        `FAIL_IF_NOT_EQUAL(err, 1);
+        `FAIL_IF_NOT_EQUAL(color_mismatch, 1'b1);
+        `FAIL_IF_NOT_EQUAL(hart_mismatch, 0);
         `FAIL_IF_NOT_EQUAL(tmem_re, '1);
         // Tag address = address >> GRANULARITY | 287 >> 2 = 71
         `FAIL_IF_NOT_EQUAL(tmem_radr, 71);
-        // Tag in memory should be zero, because of memory reset
-        `FAIL_IF_NOT_EQUAL(tmem_rdat, 0);
+        // Tag in memory should be 0x010F
+        `FAIL_IF_NOT_EQUAL(tmem_rdat, 'h010F);
     `UNIT_TEST_END
 
     `UNIT_TEST("No error if tags and harts match")
@@ -152,11 +169,12 @@ module mtag_chk_testbench();
         tmem_we = 1'b0;
 
         ena = 1'b1;
-        // Tag: 0x01A = 26 | Address: 0x011F = 287
+        // Color: 0x01A = 26 | Address: 0x011F = 287
         adr = 'h01A0_0000_0000_011F;
 
         #4
-        `FAIL_IF_NOT_EQUAL(err, 0);
+        `FAIL_IF_NOT_EQUAL(color_mismatch, 0);
+        `FAIL_IF_NOT_EQUAL(hart_mismatch, 0);
         `FAIL_IF_NOT_EQUAL(tmem_re, '1);
         // Tag address = address >> GRANULARITY | 287 >> 2 = 71
         `FAIL_IF_NOT_EQUAL(tmem_radr, 71);
@@ -176,11 +194,12 @@ module mtag_chk_testbench();
         tmem_we = 1'b0;
 
         ena = 1'b1;
-        // Tag: 0xAF1 = 2801 | Address: 0x0F1B = 3867
+        // Color: 0xAF1 = 2801 | Address: 0x0F1B = 3867
         adr = 'hAF10_0000_0000_0F1B;
 
         #4
-        `FAIL_IF_NOT_EQUAL(err, 1);
+        `FAIL_IF_NOT_EQUAL(color_mismatch, 0);
+        `FAIL_IF_NOT_EQUAL(hart_mismatch, 1'b1);
         `FAIL_IF_NOT_EQUAL(tmem_re, '1);
         // Tag address = address >> GRANULARITY | 3867 >> 2 = 966
         `FAIL_IF_NOT_EQUAL(tmem_radr, 966);

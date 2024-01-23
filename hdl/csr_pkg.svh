@@ -255,7 +255,8 @@ package csr_pkg;
         // 16 .. 23 Reserved
 
         // 24 .. 31 Custom use
-        EX_CAUSE_MTAG_INVLD                 = 24    // Memory Tag Invalid (needed? cf. LD_ or ST_ACCESS_FAULT)
+        EX_CAUSE_MTAG_COLOR_INVLD           = 24,   // Memory Tag Color Invalid
+        EX_CAUSE_MTAG_HART_INVLD            = 25    // Memory Tag Hart ID Invalid
     } ex_cause_t;
 
     /*
@@ -265,8 +266,8 @@ package csr_pkg;
         INTR_CAUSE_MSI                       = 3,    // Machine software interrupt
         INTR_CAUSE_MTI                       = 7,    // Machine timer interrupt
         INTR_CAUSE_MEI                       = 11    // Machine external interrupt
-        // 12 .. 15                                 // Reserved
-        // 16 ..                                    // Platform / implementation definded local interrupts
+        // 12 .. 15                                  // Reserved
+        // 16 ..                                     // Platform / implementation definded local interrupts
     } intr_cause_t;
 
     // --- Machine Information Registers ---------------------------------------------------------------------------- //
