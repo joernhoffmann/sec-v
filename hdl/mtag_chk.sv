@@ -71,7 +71,7 @@ module mtag_chk #(
             if (tmem_ack_i && tmem_dat_i[hartid_i] != 1'b1) begin
                 hart_mismatch = 1'b1;
             end
-            // Compare tag with tag memory
+            // Compare color with color in tag memory
             else if (tmem_ack_i && tmem_dat_i[TLEN-1:HARTS] != tag) begin
                 color_mismatch = 1'b1;
             end

@@ -16,7 +16,7 @@ import secv_pkg::*;
 module mtag #(
     parameter int HARTS = 1,
     parameter int TLEN = 16,        // Size of tags in bit
-    /* Size of granules as amount of bits to shift the memory address to the left
+    /* Size of granules as amount of bits to shift the memory address to the right
      * Shift in bits    | actual granule size in byte
      * n                | 2^n
      */
@@ -38,7 +38,7 @@ module mtag #(
     logic [ADR_WIDTH-1 : 0] mem_adr;
     assign mem_adr = ADR_WIDTH'(fu_i.src1);
 
-    // Decode encoded tag, decode hart part from rs2
+    // Decode encoded color, decode hart bitvector from rs2
     logic [TLEN-1 : 0] enc_tag;
     assign enc_tag = {fu_i.src1[XLEN-1 : XLEN-TLEN+HARTS], HARTS'(fu_i.src2)};
 
@@ -46,7 +46,7 @@ module mtag #(
     logic [TLEN-1 : 0] r_tag;
     assign r_tag = TLEN'(fu_i.src2);
 
-    // Generate random tag from rnd_i, decode hart part from rs2
+    // Generate random color from rnd_i, decode hart bitvector from rs2
     logic [TLEN-1 : 0] rnd_tag;
     assign rnd_tag = {(TLEN-HARTS)'(rnd_i != 0 ? rnd_i : 'b1), HARTS'(fu_i.src2)};
 

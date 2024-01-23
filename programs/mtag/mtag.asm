@@ -38,10 +38,10 @@ main:
     .insn   r   CUSTOM_0,   0,      0,      x0, x5, x6
     # T[31] = 0x4bd
 
-    # encode tag in address
-    # shift tag 1 bit right to get rid of the hart access
+    # encode color in address
+    # shift color 1 bit right to get rid of the hart access
     srli	x6, x6, 1 		# x6 = 0x25e
-    # shift tag 49 bit left to put it inside the top 15 bit
+    # shift color 49 bit left to put it inside the top 15 bit
     slli    x6, x6, 49      # x6 = 0x04bc 0000 0000 0000
     # add the address
     or      x5, x5, x6      # x5 = 0x04bc 0000 0000 00fc
@@ -53,16 +53,16 @@ main:
     addi    x28, x0, 0xab  # x28 = 0xab
     # hart access
     addi	x29, x0, 0b1   # x29 = 0b1
-    # tag is going to be randomly generated
+    # color is going to be randomly generated
 
     # custom instruction: tadrr
     # tadrr x30, x28, x29
     #           opcode6     func3   func7   rd   rs1  rs2
     .insn   r   CUSTOM_0,   2,      0,      x30, x28, x29
-    # T[21] = randomly generated tag, same as x30, but with
+    # T[21] = randomly generated color, same as x30, but with
     # extra bit (from x29) for hart access at the end
 
-    # encode tag in address
+    # encode color in address
     slli    x30, x30, 49    # x30 = 0xRRRR 0000 0000 0000
     or      x30, x28, x30   # x30 = 0xRRRR 0000 0000 00fc
     # successful memory store operation with tag
@@ -76,7 +76,7 @@ main:
     # hart acces: 0b1
     lui     x4, 0xac0b0     # x4 = 0xffff ffff ac0b 0000
     slli    x4, x4, 32      # x4 = 0xac0b 0000 0000 0000
-    # encode tag in address
+    # encode color in address
     or      x3, x3, x4      # x1 = 0xac0b 0000 0000 00aa
     # unseccessful memory load operation with tag
     ld      x2, 0(x3)       # tag mismatch on address 0xaa (x3)
@@ -87,7 +87,7 @@ main:
     addi    x28, x0, 0xcc  # x28 = 0xcc
     # access forbidden for hart 0
     addi	x29, x0, 0b0   # x29 = 0b0
-    # tag is going to be randomly generated
+    # color is going to be randomly generated
 
     # custom instruction: tadrr
     # tadrr x30, x28, x29
@@ -96,7 +96,7 @@ main:
     # T[25] = randomly generated tag, same as x30, but with
     # extra bit (from x29) for hart access at the end
 
-    # encode tag in address
+    # encode color in address
     slli    x30, x30, 49    # x30 = 0xRRRR 0000 0000 0000
     or      x30, x28, x30   # x30 = 0xRRRR 0000 0000 00fc
     # unsuccessful memory store operation because hart 0 isn't allowed access
