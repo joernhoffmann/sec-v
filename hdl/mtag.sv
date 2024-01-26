@@ -50,6 +50,7 @@ module mtag #(
     logic [TLEN-1 : 0] rnd_tag;
     assign rnd_tag = {(TLEN-HARTS)'(rnd_i != 0 ? rnd_i : 'b1), HARTS'(fu_i.src2)};
 
+    logic [XLEN-1 : 0] res;
     logic err;
 
     always_comb begin
@@ -66,21 +67,28 @@ module mtag #(
                 MTAG_OP_TADR: begin
                     tmem_dat_o = r_tag;
                     tmem_we_o  = 'b1;
-                    fu_o.res   = 'b0;
+                    res        = {r_tag[TLEN-1:TLEN-(TLEN-HARTS)],
+                                 {(XLEN-(TLEN-HARTS)-ADR_WIDTH){1'b0}},
+                                 mem_adr};
                 end
                 MTAG_OP_TADRE: begin
                     tmem_dat_o = enc_tag;
                     tmem_we_o  = 'b1;
-                    fu_o.res   = 'b0;
+                    res        = {enc_tag[TLEN-1:TLEN-(TLEN-HARTS)],
+                                 {(XLEN-(TLEN-HARTS)-ADR_WIDTH){1'b0}},
+                                 mem_adr};
                 end
                 MTAG_OP_TADRR: begin
                     tmem_dat_o = rnd_tag;
                     tmem_we_o  = 'b1;
-                    fu_o.res   = rnd_tag[TLEN-1 : HARTS];
+                    res        = {rnd_tag[TLEN-1:TLEN-(TLEN-HARTS)],
+                                 {(XLEN-(TLEN-HARTS)-ADR_WIDTH){1'b0}},
+                                 mem_adr};
                 end
                 default: begin
                     // Unknown opcode
                     err = 'b1;
+                    res = 'b0;
                 end
             endcase
         end
@@ -93,6 +101,7 @@ module mtag #(
         if (fu_i.ena) begin
             fu_o.rdy = 1'b1;
             fu_o.err = err;
+            fu_o.res = res;
         end
     end
 

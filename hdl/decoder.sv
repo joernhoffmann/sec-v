@@ -156,7 +156,7 @@ module decoder (
                 src1_sel    = SRC1_SEL_RS1;         // Address, possibly with encoded memory color
                 src2_sel    = SRC2_SEL_RS2;         // Tag or hart bit mask
 
-                rd_sel      = RD_SEL_FUNIT;          // Possibly memory color
+                rd_sel      = RD_SEL_FUNIT;          // Address with encoded memory color
             end
 
             OPCODE_OP, OPCODE_OP_32: begin

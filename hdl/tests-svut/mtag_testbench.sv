@@ -130,6 +130,7 @@ module mtag_testbench();
         #1
         `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
         `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
+        `FAIL_IF_NOT_EQUAL(fu_o.res, {12'h214, {44{1'b0}}, 8'h32});
         `FAIL_IF_NOT_EQUAL(tmem_we, 1);
         `FAIL_IF_NOT_EQUAL(tmem_wdat, 8522);
         // Tag address = address >> GRANULARITY | 50 >> 2 = 12
@@ -155,6 +156,7 @@ module mtag_testbench();
         #1
         `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
         `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
+        `FAIL_IF_NOT_EQUAL(fu_o.res, {12'hA4B, {44{1'b0}}, 8'hE5});
         `FAIL_IF_NOT_EQUAL(tmem_we, 1);
         `FAIL_IF_NOT_EQUAL(tmem_wdat, 42161);
         // Tag address = address >> GRANULARITY | 229 >> 2 = 57
@@ -181,9 +183,10 @@ module mtag_testbench();
         fu_i.src2 = 'b0001; // Allowed harts (none, except 0)
         // Full tag: 0xABF1 = 44017
         #1
+
         `FAIL_IF_NOT_EQUAL(fu_o.rdy, 1);
         `FAIL_IF_NOT_EQUAL(fu_o.err, 0);
-        `FAIL_IF_NOT_EQUAL(fu_o.res, 'hABF);
+        `FAIL_IF_NOT_EQUAL(fu_o.res, {12'hABF, {44{1'b0}}, 8'hE7});
         `FAIL_IF_NOT_EQUAL(tmem_we, 1);
         `FAIL_IF_NOT_EQUAL(tmem_wdat, 44017);
         // Tag address = address >> GRANULARITY | 231 >> = 57
