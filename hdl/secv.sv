@@ -254,7 +254,7 @@ module secv #(
     // Data memory inteface unit
     mem  #(
         .HARTS(HARTS),
-        .ADR_WIDTH(DADR_WIDTH)
+        .ADR_WIDTH(DADR_WIDTH),
         .TLEN(TLEN),
         .GRANULARITY(GRANULARITY)
     ) mem0 (

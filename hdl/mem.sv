@@ -77,7 +77,7 @@ module mem #(
         .HARTS(HARTS),
         .TLEN(TLEN),
         .GRANULARITY(GRANULARITY),
-        .ADR_WIDTH(ADR_WIDTH),
+        .ADR_WIDTH(ADR_WIDTH)
     ) mtag_chk0 (
         .ena_i      (fu_i.ena),
         .adr_i      (fu_i.src1),
@@ -213,10 +213,10 @@ module mem #(
 
         if (fu_i.ena) begin
             // Control output
-            fu_o.rdy = err || dmem_ack_i || colorcolorsmatch || hart_mismatch;
+            fu_o.rdy = err || dmem_ack_i || color_mismatch || hart_mismatch;
 
             // Error output
-            fu_o.err = err || colorcolorsmatch || hart_mismatch;
+            fu_o.err = err || color_mismatch || hart_mismatch;
             fu_o.ecode = ecode;
 
             // Result output
