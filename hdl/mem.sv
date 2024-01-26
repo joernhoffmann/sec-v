@@ -221,7 +221,7 @@ module mem #(
 
             // Result output
             fu_o.res = dmem_dat;
-            fu_o.res_wb = load && !err;
+            fu_o.res_wb = load && !err && !color_mismatch && !hart_mismatch;
         end
     end
 endmodule
