@@ -33,20 +33,14 @@ main:
     # hart access = 0b1
     addi    x6, x0, 0x4bd   # x6 = 0x4bd
     # custom instruction: tadr
-    # tadr x0, x5, x6
+    # tadr x7, x5, x6
     #           opcode6     func3   func7   rd  rs1 rs2
-    .insn   r   CUSTOM_0,   0,      0,      x0, x5, x6
+    .insn   r   CUSTOM_0,   0,      0,      x7, x5, x6
     # T[31] = 0x4bd
+    # x7 = address with encoded color
 
-    # encode color in address
-    # shift color 1 bit right to get rid of the hart access
-    srli	x6, x6, 1 		# x6 = 0x25e
-    # shift color 49 bit left to put it inside the top 15 bit
-    slli    x6, x6, 49      # x6 = 0x04bc 0000 0000 0000
-    # add the address
-    or      x5, x5, x6      # x5 = 0x04bc 0000 0000 00fc
     # successful memory store operation with tag
-    sd      x2, 0(x5)       # M[0xfc] = 0xff01 0000 0000 0000
+    sd      x2, 0(x7)       # M[0xfc] = 0xff01 0000 0000 0000
 
 	## TADRR
     # address
@@ -59,12 +53,9 @@ main:
     # tadrr x30, x28, x29
     #           opcode6     func3   func7   rd   rs1  rs2
     .insn   r   CUSTOM_0,   2,      0,      x30, x28, x29
-    # T[21] = randomly generated color, same as x30, but with
-    # extra bit (from x29) for hart access at the end
+    # T[21] = randomly generated color with extra bit (from x29) for hart access at the end
+    # x30 = address with randomly generated color encoded
 
-    # encode color in address
-    slli    x30, x30, 49    # x30 = 0xRRRR 0000 0000 0000
-    or      x30, x28, x30   # x30 = 0xRRRR 0000 0000 00fc
     # successful memory store operation with tag
     sd      x2, 0(x30)      # M[0xfc] = 0xff01 0000 0000 0000
 
@@ -93,11 +84,8 @@ main:
     # tadrr x30, x28, x29
     #           opcode6     func3   func7   rd   rs1  rs2
     .insn   r   CUSTOM_0,   2,      0,      x30, x28, x29
-    # T[25] = randomly generated tag, same as x30, but with
-    # extra bit (from x29) for hart access at the end
+    # T[25] = randomly generated color with extra bit (from x29) for hart access at the end
+    # x30 = address with randomly generated color encoded
 
-    # encode color in address
-    slli    x30, x30, 49    # x30 = 0xRRRR 0000 0000 0000
-    or      x30, x28, x30   # x30 = 0xRRRR 0000 0000 00fc
     # unsuccessful memory store operation because hart 0 isn't allowed access
     sd      x2, 0(x30)		# hart mismatch on address 0xaa
