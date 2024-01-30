@@ -48,7 +48,7 @@ module secv #(
      * 3                | 8
      * n                | 2^n
      */
-    parameter int GRANULARITY = 2,
+    parameter int GRANULARITY = 3,       // 1 granule = 8 byte or 64 bit in memory
 
     parameter int IADR_WIDTH = 8,        // Instruction memory address width
     parameter int DADR_WIDTH = 8,        // Data memory address width

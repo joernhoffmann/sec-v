@@ -20,7 +20,7 @@ main:
     # tadre x0, x1, x0
     #           opcode6     func3   func7   rd  rs1 rs2
     .insn   r   CUSTOM_0,   1,      0,      x0, x1, x3
-    # T[23] = 0x7f81
+    # T[23] = 0xff01
 
     # successful memory store operation with tag
     sd      x2, 0(x1)       # M[0xbe] = 0x7f80 0000 0000 0000
@@ -70,7 +70,7 @@ main:
     # encode color in address
     or      x3, x3, x4      # x1 = 0xac0b 0000 0000 00aa
     # unseccessful memory load operation with tag
-    ld      x2, 0(x3)       # tag mismatch on address 0xaa (x3)
+    ld      x2, 0(x3)       # tag mismatch on address 0xaa (in x3)
 
     ## HART MISMATCH
 	## TADRR
@@ -88,4 +88,4 @@ main:
     # x30 = address with randomly generated color encoded
 
     # unsuccessful memory store operation because hart 0 isn't allowed access
-    sd      x2, 0(x30)		# hart mismatch on address 0xaa
+    sd      x2, 0(x30)		# hart mismatch on address 0xcc (in x30)

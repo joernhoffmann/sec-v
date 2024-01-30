@@ -8,7 +8,7 @@ main:
 	# counter
 	addi	x1, x0, 3 		# x1 = 3
 	# start address
-	addi	x2, x0, 0x0c	# x2 = 0x0c
+	addi	x2, x0, 0x00	# x2 = 0x00
 	# color: 0x2aa
 	# hart access: 0b1
 	# full tag: 0xf55
@@ -26,8 +26,8 @@ tagloop:
     # counter - 1
 	addi	x1, x1, -1 		# x1 -= 1
 
-	# calculate next granule address, which is four addresse further
-	addi	x2, x2, 4 		# x2 += 4
+	# calculate next granule address, which is eight addresses further
+	addi	x2, x2, 8 		# x2 += 8
 
 	# tag granule
     # custom instruction: tadr
@@ -38,13 +38,13 @@ tagloop:
 	# loop if counter (x1) != 0
 	bnez 	x1, tagloop
 
-	## read from tagged granules + 1 (4 byte in each of the four granules)
+	## read from tagged granules + 1 (8 byte in each of the four granules)
 	# counter
-	addi	x1, x0, 17 		# x1 = 17
+	addi	x1, x0, 33 		# x1 = 33
 
 readloop:
     # successful memory load operation, unless counter (x1) is < 1
-    lb      x5, 0(x4)		# try to load 0xcc in x1, will fail because of hart (and color) mismatch
+    lb      x5, 0(x4)		# will fail if there is a hart (or color) mismatch
 
     # counter - 1
 	addi	x1, x1, -1 		# x1 -= 1

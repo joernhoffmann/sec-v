@@ -13,7 +13,7 @@ main:
     # tadrr x7, x5, x6
     #           opcode6     func3   func7   rd   rs1  rs2
     .insn   r   CUSTOM_0,   2,      0,      x7,  x5,  x6
-    # T[816] = randomly generated color with extra bit (from x6) for hart access at the end
+    # T[25] = randomly generated color with extra bit (from x6) for hart access at the end
     # x7 = address with randomly generated color encoded
 
     # successful memory store operation
@@ -25,7 +25,7 @@ main:
     # tadr x0, x7, x0
     #           opcode6     func3   func7   rd  rs1 rs2
     .insn   r   CUSTOM_0,   0,      0,      x0, x7, x0
-    # T[816] = 0
+    # T[25] = 0
 
     # unsuccessful memory load operation
     ld      x1, 0(x7)		# try to load 0xcc in x1, will fail because of hart (and color) mismatch
