@@ -6,7 +6,7 @@ main:
     # address
     addi    x5, x0, 0xcc  # x5 = 0xcc
     # access forbidden for hart 0
-    addi	x6, x0, 0b0   # x6 = 0b0
+    addi    x6, x0, 0b0   # x6 = 0b0
     # color is going to be randomly generated
 
     # custom instruction: tadrr
@@ -17,11 +17,11 @@ main:
     # x7 = address with randomly generated color encoded
 
     # unsuccessful memory store operation because hart 0 isn't allowed access
-    sd      x5, 0(x7)		# hart mismatch on address 0xcc
+    sd      x5, 0(x7)       # hart mismatch on address 0xcc
 
     ## retagging the memory address to allow hart 0
     # access allowed for hart 0
-    addi	x6, x0, 0b1   # x6 = 0b1
+    addi    x6, x0, 0b1   # x6 = 0b1
     # custom instruction: tadre
     # tadre x0, x7, x6
     #           opcode6     func3   func7   rd  rs1 rs2
@@ -29,7 +29,7 @@ main:
     # T[25] = formely generated color, with hart 0 now allowed
 
     # formerly unsuccessful memory store operation, now successful
-    sd      x5, 0(x7)		# store 0xcc in x5
+    sd      x5, 0(x7)       # store 0xcc in x5
 
     # successful memory load operation
-    ld      x1, 0(x7)		# load 0xcc in x1
+    ld      x1, 0(x7)       # load 0xcc in x1

@@ -6,7 +6,7 @@ main:
     # address
     addi    x5, x0, 0xcc  # x5 = 0xcc
     # hart access
-    addi	x6, x0, 0b1   # x6 = 0b1
+    addi    x6, x0, 0b1   # x6 = 0b1
     # color is going to be randomly generated
 
     # custom instruction: tadrr
@@ -17,7 +17,7 @@ main:
     # x7 = address with randomly generated color encoded
 
     # successful memory store operation
-    sd      x5, 0(x7)		# store 0xcc in M[0xcc]
+    sd      x5, 0(x7)       # store 0xcc in M[0xcc]
 
     ## retagging the memory address to tag 0, simulating a free
 
@@ -28,4 +28,4 @@ main:
     # T[25] = 0
 
     # unsuccessful memory load operation
-    ld      x1, 0(x7)		# try to load 0xcc in x1, will fail because of hart (and color) mismatch
+    ld      x1, 0(x7)       # try to load 0xcc in x1, will fail because of hart (and color) mismatch

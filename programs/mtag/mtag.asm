@@ -11,7 +11,7 @@ main:
     # encode color in address
     or      x1, x1, x2      # x1 = 0x7f80 0000 0000 00be
     # and the hart access tag (0b1)
-	addi	x3, x0, 0b1		# x3 = 0b1
+    addi    x3, x0, 0b1     # x3 = 0b1
     # resulting tag = 0xff01
 
     # custom instruction: tadre
@@ -42,11 +42,11 @@ main:
     # successful memory store operation with tag
     sd      x2, 0(x7)       # M[0xfc] = 0xff01 0000 0000 0000
 
-	## TADRR
+    ## TADRR
     # address
     addi    x28, x0, 0xab  # x28 = 0xab
     # hart access
-    addi	x29, x0, 0b1   # x29 = 0b1
+    addi    x29, x0, 0b1   # x29 = 0b1
     # color is going to be randomly generated
 
     # custom instruction: tadrr
@@ -73,11 +73,11 @@ main:
     ld      x2, 0(x3)       # tag mismatch on address 0xaa (in x3)
 
     ## HART MISMATCH
-	## TADRR
+    ## TADRR
     # address
     addi    x28, x0, 0xcc  # x28 = 0xcc
     # access forbidden for hart 0
-    addi	x29, x0, 0b0   # x29 = 0b0
+    addi    x29, x0, 0b0   # x29 = 0b0
     # color is going to be randomly generated
 
     # custom instruction: tadrr
@@ -88,4 +88,4 @@ main:
     # x30 = address with randomly generated color encoded
 
     # unsuccessful memory store operation because hart 0 isn't allowed access
-    sd      x2, 0(x30)		# hart mismatch on address 0xcc (in x30)
+    sd      x2, 0(x30)      # hart mismatch on address 0xcc (in x30)
