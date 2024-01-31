@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# SVUnit
+#SVUNIT_INSTALL=$HOME/lib/svunit
+#if [ -d $SVUNIT_INSTALL ]; then
+#	export SVUNIT_INSTALL
+#	export PATH=$SVUNIT_INSTALL"/bin":$PATH
+#fi
+
+# SVUT
+SVUT=$HOME/lib/svut
+if [ -d "$SVUT" ]; then
+	export SVUT
+	export PATH="$SVUT":"$PATH":
+fi
+
+# Verible
+#VERIBLE_PATH=$HOME/lib/verible/bin
+#if [ -d $VERIBLE_PATH ]; then
+#	export PATH=$VERIBLE_PATH:$PATH
+#fi
+
+# Verilator
+#VERILATOR_ROOT=$HOME/lib/verilator
+#if [ -d $VERILATOR_ROOT ]; then
+#	export VERILATOR_ROOT
+#	export PATH=$VERILATOR_ROOT/bin:$PATH
+#fi
+
+# elf2hex
+#ELF2HEX_PATH=$HOME/lib/elf2hex
+#if [ -d $ELF2HEX_PATH ]; then
+#	export PATH=$ELF2HEX_PATH:$PATH
+#fi
