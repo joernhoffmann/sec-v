@@ -57,12 +57,12 @@ fi
 #	mv $VERIBLE_VERSION/* .
 #fi
 
-#echo "elf2hex"
-#ELF2HEX_PATH=$BASE_PATH/elf2hex
-#if [ -d "$ELF2HEX_PATH" ]; then
-#	cd "$ELF2HEX_PATH" || exit
-#	git pull
-#else
-#	mkdir -p "$ELF2HEX_PATH"
-#	git clone https://github.com/sifive/elf2hex.git "$ELF2HEX_PATH"
-#fi
+echo "elf2hex"
+ELF2HEX_PATH=$BASE_PATH/elf2hex
+if [ -d "$ELF2HEX_PATH" ]; then
+	cd "$ELF2HEX_PATH" || exit
+	git pull
+else
+	mkdir -p "$ELF2HEX_PATH"
+	git clone https://github.com/sifive/elf2hex.git "$ELF2HEX_PATH"
+fi
