@@ -32,10 +32,10 @@ module mem_decoder_testbench();
     // always #2 aclk = ~aclk;
 
     // To dump data for visualization:
-    // initial begin
-    //     $dumpfile("mem_decoder_testbench.vcd");
-    //     $dumpvars(0, mem_decoder_testbench);
-    // end
+    initial begin
+        $dumpfile("mem_decoder_testbench.vcd");
+        $dumpvars(0, mem_decoder_testbench);
+    end
 
     // Setup time format when printing with $realtime()
     initial $timeformat(-9, 1, "ns", 8);
@@ -61,7 +61,7 @@ module mem_decoder_testbench();
     `UNIT_TEST("Do not decode other ops")
             i_inst.opcode = OPCODE_LUI;
             i_inst.funct3 = FUNCT3_STORE_SB;
-            inst_i = i_inst;           
+            inst_i = i_inst;
             #1
             `FAIL_IF_NOT_EQUAL(op_o, MEM_OP_NONE);
             `FAIL_IF_NOT(err_o);
@@ -77,7 +77,7 @@ module mem_decoder_testbench();
         #1
         `FAIL_IF_NOT_EQUAL(op_o, MEM_OP_LB);
         `FAIL_IF(err_o);
-    `UNIT_TEST_END   
+    `UNIT_TEST_END
 
     `UNIT_TEST("decode LOAD_LH")
         i_inst.opcode = OPCODE_LOAD;
@@ -170,7 +170,7 @@ module mem_decoder_testbench();
         #1
         `FAIL_IF_NOT_EQUAL(op_o, MEM_OP_SD);
         `FAIL_IF(err_o);
-    `UNIT_TEST_END    
+    `UNIT_TEST_END
 
     `TEST_SUITE_END
 endmodule

@@ -60,10 +60,10 @@ module decoder_testbench();
     );
 
     // To dump data for visualization:
-    // initial begin
-    //     $dumpfile("decode_testbench.vcd");
-    //     $dumpvars(0, decode_testbench);
-    // end
+    initial begin
+        $dumpfile("decode_testbench.vcd");
+        $dumpvars(0, decode_testbench);
+    end
 
     // Setup time format when printing with $realtime()
     initial $timeformat(-9, 1, "ns", 8);

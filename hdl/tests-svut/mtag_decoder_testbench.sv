@@ -32,10 +32,10 @@ module mtag_decoder_testbench();
     // always #2 aclk = ~aclk;
 
     // To dump data for visualization:
-    // initial begin
-    //     $dumpfile("mtag_decoder_testbench.vcd");
-    //     $dumpvars(0, mtag_decoder_testbench);
-    // end
+    initial begin
+        $dumpfile("mtag_decoder_testbench.vcd");
+        $dumpvars(0, mtag_decoder_testbench);
+    end
 
     // Setup time format when printing with $realtime()
     initial $timeformat(-9, 1, "ns", 8);

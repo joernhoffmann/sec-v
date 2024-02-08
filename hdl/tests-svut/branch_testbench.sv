@@ -33,10 +33,10 @@ module branch_testbench();
     );
 
     // To dump data for visualization:
-    // initial begin
-    //     $dumpfile("branch_testbench.vcd");
-    //     $dumpvars(0, branch_testbench);
-    // end
+    initial begin
+        $dumpfile("branch_testbench.vcd");
+        $dumpvars(0, branch_testbench);
+    end
 
     // Setup time format when printing with $realtime()
     initial $timeformat(-9, 1, "ns", 8);

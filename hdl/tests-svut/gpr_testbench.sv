@@ -48,10 +48,10 @@ module gpr_testbench();
     always #PERIOD clk_i = ~clk_i;
 
     // To dump data for visualization:
-    // initial begin
-    //     $dumpfile("gpr_testbench.vcd");
-    //     $dumpvars(0, gpr_testbench);
-    // end
+    initial begin
+        $dumpfile("gpr_testbench.vcd");
+        $dumpvars(0, gpr_testbench);
+    end
 
     // Setup time format when printing with $realtime()
     initial $timeformat(-9, 1, "ns", 8);

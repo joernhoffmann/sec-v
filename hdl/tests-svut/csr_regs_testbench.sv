@@ -81,10 +81,10 @@ module csr_regs_testbench();
     always #PERIOD clk_i = ~clk_i;
 
     // To dump data for visualization:
-    // initial begin
-    //     $dumpfile("csr_regs_testbench.vcd");
-    //     $dumpvars(0, csr_regs_testbench);
-    // end
+    initial begin
+        $dumpfile("csr_regs_testbench.vcd");
+        $dumpvars(0, csr_regs_testbench);
+    end
 
     // Setup time format when printing with $realtime()
     initial $timeformat(-9, 1, "ns", 8);

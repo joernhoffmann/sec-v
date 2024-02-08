@@ -34,12 +34,12 @@ module alu_core_testbench();
         .err_o   (err_o)
     );
 
-/*
+
     initial begin
         $dumpfile("alu_testbench.vcd");
         $dumpvars(1, alu_testbench);
     end
-*/
+
 
     // Setup time format when printing with $realtime()
     initial $timeformat(-9, 1, "ns", 8);
