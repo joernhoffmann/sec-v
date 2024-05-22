@@ -22,7 +22,8 @@ import secv_pkg::*;
 import csr_pkg::*;
 
 module csr_regs #(
-    parameter int HARTS = 1
+    parameter int HARTS = 1,
+    parameter int HARTS_WIDTH = (HARTS == 1) ? 1 : $clog2(HARTS)
 ) (
     input   logic                       clk_i,
     input   logic                       rst_i,
@@ -55,8 +56,6 @@ module csr_regs #(
     output  logic                       intr_ena_o,              // Interrupt handling enabled
     output  ivec_t                      intr_ena_vec_o           // Enabled interrupts (external, timer etc.)
 );
-
-    localparam int HARTS_WIDTH = (HARTS > 1) ? $clog2(HARTS) : 1;
 
     // --- Functions ------------------------------------------------------------------------------------------------ //
     /*

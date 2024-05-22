@@ -65,6 +65,14 @@ module secv #(
     input   logic [XLEN-1 : 0]          dmem_dat_i,
     input   logic                       dmem_ack_i
 );
+    // --- Shared signals and registers ----------------------------------------------------------------------------- //
+    // PC register
+    logic [XLEN-1:0] pc, pc_next;       // Program counter register
+    logic [ILEN-1:0] ir, ir_next;       // Instruction register
+    logic [XLEN-1:0] pc_inc;            // Next PC (PC + 4)
+    logic [XLEN-1:0] pc_target;         // Branch target
+    logic pc_align_err;                 // Alignment error signal
+
     // --- General purpose register file ---------------------------------------------------------------------------- //
     logic [XLEN-1:0] rs1_dat, rs2_dat, rd_dat;
     regadr_t rs1_adr, rs2_adr, rd_adr;
@@ -182,6 +190,12 @@ module secv #(
     );
 
     // --- Function units ------------------------------------------------------------------------------------------- //
+    // Function unit bus
+    funit_in_t  funit_in_bus[FUNIT_COUNT];
+    funit_out_t funit_out_bus[FUNIT_COUNT];
+    funit_in_t  funit_in;
+    funit_out_t funit_out;
+
     // Arithmetic-logic unit
     alu alu0 (
         .fu_i (funit_in_bus[FUNIT_ALU]),
@@ -237,12 +251,6 @@ module secv #(
         .ex_cause_i     (ex_cause)
     );
 
-    // Function unit bus
-    funit_in_t  funit_in_bus[FUNIT_COUNT];
-    funit_out_t funit_out_bus[FUNIT_COUNT];
-    funit_in_t  funit_in;
-    funit_out_t funit_out;
-
     // I/O of selected function unit
     always_comb begin
         funit_in_bus[funit] = funit_in;
@@ -285,6 +293,20 @@ module secv #(
     end
 
     // --- MUXer ---------------------------------------------------------------------------------------------------- //
+    // Immediate muxer
+    imm_t imm;
+    always_comb begin : imm_mux
+        unique case (imm_sel)
+            IMM_SEL_0 : imm = '0;
+            IMM_SEL_I : imm = decode_imm_i(inst);
+            IMM_SEL_S : imm = decode_imm_s(inst);
+            IMM_SEL_B : imm = decode_imm_b(inst);
+            IMM_SEL_U : imm = decode_imm_u(inst);
+            IMM_SEL_J : imm = decode_imm_j(inst);
+            default   : imm = '0;
+        endcase
+    end
+
     // Source 1 selection
     logic [XLEN-1:0] src1;
     always_comb begin: src1_mux
@@ -306,20 +328,6 @@ module secv #(
             SRC2_SEL_RS2 : src2 = rs2_dat;
             SRC2_SEL_IMM : src2 = imm;
             default      : src2 = '0;
-        endcase
-    end
-
-    // Immediate muxer
-    imm_t imm;
-    always_comb begin : imm_mux
-        unique case (imm_sel)
-            IMM_SEL_0 : imm = '0;
-            IMM_SEL_I : imm = decode_imm_i(inst);
-            IMM_SEL_S : imm = decode_imm_s(inst);
-            IMM_SEL_B : imm = decode_imm_b(inst);
-            IMM_SEL_U : imm = decode_imm_u(inst);
-            IMM_SEL_J : imm = decode_imm_j(inst);
-            default   : imm = '0;
         endcase
     end
 
@@ -349,16 +357,15 @@ module secv #(
     // -------------------------------------------------------------------------------------------------------------- //
     // Main state machine
     // -------------------------------------------------------------------------------------------------------------- //
-    // FSM register
     state_t state, state_next;
-    logic [XLEN-1:0] pc, pc_next;       // Program counter register
-    logic [ILEN-1:0] ir, ir_next;       // Instruction register
-    logic [XLEN-1:0] pc_inc;            // Next PC (PC + 4)
-    logic pc_align_err;
 
     // PC computations
     assign pc_inc = pc + 4;
     assign pc_align_err = pc[1:0] != 0; // Must be 4 byte aligned
+
+    // Branch target computation
+    // If branch, take address from funit else progress with next address
+    assign pc_target = brn_take ? funit_out.res : pc_inc;
 
     always_ff @( posedge clk_i) begin: fsm_regs
         if (rst_i) begin
@@ -373,11 +380,6 @@ module secv #(
             ir    <= ir_next;
         end
     end
-
-    // Branch target computation
-    // If branch, take address from funit else progress with next address
-    logic [XLEN-1:0] pc_target;
-    assign pc_target = brn_take ? funit_out.res : pc_inc;
 
     // --- Next state logic ----------------------------------------------------------------------------------------- //
     always_comb begin : main_fsm
