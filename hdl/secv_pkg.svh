@@ -68,7 +68,7 @@ package secv_pkg;
     typedef logic [6:0] funct7_t;
     typedef logic [2:0] funct3_t;
     typedef logic [REG_ADR-1:0] regadr_t;
-    typedef logic signed [XLEN-1:0] imm_t;
+    typedef logic [XLEN-1:0] imm_t;             // alt: typedef longint imm_t;
 
     // Instruction formats
     typedef struct packed {
