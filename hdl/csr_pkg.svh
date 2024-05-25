@@ -217,9 +217,9 @@ package csr_pkg;
      */
     typedef struct packed {
         logic [63:3]    reserved;
-        logic           ir;                 // Enable Instructions-Retired Counter
-        logic           tm;                 // Enable Timer Register
-        logic           cy;                 // Enable Cycle Counter
+        logic           ir;             // Enable Instructions-Retired Counter
+        logic           tm;             // Enable Timer Register
+        logic           cy;             // Enable Cycle Counter
     } mcounteren_t;
 
     /*
@@ -232,9 +232,9 @@ package csr_pkg;
      * Machine Trap Cause Register
      */
     typedef struct packed {
-        logic           intr;               // Interrupt occured
+        logic           intr;           // Interrupt occured
         logic [62:6]    unused;
-        logic [5:0]     cause;              // Trap cause
+        logic [5:0]     cause;          // Trap cause
     } mcause_t;
 
     /*
@@ -262,9 +262,9 @@ package csr_pkg;
      * Interrupt causes (1-prefix in mcause)
      */
     typedef enum logic [5:0] {
-        INTR_CAUSE_MSI                       = 3,    // Machine software interrupt
-        INTR_CAUSE_MTI                       = 7,    // Machine timer interrupt
-        INTR_CAUSE_MEI                       = 11    // Machine external interrupt
+        INTR_CAUSE_MSI                       = 3,   // Machine software interrupt
+        INTR_CAUSE_MTI                       = 7,   // Machine timer interrupt
+        INTR_CAUSE_MEI                       = 11   // Machine external interrupt
         // 12 .. 15                                 // Reserved
         // 16 ..                                    // Platform / implementation definded local interrupts
     } intr_cause_t;
