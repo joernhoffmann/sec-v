@@ -159,7 +159,7 @@ package csr_pkg;
         logic [63:12]   reserved0;
         logic           mei;            // 11: Machine External Interrupt (Enable / Pending)
         logic [2:0]     reserved1;
-        logic           mti;            // 7 : Machine Timer Interrupt (Enable / Pending)
+        logic           mti;            // 7 : Machine Timer    Interrupt (Enable / Pending)
         logic [2:0]     reserved2;
         logic           msi;            // 3 : Machine Software Interrupt (Enable / Pending)
         logic [2:0]     reserved3;
@@ -169,18 +169,18 @@ package csr_pkg;
      * MIE: bit positions
      */
     typedef enum {
-        IREG_MEI = 11,
-        IREG_MTI = 7,
-        IREG_MSI = 3
-    } ireg_e;
+        MIE_MEI = 11,       // Machine External Interrupt
+        MIE_MTI = 7,        // Machine Timer    Interrupt
+        MIE_MSI = 3         // Machine Software Interrupt
+    } mie_e;
 
     /*
      * MIE: write mask
      */
     parameter ireg_t MIE_MASK =
-        (1 << IREG_MEI) |
-        (1 << IREG_MTI) |
-        (1 << IREG_MSI);
+        (1 << MIE_MEI) |
+        (1 << MIE_MTI) |
+        (1 << MIE_MSI);
 
     /*
      * Interrupt Vector

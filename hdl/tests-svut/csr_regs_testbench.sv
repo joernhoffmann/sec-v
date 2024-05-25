@@ -29,7 +29,7 @@ module csr_regs_testbench();
     ex_cause_t                  ex_cause_i;
 
     logic                       intr_i;
-    intr_cause_t                 intr_cause_i;
+    intr_cause_t                intr_cause_i;
     ivec_t                      intr_pend_i;
     logic                       intr_ena_o;
     ivec_t                      intr_ena_vec_o;
@@ -367,7 +367,42 @@ module csr_regs_testbench();
         `FAIL_IF_NOT_EQUAL(priv_prev_o, PRIV_MODE_MACHINE);
     `UNIT_TEST_END
 
-    // --- Machine Trap Handling ------------------------------------------------------------------------------------ //
+    // --- Interrupt handling --------------------------------------------------------------------------------------- //
+    `UNIT_TEST("Interrupts disabled after reset")
+        reset();
+        `FAIL_IF_NOT_EQUAL(intr_ena_o, 0);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("MIE enable vector set if mie set")
+        csr_write(.adr(CSR_ADR_MSTATUS), .dat(1 << MSTATUS_MIE));
+        csr_write(.adr(CSR_ADR_MIE), .dat(1 << MIE_MEI));
+
+        `FAIL_IF_NOT_EQUAL(intr_ena_o, 1);
+        `FAIL_IF_NOT_EQUAL(intr_ena_vec_o.mei, 1);
+        `FAIL_IF_NOT_EQUAL(intr_ena_vec_o.mti, 0);
+        `FAIL_IF_NOT_EQUAL(intr_ena_vec_o.msi, 0);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("MTI enable vector set if mti set")
+        csr_write(.adr(CSR_ADR_MSTATUS), .dat(1 << MSTATUS_MIE));
+        csr_write(.adr(CSR_ADR_MIE), .dat(1 << MIE_MTI));
+
+        `FAIL_IF_NOT_EQUAL(intr_ena_o, 1);
+        `FAIL_IF_NOT_EQUAL(intr_ena_vec_o.mei, 0);
+        `FAIL_IF_NOT_EQUAL(intr_ena_vec_o.mti, 1);
+        `FAIL_IF_NOT_EQUAL(intr_ena_vec_o.msi, 0);
+    `UNIT_TEST_END
+
+    `UNIT_TEST("MSI enable vector set if msi set")
+        csr_write(.adr(CSR_ADR_MSTATUS), .dat(1 << MSTATUS_MIE));
+        csr_write(.adr(CSR_ADR_MIE), .dat(1 << MIE_MSI));
+
+        `FAIL_IF_NOT_EQUAL(intr_ena_o, 1);
+        `FAIL_IF_NOT_EQUAL(intr_ena_vec_o.mei, 0);
+        `FAIL_IF_NOT_EQUAL(intr_ena_vec_o.mti, 0);
+        `FAIL_IF_NOT_EQUAL(intr_ena_vec_o.msi, 1);
+    `UNIT_TEST_END
+
 
     `TEST_SUITE_END
 endmodule

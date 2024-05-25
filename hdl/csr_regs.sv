@@ -12,6 +12,7 @@
  *  [ ] Physical Memory Protection (PMP)
  *  [ ] Counter / Timer
  *  [ ] Exceptions / faults for invalid writes
+ *  [ ] Move csr-logic decision out of register?
  *
  * History
  *  v1.0    - Initial version
@@ -40,6 +41,9 @@ module csr_regs #(
     output  logic [XLEN-1:0]            csr_dat_o,              // CSR read data (old value)
 
     // Traps: exceptions, faults, interrupts
+    // exception - sync, inst. general fail
+    // fault     - sync, inst. memory fail
+    // interrupt - async, hw related
     input   logic [XLEN-1:0]            trap_pc_i,              // Current PC when trap occurs
     input   logic [XLEN-1:0]            trap_adr_i,             // Trap address (faulting memory address etc.)
     output  logic [XLEN-1:0]            trap_vec_o,             // Trap vector address (= next pc or base address)
@@ -70,34 +74,34 @@ module csr_regs #(
     endfunction
 
     /*
-     * Converts hid to register value
+     * Converts hardware thread id to register value
      */
     function automatic logic [XLEN-1:0] hartid_reg(logic [HARTS_WIDTH-1:0] hartid);
         return {{(XLEN - HARTS_WIDTH){1'b0}}, hartid_i};
     endfunction;
 
     /*
-     * Machine status register when trap occurs
+     * Set machine status register when trap occurs
      */
     function automatic mstatus_t mstatus_trap (mstatus_t mstatus_i, priv_mode_t priv_mode);
         mstatus_t mstatus = mstatus_i;
 
         // Currently only machine mode supported, otherwise:
         // mstatus.mpp = (priv_mode == PRIV_MODE_MACHINE) ? MSTATUS_MPP_MACHINE : MSTATUS_MPP_USER;
-        mstatus.mpp  = MSTATUS_MPP_MACHINE;
-        mstatus.mpie = mstatus_i.mie;
-        mstatus.mie  = 1'b0;
+        mstatus.mpp  = MSTATUS_MPP_MACHINE;     // Save prev. privilege
+        mstatus.mpie = mstatus_i.mie;           // Save prev. interrupt enable
+        mstatus.mie  = 1'b0;                    // Disable interrupts
         return mstatus;
     endfunction;
 
     /*
-     * Machine status register on mret instruction
+     * Set machine status register on mret instruction
      */
     function automatic mstatus_t mstatus_mret(mstatus_t mstatus_i);
         mstatus_t mstatus = mstatus_i;
-        mstatus.mpp  = MSTATUS_MPP_MACHINE;
-        mstatus.mpie = 1'b0;
-        mstatus.mie  = mstatus_i.mpie;
+        mstatus.mpp  = MSTATUS_MPP_MACHINE;     // Restore privilege
+        mstatus.mpie = 1'b0;                    // Clear previous int. enable
+        mstatus.mie  = mstatus_i.mpie;          // Restore interrupt enable
         return mstatus;
     endfunction;
 
@@ -129,9 +133,9 @@ module csr_regs #(
     function automatic ireg_t to_ireg (ivec_t ivec);
         ireg_t ireg;
         ireg = '0;
-        ireg.mei = ivec.mei;
-        ireg.mti = ivec.mti;
-        ireg.msi = ivec.msi;
+        ireg.mei = ivec.mei;        // External interrupts
+        ireg.mti = ivec.mti;        // Timer    interrupts
+        ireg.msi = ivec.msi;        // Software interrupts
         return ireg;
     endfunction
 
@@ -156,7 +160,7 @@ module csr_regs #(
      * Machine Trap Setup
      */
     mstatus_t        mstatus;       // Machine Status
-    ireg_t           mie;           // Machine Interrupt Enable
+    ireg_t           mie;           // Machine Interrupt Enable (interrupt mask)
     logic [XLEN-1:0] mtvec;         // Machine Trap-Vector Base-Address
     logic [XLEN-1:0] mcounteren;    // Machine Counter Enable
 
@@ -213,11 +217,11 @@ module csr_regs #(
     /*
      * Machine Trap Handling
      */
-    logic [XLEN-1:0] mscratch;                  // Machine Scratch
-    logic [XLEN-1:0] mepc;                      // Machine Exception Program Counter
-    mcause_t         mcause;                    // Machine Cause Register
-    logic [XLEN-1:0] mtval;                     // Machine Trap Value
-    ireg_t           mip;                       // Machine Interrupt Pending
+    logic [XLEN-1:0] mscratch;      // Machine Scratch
+    logic [XLEN-1:0] mepc;          // Machine Exception Program Counter
+    mcause_t         mcause;        // Machine Cause Register
+    logic [XLEN-1:0] mtval;         // Machine Trap Value
+    ireg_t           mip;           // Machine Interrupt Pending
 
     // Trap vector computation
     always_comb begin : trap_vec_impl
@@ -241,12 +245,14 @@ module csr_regs #(
         end
 
         else begin
+            // Handle exception (software trap)
             if (ex_i) begin
                 mepc         <= trap_pc_i;
                 mcause       <= 'h0;
                 mcause.intr  <= 1'b0;
                 mcause.cause <= ex_cause_i;
 
+                // Handle Faults
                 if (ex_cause_i == EX_CAUSE_LOAD_ADDRESS_MISALIGNED  ||
                     ex_cause_i == EX_CAUSE_LOAD_ACCESS_FAULT        ||
                     ex_cause_i == EX_CAUSE_STORE_ADDRESS_MISALIGNED ||
@@ -257,6 +263,7 @@ module csr_regs #(
                 end
             end
 
+            // Handle interrupt (hw trap)
             else if (intr_i) begin
                 mepc         <= trap_pc_i;
                 mcause       <= 'h0;
@@ -265,6 +272,7 @@ module csr_regs #(
                 mtval        <= 'h0;
             end
 
+            // Handle trap return
             else if (mret_i) begin
                 mepc    <= 'h0;
                 mcause  <= 'h0;
@@ -272,8 +280,8 @@ module csr_regs #(
                 mstatus <= mstatus_mret(mstatus);
             end
 
-            // Register writes
-            if (m_mode && csr_we_i) begin
+            // Handle register access
+            else if (m_mode && csr_we_i) begin
                 if (csr_adr_i == CSR_ADR_MSCRATCH)
                     mscratch <= csr_dat_i;
             end
@@ -358,6 +366,8 @@ module csr_regs #(
 
     /*
      * Machine Timer Registers
+     * TODO:
+     *  [ ] Improve impl. for minstret
      */
     logic [XLEN-1:0] mcycle;        // Machine Cycle Counter
     logic [XLEN-1:0] minstret;      // Machine Instructions-Retired Counter

@@ -80,7 +80,7 @@ module csr #(
         .priv_i         (PRIV_MODE_MACHINE),
         .priv_prev_o    (priv_prev),
 
-        // CSR access
+        // CSR access (register r/w, set or clear access)
         .csr_adr_i      (csr_adr),
         .csr_we_i       (csr_we),
         .csr_dat_i      (csr_dat_i),
@@ -104,7 +104,6 @@ module csr #(
         .intr_ena_vec_o  (intr_ena_vec)
     );
 
-
     always_comb begin : csr_access
         fu_o = funit_out_default();
         csr_adr     = '0;
@@ -116,6 +115,7 @@ module csr #(
             csr_adr  = src2[11:0];
 
             case (funct_i)
+                // CSR read and write
                 FUNCT3_CSR_RW,
                 FUNCT3_CSR_RWI : begin
                     fu_o.res = csr_dat_o;
@@ -124,6 +124,7 @@ module csr #(
                     csr_we    = 1'b1;
                 end
 
+                // CSR read and set
                 FUNCT3_CSR_RS,
                 FUNCT3_CSR_RSI : begin
                     fu_o.res = csr_dat_o;
@@ -133,6 +134,7 @@ module csr #(
                     csr_we    = 1'b1 & !rs1_zero_i;
                 end
 
+                // CSR read and clear
                 FUNCT3_CSR_RC,
                 FUNCT3_CSR_RCI: begin
                     fu_o.res = csr_dat_o;

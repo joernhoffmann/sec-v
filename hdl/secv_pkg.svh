@@ -36,8 +36,8 @@ package secv_pkg;
 
     // Privilege modes
     typedef enum logic {
-        PRIV_MODE_USER,         // User mode (least privilge)
-        PRIV_MODE_MACHINE       // Machine mode (highes privilege)
+        PRIV_MODE_USER,         // User mode            (lowest  privilege)
+        PRIV_MODE_MACHINE       // Machine mode         (highest privilege)
     } priv_mode_t;
 
     // -------------------------------------------------------------------------------------------------------------- //
