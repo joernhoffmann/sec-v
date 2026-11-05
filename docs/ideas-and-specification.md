@@ -16,8 +16,9 @@ Nachgelesen im Stand `bb0c8fa`; ausgeführt wurden nur die SVUT-Tests.
 
 - [ ] **Offizielle `riscv-tests` (`rv64ui`) gegen den Kern laufen lassen.** Das lief noch nie; es zeigt, ob der Kern funktioniert und wo er hakt.
 - [ ] **`secv_testbench` prüft nichts:** Er läuft 10000 Zeiteinheiten und besteht immer. Pass oder Fail über eine Speicherstelle oder Ähnliches ergänzen. Die übrigen 171 SVUT-Tests bestehen, alle 172 zusammen (gemessen).
+- [ ] **Auf cocotb umstellen [E]:** Werkzeuge aus `hex-v` (`tests/`) übernehmen, SVUT-Fälle dabei überführen.
 - [ ] **Vergleich gegen Spike:** Retire-Port (RVFI-Art) ergänzen, dann Generator, Abdeckung und Mutanten aus `hex-v` (`tests/spike/`) übernehmen.
-- [ ] **Fehlende Einheitentests:** `mem.sv` hat nur einen SVUnit-Test, kein SVUT; `csr.sv`, `ram_wb.sv` und `rom_wb.sv` haben keinen. **[O]** Bei SVUT bleiben oder wie in `hex-v` auf cocotb wechseln?
+- [ ] **Fehlende Einheitentests:** `mem.sv` hat nur einen SVUnit-Test, kein SVUT; `csr.sv`, `ram_wb.sv` und `rom_wb.sv` haben keinen. **[E]** Tests mit cocotb wie in `hex-v`; die SVUT- und SVUnit-Tests werden abgelöst.
 - [ ] **Todos nachziehen:** `alu`, `branch`, `gpr`, `mem_decoder` tragen „Add unit tests“, haben aber Testbenches.
 - [ ] Formale Verifikation der Einheiten (Todo in fast allen Köpfen).
 
@@ -56,7 +57,7 @@ Der Entwurf steht ab Abschnitt 4. Reihenfolge:
 - [ ] **Package:** „Cleanup and reorder“, fehlende Dekodierfunktionen (`decode_funct3`, `decode_rs1` usw., `zext8` usw.), Stand in `hex-v` ansehen.
 - [ ] **Decoder:** Todos in `decoder.sv`, Addierer in `SRC1_SEL_RS1_IMM` durch die ALU ersetzen **[E]**.
 - [ ] **ISA:** 32-Bit-Build **[E]**, dann M (Abschnitt 9), später B, C, Krypto (README).
-- [ ] **Autor in den Dateiköpfen:** `J. Hoffmann <...>` durch `Jörn Hoffmann` ersetzen, ohne Mail.
+- [x] **Autor in den Dateiköpfen:** nur noch `Jörn Hoffmann`, ohne Mail **[E]**.
 - [ ] **Sonstiges:** `hdl/unused/` sichten, Encoder-Funktionen im Package (später), README auf den Stand bringen.
 
 ## 1. Die Kostentreiber zuerst

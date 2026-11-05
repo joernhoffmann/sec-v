@@ -3,7 +3,7 @@
  * Copyright (C) Jörn Hoffmann, 2023 - 2024
  *
  * Project  : SEC-V
- * Author   : J. Hoffmann <joern@bitaggregat.de>
+ * Author   : Jörn Hoffmann
  * Ext.     : Zicsr
  * Purpose  : Control and status register (access, encoding etc.) implementation
  *

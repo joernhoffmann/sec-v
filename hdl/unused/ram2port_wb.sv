@@ -3,7 +3,7 @@
  * Copyright (C) Jörn Hoffmann, 2023
  *
  * Project  : SEC-V
- * Author   : J. Hoffmann <joern@bitaggregat.de>
+ * Author   : Jörn Hoffmann
  * Purpose  : Wishbone-compatible 2-port memory module intended for SEC-V processor ROM and RAM.
  *
  * History

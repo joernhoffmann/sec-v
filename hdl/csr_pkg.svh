@@ -3,7 +3,7 @@
  * Copyright (C) Jörn Hoffmann, 2023
  *
  * Project  : SEC-V
- * Author   : J. Hoffmann <joern@bitaggregat.de>
+ * Author   : Jörn Hoffmann
  * Purpose  : Control an Status Register (CSR) defines
  *
  * History
