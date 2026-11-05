@@ -56,7 +56,7 @@ Der Entwurf steht ab Abschnitt 4. Reihenfolge:
 - **Branch `memtag`:** Bleibt liegen, er ist kaputt **[E]**. Speicher-Tags wären neu zu bauen, siehe Ideen.
 - [ ] **Package:** „Cleanup and reorder“, fehlende Dekodierfunktionen (`decode_funct3`, `decode_rs1` usw., `zext8` usw.), Stand in `hex-v` ansehen.
 - [ ] **Decoder:** Todos in `decoder.sv`, Addierer in `SRC1_SEL_RS1_IMM` durch die ALU ersetzen **[E]**.
-- [ ] **ISA:** 32-Bit-Build **[E]**, dann M (Abschnitt 9), später B, C, Krypto (README).
+- [ ] **ISA:** `XLEN` als Makro, Standard 32 **[E]**, dann M (Abschnitt 9), später B, C, Krypto (README).
 - [x] **Autor in den Dateiköpfen:** nur noch `Jörn Hoffmann`, ohne Mail **[E]**.
 - [ ] **Sonstiges:** `hdl/unused/` sichten, Encoder-Funktionen im Package (später), README auf den Stand bringen.
 
@@ -89,7 +89,7 @@ Vergleichsbasis ist `v0` (Abschnitt 2), alles auf ECP5 und Gowin, Fmax über min
 - **[E]** Die CPU wird durch Struktur und Architektur sicherer gegen Schwachstellen ihrer selbst. Ein Fehler in einer Einheit bleibt in dieser Einheit.
 - **[E]** SEC-V wird auf 32 Bit abgespeckt, die Decoder werden wo möglich vereinfacht. Tempo kommt über Einheiten (GTE), Pipelining und IMT.
 - **[E]** Einheiten sind in sich abgeschlossen, alles bleibt einzeln testbar, der Code ist gut lesbar, im Stil des Owners.
-- **[V]** RV32I zuerst, dann M. `XLEN` bleibt als Makro im Package, gebaut und getestet wird zunächst nur 32. **[O]** 64 Bit später wieder?
+- **[E]** `XLEN` bleibt als Makro im Package, Standard 32. **[V]** RV32I zuerst, dann M.
 - **Nicht in dieser Arbeit:** Sprungvorhersage und Caches (höchstens spätere Optionen, standardmäßig aus), C-Erweiterung, Superskalarität, Out-of-Order.
 - **Kein Ziel:** Schutz gegen Seitenkanäle in der Physik; wo eine Aussage nur für Takte gilt, steht das dabei.
 
